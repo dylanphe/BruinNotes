@@ -1,0 +1,74 @@
+.login-body{
+    background-color:#2D68C4;
+    width: 100vw;
+    height: 100vh;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    border-top-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+}
+
+.btn {
+    background-color: white;
+    color: #2D68C4;
+    font-weight: bolder;
+    font-size: medium;
+    font-family: "Gloria Hallelujah";
+    border-style: none;
+    border-radius:40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px; 
+}
+
+.btn:hover {
+    background-color: #F2A900;
+    color: #2D68C4;
+}
+
+.btn-list {
+    position: relative;
+    top: 8vh;
+    right: 7vh;
+    align-self: flex-end;
+}
+
+#login-btn {
+    position: relative;
+    top: 5%;
+}
+
+#title-name{
+    position: relative;
+    top: 8%;
+    font-family: "Gloria Hallelujah";
+    font-size: 65px;
+    color:white;
+}
+
+#title-name:hover{
+    color:rgb(214, 213, 213);
+}
+
+input[type=text] {
+    width: 50%;
+    font-size: medium;
+    padding: 10px;
+    margin: 12px;
+    border: 0px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#link-btn {
+    color:white;
+    width: 50%;
+    text-align: right;
+}
+
+#link-btn:hover {
+    text-decoration: underline;
+    color: #F2A900;
+}
