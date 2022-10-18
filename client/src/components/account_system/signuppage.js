@@ -1,10 +1,21 @@
-import React from 'react';
+import React, {useState, useEffect
+} from 'react';
 import "@fontsource/gloria-hallelujah";
 import './signuppage.css';
 
 // The function that toggles between themes
 function SignupPage() {
 
+    async function testConnection() {
+        const response = await fetch('/Signup');
+        const data = await response.json();
+        console.log(data);
+        return 0;
+    }
+
+    useEffect(() => {
+        testConnection();
+    }, []);
 
     return (
         <div className='signup-body'>
