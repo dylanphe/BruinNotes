@@ -9,9 +9,9 @@
     border-bottom-right-radius: 100px;
 }
 
-.btn {
-    background-color: white;
-    color: #2D68C4;
+.login-btn {
+    background-color: transparent;
+    color: white;
     font-weight: bolder;
     font-size: medium;
     font-family: "Gloria Hallelujah";
@@ -23,24 +23,24 @@
     padding-bottom: 10px; 
 }
 
-.btn:hover {
+.login-btn:hover {
     background-color: #F2A900;
     color: #2D68C4;
 }
 
-.btn-list {
+.login-top-btn {
     position: relative;
     top: 8vh;
     right: 7vh;
     align-self: flex-end;
 }
 
-#login-btn {
+#login-btm-btn {
     position: relative;
     top: 5%;
 }
 
-#title-name{
+#login-title-name{
     position: relative;
     top: 8%;
     font-family: "Gloria Hallelujah";
@@ -48,11 +48,21 @@
     color:white;
 }
 
-#title-name:hover{
+#login-title-name:hover{
     color:rgb(214, 213, 213);
 }
 
 input[type=text] {
+    width: 50%;
+    font-size: medium;
+    padding: 10px;
+    margin: 12px;
+    border: 0px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+input[type=number] {
     width: 50%;
     font-size: medium;
     padding: 10px;
@@ -72,18 +82,26 @@ input[type=password] {
     box-sizing: border-box;
 }
 
-#link-box {
+#login-link-box {
     width: 50%;
     text-align: right;
 }
 
-#link-btn {
+#login-link-btn {
     color:white;
     border: none;
     background-color: transparent;
 }
 
-#link-btn:hover {
+#login-link-btn:hover {
     text-decoration: underline;
     color: #F2A900;
+}
+
+#login-show-pwd {
+    position: relative;
+    right: 5px;
+    bottom: 43px;
+    background-color: transparent;
+    border: none;
 }

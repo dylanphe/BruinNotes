@@ -18,26 +18,26 @@
     border-radius: 20px;
 }
 
-.center-align {
+.signup-center-align {
     position: relative;
     top: 5%;
     text-align: center;
 }
 
-.form-label {
+.signup-form-label {
     font-weight: bold;
     padding-left: 20%;
     padding-right: 20%;
     text-align: left;
 }
 
-.right-align {
+.signup-right-align {
     padding-left: 20%;
     padding-right: 20%;
     text-align: right;
 }
 
-.btn {
+.signup-btn {
     background-color: #2D68C4;
     color: white;
     font-weight: bolder;
@@ -51,21 +51,15 @@
     padding-bottom: 10px; 
 }
 
-.btn:hover {
-    color: #2D68C4;
-}
-
-.btn-list {
-    position: relative;
-    top: 8vh;
-    right: 7vh;
+.signup-btn:hover {
+    color: #F2A900;
 }
 
 #signup-btn {
     width: 50%;
 }
 
-#form-box {
+#signup-form-box {
     width: 60%;
     font-size: medium;
     padding: 10px;
@@ -78,7 +72,7 @@
 box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
 }
 
-#show-pwd {
+#signup-show-pwd {
     position: relative;
     right: 5px;
     bottom: 43px;
@@ -86,7 +80,7 @@ box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
     border: none;
 }
 
-.soft-btn {
+.signup-soft-btn {
     margin-top: 30px;
     background-color: transparent;
     color: black;
@@ -97,7 +91,7 @@ box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
     
 }
 
-.soft-btn:hover {
+.signup-soft-btn:hover {
     text-decoration: underline;
     color: #F2A900;
 }
