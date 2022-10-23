@@ -19,15 +19,15 @@ function Loginpage() {
 
     return (
         <div className='login-body'>
-            <span className= "btn-list">
-                <button className="btn" type="submit" onClick={()=>navigate("Signup")}>SIGN UP</button>
+            <span className= "login-top-btn">
+                <button className="login-btn" type="submit" onClick={()=>navigate("Signup")}>SIGN UP</button>
             </span>
-            <p id="title-name">BruinNotes</p>
-            <input  type="text" placeholder="Enter UID"/>
+            <p id="login-title-name">BruinNotes</p>
+            <input  type="number" placeholder="Enter 9 digits UID"/>
             <input  type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
-            <div id="link-box"><button id='show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
-            <div id="link-box"><button id="link-btn" onClick={()=>navigate("ForgetPassword")}>Forget Password?</button></div>
-            <button className="btn" id="login-btn" type="submit">LOG IN</button>
+            <div id="login-link-box"><button id='login-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
+            <div id="login-link-box"><button id="login-link-btn" onClick={()=>navigate("ForgetPassword")}>Forget Password?</button></div>
+            <button className="login-btn" id="login-btm-btn" type="submit" onClick={()=>navigate("Searchpage")}>LOG IN</button>
         </div>
     );
 }

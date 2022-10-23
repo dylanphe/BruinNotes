@@ -31,18 +31,18 @@ function SignupPage() {
     return (
         <div className='signup-body'>
             <div className='signup-box'>
-                <div className='center-align'>
-                    <div className='form-label'>FULL NAME</div>
-                    <input id='form-box'  type="text" placeholder="Enter Full Name"/>
-                    <div className='form-label'>UID</div>
-                    <input id='form-box' type="text" placeholder="Enter 9-digits UID"/>
-                    <div className='form-label'>UCLA EMAIL</div>
-                    <input  id='form-box' type="text" placeholder="Enter UCLA Email Address"/>
-                    <div className='form-label'>PASSWORD</div>
-                    <input  id='form-box' type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
-                    <div className='right-align'><button id='show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
-                    <button className="btn" id="signup-btn" type="submit">SIGN UP</button>
-                    <div><button className="soft-btn" id="login-btn" type="submit" onClick={()=>navigate("/")}>Already registered, sign in?</button></div>
+                <div className='signup-center-align'>
+                    <div className='signup-form-label'>FULL NAME</div>
+                    <input id='signup-form-box'  type="text" placeholder="Enter Full Name"/>
+                    <div className='signup-form-label'>UID</div>
+                    <input id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
+                    <div className='signup-form-label'>UCLA EMAIL</div>
+                    <input  id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
+                    <div className='signup-form-label'>PASSWORD</div>
+                    <input  id='signup-form-box' type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
+                    <div className='signup-right-align'><button id='signup-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
+                    <button className="signup-btn" id="signup-btn" type="submit">SIGN UP</button>
+                    <div><button className="signup-soft-btn" type="submit" onClick={()=>navigate("/")}>Already registered, sign in?</button></div>
                 </div>
             </div>
         </div>
