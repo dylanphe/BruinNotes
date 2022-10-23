@@ -62,10 +62,25 @@ input[type=text] {
     box-sizing: border-box;
 }
 
-#link-btn {
-    color:white;
+input[type=password] {
+    width: 50%;
+    font-size: medium;
+    padding: 10px;
+    margin: 12px;
+    border: 0px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#link-box {
     width: 50%;
     text-align: right;
+}
+
+#link-btn {
+    color:white;
+    border: none;
+    background-color: transparent;
 }
 
 #link-btn:hover {

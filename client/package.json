@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
@@ -13,6 +13,7 @@
     "emotion-theming": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.6.0",
     "react-router-dom": "^6.4.2",
     "react-scripts": "^2.1.8",
     "web-vitals": "^2.1.4"
