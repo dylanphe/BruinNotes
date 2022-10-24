@@ -39,7 +39,9 @@ class PyObjectId(ObjectId):
 
 class UserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    username: str
+    firstname: str
+    lastname: str
+    email: str
 
     class Config:
         allow_population_by_field_name = True
@@ -47,7 +49,9 @@ class UserModel(BaseModel):
         json_encoders = {ObjectId: str}
 
 class UpdateUserModel(BaseModel):
-    username: Optional[str]
+    firstname: Optional[str]
+    lastname: Optional[str]
+    email: Optional[str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -55,10 +59,13 @@ class UpdateUserModel(BaseModel):
 
 # Add a new database item
 # TODO: Change to a POST request, and pass in user's info.
-@app.get("/adduser", response_description="Add new user")
-async def add_user():
-    random_username="test_user_" + str(random.randint(1,100))
-    user = UserModel(username=random_username)
+@app.post("/adduser", response_description="Add new user")
+async def add_user(userInfo: dict):
+    #random_username="test_user_" + str(random.randint(1,100))
+    firstname = userInfo['firstname']
+    lastname = userInfo['lastname']
+    email = userInfo['email']
+    user = UserModel(firstname= 'firstname', lastname='lastname', email='email')
     new_user = jsonable_encoder(user)
     inserted_user = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": inserted_user.inserted_id})
