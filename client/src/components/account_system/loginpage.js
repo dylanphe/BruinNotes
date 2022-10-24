@@ -23,8 +23,8 @@ function Loginpage() {
                 <button className="login-btn" type="submit" onClick={()=>navigate("Signup")}>SIGN UP</button>
             </span>
             <p id="login-title-name">BruinNotes</p>
-            <input  type="number" placeholder="Enter 9 digits UID"/>
-            <input  type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
+            <input id="login-txtbox"  type="number" placeholder="Enter 9 digits UID"/>
+            <input id="login-txtbox" type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
             <div id="login-link-box"><button id='login-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
             <div id="login-link-box"><button id="login-link-btn" onClick={()=>navigate("ForgetPassword")}>Forget Password?</button></div>
             <button className="login-btn" id="login-btm-btn" type="submit" onClick={()=>navigate("Searchpage")}>LOG IN</button>
