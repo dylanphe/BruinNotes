@@ -19,12 +19,12 @@ function Loginpage() {
 
     return (
         <div className='login-body'>
-            <span className= "login-top-btn">
+            <div className= "login-top-btn">
                 <button className="login-btn" type="submit" onClick={()=>navigate("Signup")}>SIGN UP</button>
-            </span>
+            </div>
             <p id="login-title-name">BruinNotes</p>
-            <input id="login-txtbox"  type="number" placeholder="Enter 9 digits UID"/>
-            <input id="login-txtbox" type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
+            <input className="login-txtbox"  type="number" placeholder="Enter 9 digits UID"/>
+            <input className="login-txtbox" type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
             <div id="login-link-box"><button id='login-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
             <div id="login-link-box"><button id="login-link-btn" onClick={()=>navigate("ForgetPassword")}>Forget Password?</button></div>
             <button className="login-btn" id="login-btm-btn" type="submit" onClick={()=>navigate("Searchpage")}>LOG IN</button>

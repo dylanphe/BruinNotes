@@ -41,8 +41,7 @@
 }
 
 #login-title-name{
-    position: relative;
-    top: 8%;
+    margin-top: 8%;
     font-family: "Gloria Hallelujah";
     font-size: 65px;
     color:white;
@@ -52,7 +51,7 @@
     color:rgb(214, 213, 213);
 }
 
-#login-txtbox {
+.login-txtbox {
     width: 50%;
     font-size: medium;
     padding: 10px;
