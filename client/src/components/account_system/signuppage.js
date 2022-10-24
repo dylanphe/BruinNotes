@@ -17,6 +17,28 @@ function SignupPage() {
         testConnection();
     }, []);
 
+    const [firstname, setFirstname] = React.useState('')
+    const [lastname, setLastname] = React.useState('')
+    const [email, setEmail] = React.useState('')
+
+    const handleSubmit = (event) => {
+        const userInfo = {
+            'firstname': firstname,
+            'lastname': lastname,
+            'email': email
+        }
+
+        fetch("http://localhost:8000/adduser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userInfo)
+        })
+    }
+    
+    // const addUserHandler = () => {
+    //     axios.post('http://127.0.0.1:8000/adduser', {'firstname': firstname, 'lastname': lastname, 'email': email})
+    //         .then(res => console.log(res))
+    // }
 
 
     const navigate = useNavigate();
@@ -33,15 +55,15 @@ function SignupPage() {
             <div className='signup-box'>
                 <div className='signup-center-align'>
                     <div className='signup-form-label'>FULL NAME</div>
-                    <input id='signup-form-box'  type="text" placeholder="Enter Full Name"/>
+                    <input onChange={event => setFirstname(event.target.value)} id='signup-form-box'  type="text" placeholder="Enter Full Name"/>
                     <div className='signup-form-label'>UID</div>
                     <input id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
                     <div className='signup-form-label'>UCLA EMAIL</div>
-                    <input  id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
+                    <input onChange={event => setEmail(event.target.value)} id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
                     <div className='signup-form-label'>PASSWORD</div>
                     <input  id='signup-form-box' type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
                     <div className='signup-right-align'><button id='signup-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
-                    <button className="signup-btn" id="signup-btn" type="submit">SIGN UP</button>
+                    <button className="signup-btn" id="signup-btn" type="submit" onClick={handleSubmit}>SIGN UP</button>
                     <div><button className="signup-soft-btn" type="submit" onClick={()=>navigate("/")}>Already registered, sign in?</button></div>
                 </div>
             </div>
