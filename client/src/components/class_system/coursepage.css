@@ -1,19 +1,54 @@
 .course-title {
-    /* position: sticky; */
-    /* top: 5%; */
+    /* position: absolute; */
+    /* position: relative; */
+    top: 40px;
     color: white;
     font-family: "Gloria Hallelujah";
+    margin-top: 60px;
+    margin-bottom: 25px;
+}
+
+.class-list {
+    /* position: relative; */
+    width: 30%;
+    min-width: 250px;
+    margin-top: 2.5%;    
 }
 
 .instructor {
+    /* color: #2D68C4; */
     color: white;
+    font-size: large;
+    left: 10%;
+    margin-top: 30px;
+    padding: 3%;
+    text-align: center;
+    border-style: dashed;
+    border-radius: 20px;
+    border-width: thick;
+    min-width: 200px;
 }
 
-.term-under-instructor{
-    list-style-type: none; 
+ul.term-under-instructor{
+    list-style-type: none;
+    padding-left: 0px;
+    text-align: center;
+}
+ul.term-under-instructor li {
+    display: inline;
+    /* padding: .5%; */
+    margin-right: 5%;
+    
 }
 
-.lnk{
+.course-btn {
+    /* margin-top: 5%; */
+    background-color: white;
+    color: #2D68C4;
+}
+
+.lnk {
+    /* color: #2D68C4; */
     color: white;
 }
 .lnk:hover {
@@ -25,12 +60,13 @@ a {
   }
 a:visited {
     color: gainsboro;
+    /* color: whitesmoke; */
 }
 a:hover {
     color: #F2A900;
 }
 
-#home-lnk{
+#home-btn{
     position: absolute;
     top: 2%;
     right: 2%;

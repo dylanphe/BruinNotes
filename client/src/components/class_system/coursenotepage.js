@@ -49,9 +49,9 @@ function CourseNotePage(props) {
     return (
       <div key={note._id}>
         <div>
-          <a href={note.URL}>{title}</a>
+          <a href={note.URL} className="lnk">{title}</a>
         </div>
-        <button>Like {note.likes}</button>  
+        <button className='like-btn'>Like {note.likes}</button>  
         <button>Dislike {note.dislikes}</button>  
         <div>
           <input type="text" placeholder='Enter a comment...'></input>
@@ -71,15 +71,17 @@ function CourseNotePage(props) {
 
   return (
     <div className='login-body'>
+      <HomeBtn />
       <h1 className='course-title'>{courseName} {term} {instructor}</h1>
       <div>
-        <button> + Share Notes </button>
-        <button> Request Notes </button>
+        <button className='login-btn course-btn btn-lst'> + Share Notes </button>
+        <div style={{width: '40px', height: 'auto', display: 'inline-block'}}></div>
+        <button className='login-btn course-btn btn-lst'> Request Notes </button>
       </div>
       <div>
         <Notes />
       </div>
-      <HomeBtn />
+      
     </div>
   
   );  

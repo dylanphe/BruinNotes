@@ -107,12 +107,12 @@ function CoursePage(props) {
     let instructor = courseDataElement.instructor;
     return (
       <div className='instructor' key={instructor}>
-        Instructor: {courseDataElement.instructor}
+        <b>Instructor: {courseDataElement.instructor}</b>
         <ul className='term-under-instructor'>
           {courseDataElement.terms.map((term) => 
             <li key={term} className='lnk'>
               {/* <Link to={"".concat("/c/", coursename, "/", instructor, "/", term)} className='lnk'>{term}</Link> */}
-              <Link to={"".concat("/c/", coursename, "/", instructor, "/", term)}>{term}</Link>
+              <Link className="lnk" to={"".concat("/c/", coursename, "/", instructor, "/", term)}>{term}</Link>
             </li>)}
         </ul>
       </div>
@@ -131,12 +131,8 @@ function CoursePage(props) {
   return (
     <div className='login-body'>
       <h1 className='course-title'>{coursename}</h1>
-      <button type='button' className='login-btn'>+ Add Professor and Quarter</button>
+      <button type='button' className='login-btn course-btn' onClick={handleShow}>+ Add Professor and Quarter</button>
       <>
-        <button variant="primary" onClick={handleShow}>
-          Launch demo modal
-        </button>
-
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Enter Professor Below</Modal.Title>

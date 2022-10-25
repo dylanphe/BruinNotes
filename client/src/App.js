@@ -9,7 +9,6 @@ import CourseNotePage from './components/class_system/coursenotepage';
 
 function App() {
   return (
-
     <BrowserRouter>
         <Routes>
           <Route path = "/" element={<Loginpage />} />
