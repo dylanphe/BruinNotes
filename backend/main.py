@@ -4,6 +4,7 @@ import random
 
 from bson import ObjectId
 from fastapi import FastAPI, Body, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
@@ -13,6 +14,20 @@ client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:
 db = client.cluster0
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "localhost:3000"
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 # START MONGODB SKELETON CODE
 # Source: https://www.mongodb.com/developer/languages/python/python-quickstart-fastapi/
@@ -59,7 +74,7 @@ async def add_user(userInfo: dict):
     firstname = userInfo['firstname']
     lastname = userInfo['lastname']
     email = userInfo['email']
-    user = UserModel(firstname= 'firstname', lastname='lastname', email='email')
+    user = UserModel(firstname= firstname, lastname=lastname, email=email)
     new_user = jsonable_encoder(user)
     inserted_user = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": inserted_user.inserted_id})

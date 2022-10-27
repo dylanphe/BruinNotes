@@ -13,30 +13,29 @@ function SignupPage() {
         console.log(data);
         return 0;
     }
-    asdf
 
     const [firstname, setFirstname] = React.useState('')
     const [lastname, setLastname] = React.useState('')
     const [email, setEmail] = React.useState('')
 
-    const handleSubmit = (event) => {
-        const userInfo = {
-            'firstname': firstname,
-            'lastname': lastname,
-            'email': email
-        }
+    // const handleSubmit = (event) => {
+    //     const userInfo = {
+    //         'firstname': firstname,
+    //         'lastname': lastname,
+    //         'email': email
+    //     }
 
-        fetch("http://localhost:8000/adduser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userInfo)
-        })
-    }
-    
-    // const addUserHandler = () => {
-    //     axios.post('http://127.0.0.1:8000/adduser', {'firstname': firstname, 'lastname': lastname, 'email': email})
-    //         .then(res => console.log(res))
+    //     fetch("http://localhost:8000/adduser", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify(userInfo)
+    //     })
     // }
+    
+    const handleSubmit = () => {
+         axios.post('http://127.0.0.1:8000/adduser', {'firstname': firstname, 'lastname': lastname, 'email': email})
+         .then(res => console.log(res))
+    }
 
     //useEffect(() => {
     //    testConnection();
