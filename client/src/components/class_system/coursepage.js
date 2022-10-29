@@ -1,4 +1,4 @@
-
+// TODO: https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
 import React, {useState, useEffect} from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
@@ -151,21 +151,6 @@ function CoursePage(props) {
   // window.React2 = require('react');
   // console.log(window.React1 === window.React2);
 
-  const AddClassMsg = () => {
-    return (
-      <Modal show={showMsg} onHide={handleCloseMsg}>
-        <Modal.Body 
-          // style={{display: 'flex'}}
-        >
-          {msg}{'     '}
-          <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
-              OK
-          </Button>
-        </Modal.Body>
-      </Modal>
-    );
-  }
-
   return (
     <div className='login-body'>
       <h1 className='course-title'>{coursename}</h1>
@@ -176,17 +161,16 @@ function CoursePage(props) {
             <Modal.Title>Enter Professor Below</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-          <form>
-            <label htmlFor="fullname">Full Name (Last Name, First Name)</label>
-            <input type="text" name="fullname" id="fullname" onChange={handleChange}></input>
-            
-            <label htmlFor="qtr">Quarter (ex: Fall, Winter, Spring)</label>
-            <input type="text" name="quarter" id="qtr" onChange={handleChange}></input>
-            <br></br>
-            <label htmlFor="yr">Year (YYYY)</label>
-            <input type="number" name='year' min="1900" max="2099" step="1" id="yr" onChange={handleChange}></input> 
-          </form>
-
+            <form>
+              <label htmlFor="fullname">Full Name (Last Name, First Name)</label>
+              <input type="text" name="fullname" id="fullname" onChange={handleChange}></input>
+              
+              <label htmlFor="qtr">Quarter (ex: Fall, Winter, Spring)</label>
+              <input type="text" name="quarter" id="qtr" onChange={handleChange}></input>
+              <br></br>
+              <label htmlFor="yr">Year (YYYY)</label>
+              <input type="number" name='year' min="1900" max="2099" step="1" id="yr" onChange={handleChange}></input> 
+            </form>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClose}>
@@ -197,7 +181,17 @@ function CoursePage(props) {
             </Button>
           </Modal.Footer>
         </Modal>
-        <AddClassMsg />
+        {/* <AddClassMsg /> */}
+        <Modal show={showMsg} onHide={handleCloseMsg}>
+          <Modal.Body 
+            // style={{display: 'flex'}}
+          >
+            {msg}{'     '}
+            <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
+                OK
+            </Button>
+          </Modal.Body>
+        </Modal>
       </>
       <div className='class-list'>
         <Professors />
