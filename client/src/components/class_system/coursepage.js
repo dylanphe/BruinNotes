@@ -18,7 +18,7 @@ const sampleCourseBucket = {
     {"id": 2, "term": "Fall 2021", "instructor": "Kim, Miryung"}, 
     {"id": 3, "instructor": "John Doe"}, 
     {"id": 4, "term": "Spring 2022", "instructor": "DJ, JAYS"},
-    {"id": 4, "term": "Fall 2022", "instructor": "DJ, JAYS"}
+    {"id": 5, "term": "Fall 2022", "instructor": "DJ, JAYS"}
 	]
 };
 
@@ -71,9 +71,16 @@ function CoursePage(props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
+  const [newClassForm, setNewClass] = useState({});
+  // const [msg, setMsg] = useState("hiiii");  // TODO: change default message
+  let msg = "hiiiiii"; // TODO: change default message
+  const [showMsg, setShowMsg] = useState(false);
 
+  // TODO: maybe refactoring into functions handleClose(para) and handleShow(para)? 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleCloseMsg = () => setShowMsg(false);
+  const handleShowMsg = () => setShowMsg(true);
 
   useEffect(() => {
     // ref: https://maxrozen.com/fetching-data-react-with-useeffect
@@ -101,6 +108,22 @@ function CoursePage(props) {
     console.log(courseData[1].instructor);
   }
 
+  // ref: https://learningprogramming.net/modern-web/react-functional-components/use-onsubmit-event-in-react-functional-components/
+  const handleChange = (e) => {
+    let name = e.target.name;
+    let value = e.target.value;
+    newClassForm[name] = value;
+    setNewClass(newClassForm);
+  }
+
+  const handleSubmit = (e) => {
+    // e.preventDefault();
+    console.log(newClassForm);
+    const newClassInfo = {instructor: newClassForm['fullname'], term: (newClassForm['quarter'] + ' ' + newClassForm['year'])};
+    console.log(newClassInfo);
+    handleClose();
+    setShowMsg(true);
+  }
 
   function professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
@@ -128,11 +151,26 @@ function CoursePage(props) {
   // window.React2 = require('react');
   // console.log(window.React1 === window.React2);
 
+  const AddClassMsg = () => {
+    return (
+      <Modal show={showMsg} onHide={handleCloseMsg}>
+        <Modal.Body 
+          // style={{display: 'flex'}}
+        >
+          {msg}{'     '}
+          <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
+              OK
+          </Button>
+        </Modal.Body>
+      </Modal>
+    );
+  }
+
   return (
     <div className='login-body'>
       <h1 className='course-title'>{coursename}</h1>
       <button type='button' className='login-btn course-btn' onClick={handleShow}>+ Add Professor and Quarter</button>
-      <>
+      <> {/* ref: https://react-bootstrap.github.io/components/modal/ */}
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Enter Professor Below</Modal.Title>
@@ -140,13 +178,13 @@ function CoursePage(props) {
           <Modal.Body>
           <form>
             <label htmlFor="fullname">Full Name (Last Name, First Name)</label>
-            <input type="text" name="fullname" id="fullname"></input>
+            <input type="text" name="fullname" id="fullname" onChange={handleChange}></input>
             
             <label htmlFor="qtr">Quarter (ex: Fall, Winter, Spring)</label>
-            <input type="text" name="quarter" id="qtr"></input>
+            <input type="text" name="quarter" id="qtr" onChange={handleChange}></input>
             <br></br>
             <label htmlFor="yr">Year (YYYY)</label>
-            <input type="number" min="1900" max="2099" step="1" id="yr"></input> 
+            <input type="number" name='year' min="1900" max="2099" step="1" id="yr" onChange={handleChange}></input> 
           </form>
 
           </Modal.Body>
@@ -154,11 +192,12 @@ function CoursePage(props) {
             <Button variant="secondary" onClick={handleClose}>
               Close
             </Button>
-            <Button variant="primary" onClick={handleClose}>
+            <Button variant="primary" onClick={/*handleClose*/ handleSubmit}>
               Save Changes
             </Button>
           </Modal.Footer>
         </Modal>
+        <AddClassMsg />
       </>
       <div className='class-list'>
         <Professors />
