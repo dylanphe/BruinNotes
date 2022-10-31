@@ -103,6 +103,12 @@ function CoursePage(props) {
     setShow(props.show);
   }, [props]);
 
+  const getProfessors = (courses) => {
+    courses.map((course) => console.log(course["instructor"]));
+  };
+
+  console.log("professors: ", courseData, getProfessors(courseData));
+
   // setCourseBucket(sampleCourseBucket);
 
   // debug
@@ -142,7 +148,7 @@ function CoursePage(props) {
     let instructorColor = courseDataElement.colorCode;
 
     return (
-      <div>
+      <div key={instructor}>
         <div id='coursepage-instructor' key={instructor}>
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
@@ -193,10 +199,15 @@ function CoursePage(props) {
             </Modal.Header>
             <Modal.Body>
               <form>
+                <div className='modal-input-box'>
+                  <span>Add Quarter to an Existing Professor</span>
+                  <input type="checkbox" id="modal-input-label" onClick={checked}></input>
+                </div>
+                <br/>
                 {isModalInputTextShown && ( 
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Full Name</span>
-                  <input type="text" name="fullname" id="modal-input" onChange={handleChange} placeholder="Last-Name First-Name"></input>
+                  <input type="text" name="fullname" id="modal-input" onChange={handleChange} placeholder="Last-Name, First-Name"></input>
                 </div>
                 )}
                 {isModalInputSelectShown && ( 
@@ -206,17 +217,13 @@ function CoursePage(props) {
                     <Form action="#">
                       <select name="languages" id='modal-input-select'>
                         <option value="select">Select a Professor</option>
-                        <option value="javascript">JavaScript</option>
+                        <option value="javascript">JavaScript</option>  {/* TODO */}
+                        {professor()}
                       </select>
                     </Form>
                   </div>
                 </div>
                 )}
-                <br/>
-                <div className='modal-input-box'>
-                  <span>Add Quarter to an Existing Professor</span>
-                  <input type="checkbox" id="modal-input-label" onClick={checked}></input>
-                </div>
                 <br/>
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Quarter</span>
