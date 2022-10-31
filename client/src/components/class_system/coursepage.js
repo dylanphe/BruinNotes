@@ -104,18 +104,19 @@ function CoursePage(props) {
   }, [props]);
 
   const getProfessors = (courses) => {
-    courses.map((course) => console.log(course["instructor"]));
+    return (courses.length) ? (courses.map(course => course.instructor)) : [];
   };
 
-  console.log("professors: ", courseData, getProfessors(courseData));
+  // console.log("professors: ", courseData, getProfessors(courseData));
 
   // setCourseBucket(sampleCourseBucket);
 
   // debug
-  console.log(courseData);
+  console.log("courseData", courseData);
   if (courseData.length) {
     console.log(courseData[1].instructor);
   }
+  console.log("professors:", getProfessors(courseData));
 
   // ref: https://learningprogramming.net/modern-web/react-functional-components/use-onsubmit-event-in-react-functional-components/
   const handleChange = (e) => {
@@ -198,7 +199,7 @@ function CoursePage(props) {
               <Modal.Title>Enter Professor and Quarter Below</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <form>
+              <Form action="#">
                 <div className='modal-input-box'>
                   <span>Add Quarter to an Existing Professor</span>
                   <input type="checkbox" id="modal-input-label" onClick={checked}></input>
@@ -214,13 +215,13 @@ function CoursePage(props) {
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Professor</span>
                   <div id='modal-input'>
-                    <Form action="#">
+                    {/* <Form action="#"> */}
                       <select name="languages" id='modal-input-select'>
                         <option value="select">Select a Professor</option>
-                        <option value="javascript">JavaScript</option>  {/* TODO */}
-                        {professor()}
+                        {/* <option value="javascript">JavaScript</option>  TODO */}
+                        {getProfessors(courseData).map(prof => <option value={prof} key={prof}>{prof}</option>)}
                       </select>
-                    </Form>
+                    {/* </Form> */}
                   </div>
                 </div>
                 )}
@@ -234,7 +235,7 @@ function CoursePage(props) {
                   <span id='modal-input-label'>Year</span>
                   <input type="number" name='year' min="1900" max="2099" step="1" id="modal-input" placeholder="YYYY" onChange={handleChange}></input> 
                 </div>
-              </form>
+              </Form>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={handleClose}>
