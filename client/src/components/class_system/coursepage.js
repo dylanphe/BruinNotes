@@ -50,13 +50,16 @@ result = client[''][''].aggregate([
 */
 const sampleCourseData = [{
     "instructor": "Kim, Miryung",
-    "terms": ["Fall 2022", "Fall 2021"]
+    "terms": ["Fall 2022", "Fall 2021"],
+    "colorCode": "color1",
   }, {
     "instructor": "DJ, JAYS",
-    "terms": ["Spring 2022", "Fall 2022"]
+    "terms": ["Spring 2022", "Fall 2022"],
+    "colorCode": "color2",
   }, {
     "instructor": "John Doe", 
-    "terms": []
+    "terms": [],
+    "colorCode": "color3",
   }]
 
 // route: /c/:coursename
@@ -125,19 +128,34 @@ function CoursePage(props) {
     setShowMsg(true);
   }
 
+  //const color1= '#6B8E23';
+  //const color2= '#EC7063';
+  //const color3= '#A569BD';
+  //const color4= '#34495E';
+  //const color5= '#F5B041';
+  //const color6= '#2D68C4';
+  //const colorCodes = {color1, color2, color3, color4, color5, color6};
+
   function professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
     let instructor = courseDataElement.instructor;
+    let instructorColor = courseDataElement.colorCode;
+
     return (
-      <div className='instructor' key={instructor}>
-        <b>Instructor: {courseDataElement.instructor}</b>
-        <ul className='term-under-instructor'>
-          {courseDataElement.terms.map((term) => 
-            <li key={term} className='lnk'>
-              {/* <Link to={"".concat("/c/", coursename, "/", instructor, "/", term)} className='lnk'>{term}</Link> */}
-              <Link className="lnk" to={"".concat("/c/", coursename, "/", instructor, "/", term)}>{term}</Link>
-            </li>)}
-        </ul>
+      <div>
+        <div id='coursepage-instructor' key={instructor}>
+          <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
+          <span> {courseDataElement.instructor}</span>
+        </div>
+        <div className="coursepage-term-list">
+          <ul className='term-under-instructor'>
+            {courseDataElement.terms.map((term) => 
+              <li key={term} className='lnk'>
+                {/* <Link to={"".concat("/c/", coursename, "/", instructor, "/", term)} className='lnk'>{term}</Link> */}
+                <Link className="lnk" to={"".concat("/c/", coursename, "/", instructor, "/", term)}>{term}</Link>
+              </li>)}
+          </ul>
+        </div>
       </div>
     );
   }
@@ -147,56 +165,96 @@ function CoursePage(props) {
     return (courseData.map((courseDataElement) => professor(courseDataElement)));
   }
 
+  const [isModalInputTextShown, setModalInputTextShown] = useState(true);
+  const [isModalInputSelectShown, setModalInputSelectShown] = useState(false);
+
+  function checked() {
+    setModalInputTextShown(!isModalInputTextShown);
+    setModalInputSelectShown(!isModalInputSelectShown);
+  }
+
   // require('react-dom');
   // window.React2 = require('react');
   // console.log(window.React1 === window.React2);
 
   return (
-    <div className='login-body'>
-      <h1 className='course-title'>{coursename}</h1>
-      <button type='button' className='login-btn course-btn' onClick={handleShow}>+ Add Professor and Quarter</button>
-      <> {/* ref: https://react-bootstrap.github.io/components/modal/ */}
-        <Modal show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Enter Professor Below</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <form>
-              <label htmlFor="fullname">Full Name (Last Name, First Name)</label>
-              <input type="text" name="fullname" id="fullname" onChange={handleChange}></input>
-              
-              <label htmlFor="qtr">Quarter (ex: Fall, Winter, Spring)</label>
-              <input type="text" name="quarter" id="qtr" onChange={handleChange}></input>
-              <br></br>
-              <label htmlFor="yr">Year (YYYY)</label>
-              <input type="number" name='year' min="1900" max="2099" step="1" id="yr" onChange={handleChange}></input> 
-            </form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={/*handleClose*/ handleSubmit}>
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        {/* <AddClassMsg /> */}
-        <Modal show={showMsg} onHide={handleCloseMsg}>
-          <Modal.Body 
-            // style={{display: 'flex'}}
-          >
-            {msg}{'     '}
-            <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
-                OK
-            </Button>
-          </Modal.Body>
-        </Modal>
-      </>
-      <div className='class-list'>
-        <Professors />
+    <div className='coursepage-main-body'>
+      <div className='coursepage-title-box'>
+        <h1 className='coursepage-title'>{coursename}</h1>
+        <div className='coursepage-nav-button'>
+          <button type='button' className='coursepage-btn' onClick={handleShow}>+ Add Professor and Quarter</button>
+        </div>
       </div>
-      <HomeBtn />
+      <div className='coursepage-body'>
+        <> {/* ref: https://react-bootstrap.github.io/components/modal/ */}
+          <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Enter Professor and Quarter Below</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <form>
+                {isModalInputTextShown && ( 
+                <div className='modal-input-box'>
+                  <span id='modal-input-label'>Full Name</span>
+                  <input type="text" name="fullname" id="modal-input" onChange={handleChange} placeholder="Last-Name First-Name"></input>
+                </div>
+                )}
+                {isModalInputSelectShown && ( 
+                <div className='modal-input-box'>
+                  <span id='modal-input-label'>Professor</span>
+                  <div id='modal-input'>
+                    <Form action="#">
+                      <select name="languages" id='modal-input-select'>
+                        <option value="select">Select a Professor</option>
+                        <option value="javascript">JavaScript</option>
+                      </select>
+                    </Form>
+                  </div>
+                </div>
+                )}
+                <br/>
+                <div className='modal-input-box'>
+                  <span>Add Quarter to an Existing Professor</span>
+                  <input type="checkbox" id="modal-input-label" onClick={checked}></input>
+                </div>
+                <br/>
+                <div className='modal-input-box'>
+                  <span id='modal-input-label'>Quarter</span>
+                  <input type="text" name="quarter" id="modal-input" placeholder="Fall/Winter/Spring" onChange={handleChange}></input>
+                </div>
+                <br/>
+                <div className='modal-input-box'>
+                  <span id='modal-input-label'>Year</span>
+                  <input type="number" name='year' min="1900" max="2099" step="1" id="modal-input" placeholder="YYYY" onChange={handleChange}></input> 
+                </div>
+              </form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={/*handleClose*/ handleSubmit}>
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          {/* <AddClassMsg /> */}
+          <Modal show={showMsg} onHide={handleCloseMsg}>
+            <Modal.Body 
+              // style={{display: 'flex'}}
+            >
+              {msg}{'     '}
+              <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
+                  OK
+              </Button>
+            </Modal.Body>
+          </Modal>
+        </>
+        <div className='coursepage-class-list'>
+          <Professors />
+        </div>
+        <HomeBtn/>
+      </div>
     </div>
   ); 
 }

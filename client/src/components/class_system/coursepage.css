@@ -1,38 +1,94 @@
-.course-title {
-    /* position: absolute; */
-    /* position: relative; */
-    top: 40px;
-    color: white;
-    font-family: "Gloria Hallelujah";
-    margin-top: 60px;
-    margin-bottom: 25px;
+:root {
+    --colorCode: #6B8E23;
+    --color1: #6B8E23;
+    --color2: #EC7063;
+    --color3: #A569BD;
+    --color4: #34495E;
+    --color5: #F5B041;
+    --color6: #2D68C4;
 }
 
-.class-list {
+.coursepage-main-body {
+    width: 100vw;
+    height: 100vh;
+    background-color:#2D68C4;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.coursepage-nav-button {
+    position:relative;
+    padding-left: 2%;
+    bottom: 60%;
+    display: flex;
+    flex-direction: row;
+}
+
+.coursepage-title-box {
+    width: 100vw;
+    height: 10vh;
+    border-bottom-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+}
+
+.coursepage-body{
+    background-color:#FFFAF1;
+    width: 100vw;
+    height: 100vh;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+}
+
+.coursepage-title {
+    text-align: center;
+    color: #FFFAF1;
+    font-family: "Gloria Hallelujah";
+}
+
+.coursepage-class-list {
     /* position: relative; */
-    width: 30%;
+    width: 95%;
     min-width: 250px;
     margin-top: 2.5%;    
 }
 
-.instructor {
+
+#coursepage-instructor {
     /* color: #2D68C4; */
-    color: white;
+    background-color: var(--colorCode);
+    color: #FFFAF1;
+    font-family: "Gloria Hallelujah";
     font-size: large;
-    left: 10%;
-    margin-top: 30px;
-    padding: 3%;
-    text-align: center;
-    border-style: dashed;
-    border-radius: 20px;
-    border-width: thick;
-    min-width: 200px;
+    text-align: left;
+    padding: 20px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+
+}
+
+.coursepage-term-list {
+    background-color:#FFFAF1;
+
+    padding: 20px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 30px;
+    
+
+}
+
+#coursepage-prof-title {
+    text-decoration: underline;
 }
 
 ul.term-under-instructor{
     list-style-type: none;
-    padding-left: 0px;
-    text-align: center;
+    text-align: left;
 }
 ul.term-under-instructor li {
     display: inline;
@@ -41,15 +97,53 @@ ul.term-under-instructor li {
     
 }
 
-.course-btn {
-    /* margin-top: 5%; */
+.coursepage-btn {
     background-color: white;
     color: #2D68C4;
+    font-weight: bolder;
+    font-size: medium;
+    font-family: "Gloria Hallelujah";
+    border-style: none;
+    border-radius:40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px; 
+}
+
+.coursepage-btn:hover {
+    background-color: #F2A900;
+    color: #2D68C4;
+}
+
+.modal-input-box {
+    display: flex;
+    flex-direction: row;
+}
+
+#modal-input-label {
+    width:25%;
+    padding-right: 10px;
+}
+
+#modal-input {
+    width: 70%;
+    border-radius: 10px;
+}
+
+#modal-input-select {
+    width: 100%;
+    border-radius: 10px;
+    border-width: 2px;
 }
 
 .lnk {
     /* color: #2D68C4; */
-    color: white;
+    color: #2D68C4;
+    font-family: "Gloria Hallelujah";
+    text-decoration: none;
+    font-weight: bolder;
+    font-size: medium;
 }
 .lnk:hover {
     color: #F2A900;
@@ -59,7 +153,7 @@ a {
     color: white;
   }
 a:visited {
-    color: gainsboro;
+    color: #F2A900;
     /* color: whitesmoke; */
 }
 a:hover {

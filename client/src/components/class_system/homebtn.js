@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 function HomeBtn() {
   const navigate = useNavigate();
   return (
-    <button id='home-btn' className='login-btn' onClick={() => navigate("/Searchpage")}>
+    <button id='home-btn' className='coursepage-btn' onClick={() => navigate("/Searchpage")}>
       {/* <Link to="/"> */}
       HOME
       {/* </Link> */}
