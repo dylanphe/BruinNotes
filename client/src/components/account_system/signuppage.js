@@ -52,7 +52,7 @@ function SignupPage() {
                 </span>
                 <input  onChange={event => setEmail(event.target.value)} id='long-textbox' type="text" placeholder="Enter UCLA Email Address"/>
                 <input  id='long-textbox' type="text" placeholder="Enter Password"/>
-                <input  id='long-textbox' type="text" placeholder="Rytype Password"/>
+                <input  id='long-textbox' type="text" placeholder="Retype Password"/>
                 <button  className="btn" id="signup-btn" type="submit" onClick={handleSubmit} >SIGN UP</button>
             </div>
         </div>
