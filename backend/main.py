@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-from fastapi import FastAPI
-
-app = FastAPI()
-
-=======
 import os
 import motor.motor_asyncio
 import random
@@ -135,7 +129,6 @@ async def delete_user(username: str):
 
 # END MONGODB SKELETON CODE
 
->>>>>>> Added functions for adding, viewing, updating, and deleting MongoDB entries
 @app.get("/", tags=["root"])
 async def read_root():
     print("read_root")

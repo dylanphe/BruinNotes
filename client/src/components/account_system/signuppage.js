@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {BsEyeFill, BsEyeSlashFill} from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import "@fontsource/gloria-hallelujah";
 import './signuppage.css';
 
@@ -57,7 +58,7 @@ function SignupPage() {
                     <div className='signup-form-label'>FULL NAME</div>
                     <input onChange={event => setFirstname(event.target.value)} id='signup-form-box'  type="text" placeholder="Enter Full Name"/>
                     <div className='signup-form-label'>UID</div>
-                    <input id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
+                    <input onChange={event => setLastname(event.target.value)} id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
                     <div className='signup-form-label'>UCLA EMAIL</div>
                     <input onChange={event => setEmail(event.target.value)} id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
                     <div className='signup-form-label'>PASSWORD</div>
