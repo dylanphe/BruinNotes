@@ -3,6 +3,8 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import {BiLike, BiDislike, BiCommentAdd} from 'react-icons/bi';
+import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike} from 'react-icons/ai'; 
 import Button from 'react-bootstrap/esm/Button';
 import Modal from 'react-bootstrap/Modal';
 import './coursenotepage.css';
@@ -42,23 +44,30 @@ const sampleNotes = [{
 
 function Note(note) {
   const [showComments, setShowComments] = useState(false);
+  const [showLikes, setShowLikes] = useState(false);
+  const [showDislikes, setShowDislikes] = useState(false);
+  const toggleDislikes = () => setShowDislikes(!showDislikes);
+  const toggleLikes = () => setShowLikes(!showLikes);
   const toggleComments = () => setShowComments(!showComments);
   let title = note.author + ": " + note.title + " | Week " + note.week + " (" + note.role + ")";
   let comments = note.commentList;
   return (
     <div key={note._id}>
-      <div>
-        <a href={note.URL} className="lnk">{title}</a>
+      <div className="note-nav-button">
+        <a href={note.URL} className="note-lnk">{title}</a>
+        <div className='misc-button-list'>
+          <button className='misc-button' id='comment' onClick={toggleComments}> <BiCommentAdd/> </button>
+          <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button>  
+          <button className='misc-button' id="like" onClick={toggleLikes}>{showLikes === false ? <AiOutlineLike/> : <AiFillLike />} {note.likes}</button>  
+        </div>
       </div>
-      <button className='like-btn'>Like {note.likes}</button>  
-      <button> Dislike {note.dislikes}</button>  
-      <button onClick={toggleComments}> Comments </button>
       <div style={{display: showComments ? 'block' : 'none'}}>
-        <input type="text" placeholder='Enter a comment...'></input>
-        <div className='comments' >
-          {comments.map((comment, idx) => <p key={idx}><b className='commentAuthor'>{comment.username}</b> {comment.comment}</p>)}
+        <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
+        <div className='comments'>
+          {comments.map((comment, idx) => <div id='cmt-box' key={idx}><b>{comment.username}</b> {comment.comment}</div>)}
         </div>          
       </div>  
+      <hr/>
     </div>
   );
 }
@@ -111,16 +120,24 @@ function CourseNotePage(props) {
   // console.log(requestMsg);
 
   return (
-    <div className='login-body'>
+    <div className='quarterpage-main-body'>
       <HomeBtn />
-      <h1 className='course-title'>{courseName} {term} {instructor}</h1>
-      <div>
-        <button className='login-btn course-btn btn-lst' onClick={handleOpenAdd}> + Share Notes </button>
-        <div style={{width: '40px', height: 'auto', display: 'inline-block'}}></div>
-        <button className='login-btn course-btn btn-lst' onClick={handleOpenReq}> Request Notes </button>
+      <div className='quarterpage-title-box'>
+        <h1 className='quarterpage-title'>{courseName} {term} {instructor}</h1>
+        <div className='quarterpage-nav-button'>
+          <button className='quarterpage-btn' onClick={handleOpenAdd}> + Share Notes </button>
+          <button className='quarterpage-btn' onClick={handleOpenReq}> Request Notes </button>
+        </div>
       </div>
-      <div>
-        <Notes />
+      <div className='quarterpage-body'>
+        <div className='quarterpage-week-list'>
+          <div id='quarterpage-week'>
+            Week 1
+          </div>
+          <div id="quarterpage-note-list">
+            <Notes />
+          </div>
+        </div>
       </div>
       <>
         <Modal show={showAdd} onHide={handleCloseAdd} autoFocus={false}>
@@ -130,15 +147,17 @@ function CourseNotePage(props) {
           <Modal.Body>
             <label htmlFor='notelink'>Insert link below...</label>
             <textarea autoFocus type="text" name="notelink" className='txt-box' onChange={handleChangeAdd}></textarea>
-            <br></br>
-            <label htmlFor='namelink'>Name Link (Title, Week)</label>
-            <input type="text" name="namelink" onChange={handleChangeAdd}></input>
-            <br></br>
-            Choose Author Type: 
-            <span>
+            <br /> <br />
+            <div className='modal-input-box'>
+              <span id='modal-input-label'>Name</span>
+              <input type="text" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='Title Week'></input>
+            </div>
+            <br />
+            <div className='modal-input-box'>
+              <span id='modal-input-label'>Author Type</span>
               {/* <button> Student </button> <button> TA </button> <button> Professor </button> */}
-              {authorTypes.map((at, idx) => (<button key={at} onClick={() => handleClickAuthorType(at)}> {at} </button>))}
-            </span>
+              {authorTypes.map((at, idx) => (<button id='author-button' key={at} onClick={() => handleClickAuthorType(at)}> {at} </button>))}
+            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant='primary' onClick={handleSubmitAdd}> Share </Button>
