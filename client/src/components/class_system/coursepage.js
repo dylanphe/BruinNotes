@@ -1,4 +1,6 @@
-// TODO: https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
+// TODOs: Input validation 
+//        More tests on the comparator function
+//        https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
 import React, {useState, useEffect} from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
@@ -74,7 +76,7 @@ function CoursePage(props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
-  const [newClassForm, setNewClass] = useState({});
+  const [newClassForm, setNewClassForm] = useState({});
   // const [msg, setMsg] = useState("hiiii");  // TODO: change default message
   let msg = "hiiiiii"; // TODO: change default message
   const [showMsg, setShowMsg] = useState(false);
@@ -123,16 +125,70 @@ function CoursePage(props) {
     let name = e.target.name;
     let value = e.target.value;
     newClassForm[name] = value;
-    setNewClass(newClassForm);
+    setNewClassForm(newClassForm);
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    // !TODO: validate input 
     // e.preventDefault();
     console.log(newClassForm);
-    const newClassInfo = {instructor: newClassForm['fullname'], term: (newClassForm['quarter'] + ' ' + newClassForm['year'])};
+    const isProfExist = (newClassForm['professor_select'] != null);
+    // TODO: might need to assert that fullname == null whenever professor_select exists
+    
+    // TODO: might become legacy 
+    const newClassInfo = {
+      instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
+      term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
+      // colorCode: "color2", // temporarily set to color2. TODO: assign to different colors 
+    };
     console.log(newClassInfo);
+    // await fetch('/Coursepage/add', {
+    //   method: "PUT", 
+    //   headers: {"Content-Type": "application/json"}, 
+    //   body: JSON.stringify({msg: "hello"})
+    // })    
+    setModalInputTextShown(true);
+    setModalInputSelectShown(false);
     handleClose();
     setShowMsg(true);
+    // ////////// For demo propose, subject to change //////////
+    // Add input to the `courseData` to simulate inserting to the db 
+    // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
+    const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
+    if (course_idx === -1) { // Add a new professor to courseData
+      let newProf = {
+        instructor: newClassForm['fullname'], 
+        terms: [(newClassForm['quarter'] + ' ' + newClassForm['year'])], 
+        colorCode: "color2" // temporarily set to color2. TODO: assign to different colors 
+        ,
+      };
+      courseData.unshift(newProf);  
+      setCourseData(courseData);
+    } else {  // Add term to an existing professor 
+      let l = courseData[course_idx].terms.length; 
+      courseData[course_idx].terms.push(newClassForm['quarter'] + ' ' + newClassForm['year']);
+      let l2 = courseData[course_idx].terms.length; 
+      console.log("l:", l, "l2:", l2);
+      function compareTerms(term1, term2) { 
+        function compareQuarter(q1, q2) { 
+          const qToInt = {'Winter': 0, 'Spring': 1, 'Summer': 2, 'Fall': 3};
+          const q1int = qToInt[q1], q2int = qToInt[q2];
+          return q1int - q2int;
+        }
+        // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split 
+        // ASSUME a "quarter year" string. (ASSUME input validation)
+        const [qtr1, yr1] = term1.split(' ');
+        const [qtr2, yr2] = term2.split(' ');
+        if (yr1 !== yr2) {
+          return yr1 - yr2;
+        } else {
+          return compareQuarter(qtr1, qtr2);
+        }
+      }
+      courseData[course_idx].terms.sort(compareTerms).reverse();
+      setCourseData(courseData);
+    }
+    // /////////////////////////////////////////////////////////
   }
 
   //const color1= '#6B8E23';
@@ -216,7 +272,7 @@ function CoursePage(props) {
                   <span id='modal-input-label'>Professor</span>
                   <div id='modal-input'>
                     {/* <Form action="#"> */}
-                      <select name="languages" id='modal-input-select'>
+                      <select name="professor_select" id='modal-input-select' onChange={handleChange}>
                         <option value="select">Select a Professor</option>
                         {/* <option value="javascript">JavaScript</option>  TODO */}
                         {getProfessors(courseData).map(prof => <option value={prof} key={prof}>{prof}</option>)}
@@ -228,7 +284,7 @@ function CoursePage(props) {
                 <br/>
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Quarter</span>
-                  <input type="text" name="quarter" id="modal-input" placeholder="Fall/Winter/Spring" onChange={handleChange}></input>
+                  <input type="text" name="quarter" id="modal-input" placeholder="Fall/Winter/Spring/Summer" onChange={handleChange}></input>
                 </div>
                 <br/>
                 <div className='modal-input-box'>
