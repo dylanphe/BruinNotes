@@ -3,7 +3,8 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {BiLike, BiDislike, BiCommentAdd} from 'react-icons/bi';
+import {BiCommentAdd} from 'react-icons/bi';
+import SlidingPane from "react-sliding-pane";
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike} from 'react-icons/ai'; 
 import Button from 'react-bootstrap/esm/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -99,6 +100,14 @@ function CourseNotePage(props) {
   const handleCloseAdd = () => {setShowAdd(false);}
   const handleChangeReq = (e) => {setRequestMsg(e.target.value);}
 
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [hideNote, setHideNote] = useState(false);
+
+  const openReqPanel = () => {
+    setPanelOpen(!panelOpen);
+    setHideNote(!hideNote);
+  }
+
   const notes = sampleNotes;
 
   const Notes = () => {
@@ -141,11 +150,22 @@ function CourseNotePage(props) {
       <div className='quarterpage-body'>
         <div className='quarterpage-week-list'>
           <div id='quarterpage-week'>
-            Week 1
+            <div id='quarterpage-week-num'>
+              {!panelOpen ? "Week 1" : "Week 1's requests"}
+            </div>
+            <div id='quarterpage-week-req'>
+              <button id="quarterpage-req-btn" onClick={openReqPanel}>Requests</button>
+            </div>
           </div>
-          <div id="quarterpage-note-list">
+          {!hideNote && (<div id="quarterpage-note-list">
             <Notes />
+          </div> 
+          )}
+          {hideNote && (<div id="quarterpage-request-list">
+            <Notes />
+            sdasd
           </div>
+          )}
         </div>
       </div>
       <>

@@ -74,10 +74,38 @@
     font-family: "Gloria Hallelujah";
     font-size: large;
     text-align: left;
-    padding: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
+    display: flex;
+}
 
+#quarterpage-week-num {
+    /* color: #2D68C4; */
+    width:80%;
+}
+
+#quarterpage-week-req {
+    /* color: #2D68C4; */
+    width:20%;
+    text-align: right;
+}
+
+#quarterpage-req-btn {
+    background-color: white;
+    color: #2D68C4;
+    font-size: 0.6em;
+    font-weight: bolder;
+    border-style: none;
+    border-radius:40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px; 
+    
 }
 
 #quarterpage-note-list {
@@ -89,6 +117,15 @@
     margin-bottom: 30px;
     
 
+}
+
+#quarterpage-request-list {
+    background-color:#FFFAF1;
+    padding: 20px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 30px;
 }
 
 .txt-box {
