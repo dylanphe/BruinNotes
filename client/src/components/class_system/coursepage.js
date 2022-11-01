@@ -210,7 +210,7 @@ function CoursePage(props) {
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
         </div>
-        <div className="coursepage-term-list">
+        <div id="coursepage-term-list">
           <ul className='term-under-instructor'>
             {courseDataElement.terms.map((term) => 
               <li key={term} className='lnk'>
