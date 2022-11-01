@@ -34,7 +34,7 @@ const sampleNotes = [{
   'date': '2020/10/22',
   'week': 5,
   'commentList': [
-    {'username': 'UserSRam', 'comment': 'comment 1'}, 
+    {'username': 'FirstName,LastName', 'comment': 'comment 1'}, 
     {'username': 'Lgv', 'comment': 'comment 2'}
   ],
   'ratingList': [],
@@ -56,15 +56,24 @@ function Note(note) {
       <div className="note-nav-button">
         <a href={note.URL} className="note-lnk">{title}</a>
         <div className='misc-button-list'>
-          <button className='misc-button' id='comment' onClick={toggleComments}> <BiCommentAdd/> </button>
-          <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button>  
           <button className='misc-button' id="like" onClick={toggleLikes}>{showLikes === false ? <AiOutlineLike/> : <AiFillLike />} {note.likes}</button>  
+          <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button> 
+          <button className='misc-button' id='comment' onClick={toggleComments}> <BiCommentAdd/> </button> 
         </div>
       </div>
       <div style={{display: showComments ? 'block' : 'none'}}>
         <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
         <div className='comments'>
-          {comments.map((comment, idx) => <div id='cmt-box' key={idx}><b>{comment.username}</b> {comment.comment}</div>)}
+          {comments.map((comment, idx) => 
+            <div id='cmt-box' key={idx}>
+              <div id='user-box'>
+                <b>{comment.username}</b>
+              </div>
+              <div id='user-cmt-box'>
+                {comment.comment}
+              </div>
+            </div>
+          )}
         </div>          
       </div>  
       <hr/>
@@ -149,8 +158,13 @@ function CourseNotePage(props) {
             <textarea autoFocus type="text" name="notelink" className='txt-box' onChange={handleChangeAdd}></textarea>
             <br /> <br />
             <div className='modal-input-box'>
-              <span id='modal-input-label'>Name</span>
-              <input type="text" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='Title Week'></input>
+              <span id='modal-input-label'>Title</span>
+              <input type="text" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='Lecture1, Discussion1,...'></input>
+            </div>
+            <br />
+            <div className='modal-input-box'>
+              <span id='modal-input-label'>Week</span>
+              <input type="number" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='1, 2, 3,...'></input>
             </div>
             <br />
             <div className='modal-input-box'>
@@ -169,9 +183,14 @@ function CourseNotePage(props) {
             <Modal.Title>Request Notes</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            Enter request below (Title, Week)
+            Enter request below:
             <br></br>
             <textarea autoFocus type="text" name="request" className="txt-box" onChange={(e) => setRequestMsg(e.target.value)}></textarea>
+            <br />
+            <div className='modal-input-box'>
+              <span id='modal-input-label'>Week</span>
+              <input type="number" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='1, 2, 3,...'></input>
+            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="primary" onClick={handleSubmitReq}> Submit </Button>
