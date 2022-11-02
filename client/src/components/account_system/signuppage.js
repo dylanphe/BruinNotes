@@ -18,27 +18,14 @@ function SignupPage() {
         testConnection();
     }, []);
 
-    const [firstname, setFirstname] = React.useState('')
-    const [lastname, setLastname] = React.useState('')
+    const [fullname, setFullname] = React.useState('')
+    const [uid, setUID] = React.useState('')
     const [email, setEmail] = React.useState('')
-
-    // const handleSubmit = (event) => {
-    //     const userInfo = {
-    //         'firstname': firstname,
-    //         'lastname': lastname,
-    //         'email': email
-    //     }
-
-    //     fetch("http://localhost:8000/adduser", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify(userInfo)
-    //     })
-    // }
+    const [password, setPassword] = React.useState('')
     
     const handleSubmit = () => {
-         axios.post('http://127.0.0.1:8000/adduser', {'firstname': firstname, 'lastname': lastname, 'email': email})
-         .then(res => console.log(res))
+        axios.post('http://127.0.0.1:8000/adduser', {'fullname': fullname, 'uid': uid, 'email': email, 'password': password})
+        .then(res => console.log(res))
     }
 
 
@@ -56,13 +43,13 @@ function SignupPage() {
             <div className='signup-box'>
                 <div className='signup-center-align'>
                     <div className='signup-form-label'>FULL NAME</div>
-                    <input onChange={event => setFirstname(event.target.value)} id='signup-form-box'  type="text" placeholder="Enter Full Name"/>
+                    <input onChange={event => setFullname(event.target.value)} id='signup-form-box'  type="text" placeholder="Enter Full Name"/>
                     <div className='signup-form-label'>UID</div>
-                    <input onChange={event => setLastname(event.target.value)} id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
+                    <input onChange={event => setUID(event.target.value)} id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
                     <div className='signup-form-label'>UCLA EMAIL</div>
                     <input onChange={event => setEmail(event.target.value)} id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
                     <div className='signup-form-label'>PASSWORD</div>
-                    <input  id='signup-form-box' type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
+                    <input onChange={event => setPassword(event.target.value)} id='signup-form-box' type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
                     <div className='signup-right-align'><button id='signup-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
                     <button className="signup-btn" id="signup-btn" type="submit" onClick={handleSubmit}>SIGN UP</button>
                     <div><button className="signup-soft-btn" type="submit" onClick={()=>navigate("/")}>Already registered, sign in?</button></div>

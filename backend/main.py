@@ -48,9 +48,10 @@ class PyObjectId(ObjectId):
 
 class UserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    firstname: str
-    lastname: str
+    fullname: str
+    uid: str
     email: str
+    password: str
 
     class Config:
         allow_population_by_field_name = True
@@ -71,10 +72,11 @@ class UpdateUserModel(BaseModel):
 @app.post("/adduser", response_description="Add new user")
 async def add_user(userInfo: dict):
     #random_username="test_user_" + str(random.randint(1,100))
-    firstname = userInfo['firstname']
-    lastname = userInfo['lastname']
+    fullname = userInfo['fullname']
+    uid = userInfo['uid']
     email = userInfo['email']
-    user = UserModel(firstname= firstname, lastname=lastname, email=email)
+    password = userInfo['password']
+    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
     new_user = jsonable_encoder(user)
     inserted_user = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": inserted_user.inserted_id})
@@ -87,13 +89,13 @@ async def view_all_users():
     return users
 
 # View a specific database item
-@app.get("/viewuser/{username}", response_description="View user with given username")
-async def view_user(username: str):
+@app.get("/viewuser/{uid}", response_description="View user with given username")
+async def view_user(uid: str):
     matching_users = []
-    if (user := await db["users"].find_one({"username": username})) is not None:
+    if (user := await db["users"].find_one({"uid": uid})) is not None:
         matching_users.append(user)
     if len(matching_users) == 0:
-        raise HTTPException(status_code=404, detail=f"User with username {username} not found")
+        raise HTTPException(status_code=404, detail=f"User with UID {uid} not found")
     return matching_users
 
 # # Update a database item
