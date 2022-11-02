@@ -29,7 +29,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# START MONGODB SKELETON CODE
 # Source: https://www.mongodb.com/developer/languages/python/python-quickstart-fastapi/
 class PyObjectId(ObjectId):
     @classmethod
@@ -68,10 +67,17 @@ class UpdateUserModel(BaseModel):
         json_encoders = {ObjectId: str}
 
 # Add a new database item
-# TODO: Change to a POST request, and pass in user's info.
 @app.post("/adduser", response_description="Add new user")
 async def add_user(userInfo: dict):
-    #random_username="test_user_" + str(random.randint(1,100))
+    """
+    Creates a new user and adds it to the database.
+    
+    Args:
+        userInfo (dict): A dict containing the user's information.
+
+    Returns:
+        JSON object with created user and 201 status.
+    """
     fullname = userInfo['fullname']
     uid = userInfo['uid']
     email = userInfo['email']
@@ -85,12 +91,27 @@ async def add_user(userInfo: dict):
 # View all database items
 @app.get("/viewallusers", response_description="View all users")
 async def view_all_users():
+    """
+    View all users currently in the database.
+
+    Returns:
+        A list containing the database's users.
+    """
     users = await db["users"].find().to_list(1000)
     return users
 
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given username")
 async def view_user(uid: str):
+    """
+    View a specific user in the database.
+
+    Args:
+        uid (str): A string containing the requested user's UID.
+
+    Returns:
+        The requested user's information.
+    """
     matching_users = []
     if (user := await db["users"].find_one({"uid": uid})) is not None:
         matching_users.append(user)
@@ -98,12 +119,21 @@ async def view_user(uid: str):
         raise HTTPException(status_code=404, detail=f"User with UID {uid} not found")
     return matching_users
 
-# # Update a database item
+# Update a database item
 # # TODO: Change to a PUT request, and pass in changed info.
-@app.get("/updateuser/{username}", response_description="Update user with given username")
-async def update_user(username: str):
-    new_random_username = "new_username_" + str(random.randint(1,100))
-    updated_user_info = UpdateUserModel(username=new_random_username)
+@app.get("/updateuser/{uid}", response_description="Update user with given uid")
+async def update_user(uid: str):
+    """
+    Update the user with the given UID.
+
+    Args:
+        uid (str): A string containing the user's UID.
+
+    Returns:
+        The updated user information.
+    """
+    new_random_uid = "new_uid_" + str(random.randint(1,100))
+    updated_user_info = UpdateUserModel(uid=new_random_uid)
     # Don't want to update empty fields, only grab the fields with values.
     print(updated_user_info)
     print(updated_user_info.dict())
@@ -112,25 +142,15 @@ async def update_user(username: str):
     print(updated_fields)
 
     if len(updated_fields) >= 1:
-        update_result = await db["users"].update_one({"username": username}, {"$set": updated_fields})
+        update_result = await db["users"].update_one({"uid": uid}, {"$set": updated_fields})
         if update_result.modified_count == 1:
-            if (updated_user := await db["users"].find_one({"username": new_random_username})) is not None:
+            if (updated_user := await db["users"].find_one({"uid": new_random_uid})) is not None:
                 return updated_user
         
-    if (existing_user := await db["users"].find_one({"username": username})) is not None:
+    if (existing_user := await db["users"].find_one({"uid": uid})) is not None:
         return existing_user
 
-# Delete a database item
-# TODO: Change to a DELETE request, and pass in username to be deleted.
-@app.get("/deleteuser/{username}", response_description="Delete a user")
-async def delete_user(username: str):
-    delete_result = await db["users"].delete_one({"username": username})
-    if delete_result.deleted_count >= 1:
-        return f"Successfully deleted user {username}"
-    return f"User {username} does not exist"
-
-# END MONGODB SKELETON CODE
-
+# Test Code
 @app.get("/", tags=["root"])
 async def read_root():
     print("read_root")

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "@fontsource/gloria-hallelujah";
 import './signuppage.css';
+import axios from 'axios'
 
 // The function that toggles between themes
 function SignupPage() {
@@ -14,9 +15,32 @@ function SignupPage() {
         return 0;
     }
 
-    useEffect(() => {
-        testConnection();
-    }, []);
+    const [firstname, setFirstname] = React.useState('')
+    const [lastname, setLastname] = React.useState('')
+    const [email, setEmail] = React.useState('')
+
+    // const handleSubmit = (event) => {
+    //     const userInfo = {
+    //         'firstname': firstname,
+    //         'lastname': lastname,
+    //         'email': email
+    //     }
+
+    //     fetch("http://localhost:8000/adduser", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify(userInfo)
+    //     })
+    // }
+    
+    const handleSubmit = () => {
+         axios.post('http://127.0.0.1:8000/adduser', {'firstname': firstname, 'lastname': lastname, 'email': email})
+         .then(res => console.log(res))
+    }
+
+    //useEffect(() => {
+    //    testConnection();
+    //}, []);
 
     const [fullname, setFullname] = React.useState('')
     const [uid, setUID] = React.useState('')
