@@ -151,6 +151,25 @@ async def view_user(uid: str):
         raise HTTPException(status_code=404, detail=f"User with UID {uid} not found")
     return matching_users
 
+@app.post("/checkpassword", response_description="Check if password is correct.")
+async def check_password(userInfo: dict):
+    """
+    Checks if the password is correct for the given user.
+    
+    Args:
+        userInfo (dict): A dict containing the user's information.
+
+    Returns:
+        True if the password matches, and False if it does not.
+    """
+    uid = userInfo['uid']
+    password = userInfo['password']
+    user = await db["users"].find_one({"uid": uid})
+    
+    if password == user["password"]:
+        return True
+    return False
+
 # Update a database item
 # TODO: Change to a PUT request, and pass in changed info.
 @app.get("/updateuser/{uid}", response_description="Update user with given uid")
@@ -167,11 +186,7 @@ async def update_user(uid: str):
     new_random_uid = "new_uid_" + str(random.randint(1,100))
     updated_user_info = UpdateUserModel(uid=new_random_uid)
     # Don't want to update empty fields, only grab the fields with values.
-    print(updated_user_info)
-    print(updated_user_info.dict())
-    print(updated_user_info.dict().items())
     updated_fields = {k: v for k, v in updated_user_info.dict().items() if v is not None}
-    print(updated_fields)
 
     if len(updated_fields) >= 1:
         update_result = await db["users"].update_one({"uid": uid}, {"$set": updated_fields})
@@ -181,19 +196,3 @@ async def update_user(uid: str):
         
     if (existing_user := await db["users"].find_one({"uid": uid})) is not None:
         return existing_user
-
-# Test Code
-@app.get("/", tags=["root"])
-async def read_root():
-    print("read_root")
-    return {"message": "Hello World"}
-
-@app.get("/login")
-async def test():
-    print("/login")
-    return {'login' : "hello world"}
-
-@app.get("/Signup")
-async def signup_test():
-    print("/Signup")
-    return {'Singup' : 'Hello World!'}

@@ -57,7 +57,6 @@ app.add_middleware(
     allow_headers=[&#34;*&#34;]
 )
 
-# START MONGODB SKELETON CODE
 # Source: https://www.mongodb.com/developer/languages/python/python-quickstart-fastapi/
 class PyObjectId(ObjectId):
     @classmethod
@@ -76,9 +75,10 @@ class PyObjectId(ObjectId):
 
 class UserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
-    firstname: str
-    lastname: str
+    fullname: str
+    uid: str
     email: str
+    password: str
 
     class Config:
         allow_population_by_field_name = True
@@ -94,7 +94,7 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-# Add a database item
+# Add a new database item
 @app.post(&#34;/adduser&#34;, response_description=&#34;Add new user&#34;)
 async def add_user(userInfo: dict):
     &#34;&#34;&#34;
@@ -106,10 +106,11 @@ async def add_user(userInfo: dict):
     Returns:
         JSON object with created user and 201 status.
     &#34;&#34;&#34;
-    firstname = userInfo[&#39;firstname&#39;]
-    lastname = userInfo[&#39;lastname&#39;]
+    fullname = userInfo[&#39;fullname&#39;]
+    uid = userInfo[&#39;uid&#39;]
     email = userInfo[&#39;email&#39;]
-    user = UserModel(firstname= firstname, lastname=lastname, email=email)
+    password = userInfo[&#39;password&#39;]
+    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
     new_user = jsonable_encoder(user)
     inserted_user = await db[&#34;users&#34;].insert_one(new_user)
     created_user = await db[&#34;users&#34;].find_one({&#34;_id&#34;: inserted_user.inserted_id})
@@ -127,90 +128,102 @@ async def view_all_users():
     users = await db[&#34;users&#34;].find().to_list(1000)
     return users
 
+@app.get(&#34;/checkuid/{uid}&#34;, response_description=&#34;Check that a user with a given UID does not already exist&#34;)
+async def check_uid(uid: str):
+    &#34;&#34;&#34;
+    Check that a user with a given UID does not already exist.
+
+    Args:
+        uid (str): A string containing the UID to be checked.
+
+    Returns:
+        True if the UID is unique, False if it already exists.
+    &#34;&#34;&#34;
+    user = await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})
+    if user is not None:
+        return False
+    return True
+
+@app.get(&#34;/checkemail/{email}&#34;, response_description=&#34;Check that a user with a given email does not already exist&#34;)
+async def check_email(email: str):
+    &#34;&#34;&#34;
+    Check that a user with a given email does not already exist.
+
+    Args:
+        email (str): A string containing the email to be checked.
+
+    Returns:
+        True if the email is unique, False if it already exists.
+    &#34;&#34;&#34;
+    user = await db[&#34;users&#34;].find_one({&#34;email&#34;: email})
+    if user is not None:
+        return False
+    return True
+
 # View a specific database item
-@app.get(&#34;/viewuser/{username}&#34;, response_description=&#34;View user with given username&#34;)
-async def view_user(username: str):
+@app.get(&#34;/viewuser/{uid}&#34;, response_description=&#34;View user with given username&#34;)
+async def view_user(uid: str):
     &#34;&#34;&#34;
     View a specific user in the database.
 
     Args:
-        username (str): A string containing the requested user&#39;s username.
+        uid (str): A string containing the requested user&#39;s UID.
 
     Returns:
         The requested user&#39;s information.
     &#34;&#34;&#34;
     matching_users = []
-    if (user := await db[&#34;users&#34;].find_one({&#34;username&#34;: username})) is not None:
+    if (user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})) is not None:
         matching_users.append(user)
     if len(matching_users) == 0:
-        raise HTTPException(status_code=404, detail=f&#34;User with username {username} not found&#34;)
+        raise HTTPException(status_code=404, detail=f&#34;User with UID {uid} not found&#34;)
     return matching_users
+
+@app.post(&#34;/checkpassword&#34;, response_description=&#34;Check if password is correct.&#34;)
+async def check_password(userInfo: dict):
+    &#34;&#34;&#34;
+    Checks if the password is correct for the given user.
+    
+    Args:
+        userInfo (dict): A dict containing the user&#39;s information.
+
+    Returns:
+        True if the password matches, and False if it does not.
+    &#34;&#34;&#34;
+    uid = userInfo[&#39;uid&#39;]
+    password = userInfo[&#39;password&#39;]
+    user = await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})
+    
+    if password == user[&#34;password&#34;]:
+        return True
+    return False
 
 # Update a database item
 # TODO: Change to a PUT request, and pass in changed info.
-@app.get(&#34;/updateuser/{username}&#34;, response_description=&#34;Update user with given username&#34;)
-async def update_user(username: str):
+@app.get(&#34;/updateuser/{uid}&#34;, response_description=&#34;Update user with given uid&#34;)
+async def update_user(uid: str):
     &#34;&#34;&#34;
-    Update a user&#39;s information in the database.
+    Update the user with the given UID.
 
     Args:
-        username (str): A string containing the username of the user to update.
+        uid (str): A string containing the user&#39;s UID.
 
     Returns:
-        The updated user&#39;s information.
+        The updated user information.
     &#34;&#34;&#34;
-    new_random_username = &#34;new_username_&#34; + str(random.randint(1,100))
-    updated_user_info = UpdateUserModel(username=new_random_username)
+    new_random_uid = &#34;new_uid_&#34; + str(random.randint(1,100))
+    updated_user_info = UpdateUserModel(uid=new_random_uid)
     # Don&#39;t want to update empty fields, only grab the fields with values.
-    print(updated_user_info)
-    print(updated_user_info.dict())
-    print(updated_user_info.dict().items())
     updated_fields = {k: v for k, v in updated_user_info.dict().items() if v is not None}
-    print(updated_fields)
 
     if len(updated_fields) &gt;= 1:
-        update_result = await db[&#34;users&#34;].update_one({&#34;username&#34;: username}, {&#34;$set&#34;: updated_fields})
+        update_result = await db[&#34;users&#34;].update_one({&#34;uid&#34;: uid}, {&#34;$set&#34;: updated_fields})
         if update_result.modified_count == 1:
-            if (updated_user := await db[&#34;users&#34;].find_one({&#34;username&#34;: new_random_username})) is not None:
+            if (updated_user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: new_random_uid})) is not None:
                 return updated_user
         
-    if (existing_user := await db[&#34;users&#34;].find_one({&#34;username&#34;: username})) is not None:
-        return existing_user
-
-# Delete a database item
-# TODO: Change to a DELETE request, and pass in username to be deleted.
-@app.get(&#34;/deleteuser/{username}&#34;, response_description=&#34;Delete a user&#34;)
-async def delete_user(username: str):
-    &#34;&#34;&#34;
-    Delete a user from the database
-
-    Args:
-        username (str): A string containing the username of the user to delete.
-
-    Returns:
-        The final status of the delete.
-    &#34;&#34;&#34;
-    delete_result = await db[&#34;users&#34;].delete_one({&#34;username&#34;: username})
-    if delete_result.deleted_count &gt;= 1:
-        return f&#34;Successfully deleted user {username}&#34;
-    return f&#34;User {username} does not exist&#34;
-
-# END MONGODB SKELETON CODE
-
-@app.get(&#34;/&#34;, tags=[&#34;root&#34;])
-async def read_root():
-    print(&#34;read_root&#34;)
-    return {&#34;message&#34;: &#34;Hello World :)&#34;}
-
-@app.get(&#34;/login&#34;)
-async def test():
-    print(&#34;/login&#34;)
-    return {&#39;login&#39; : &#34;hello world&#34;}
-
-@app.get(&#34;/signup&#34;)
-async def signup_test():
-    print(&#34;/signup&#34;)
-    return {&#39;Signup&#39; : &#39;Hello World!&#39;}</code></pre>
+    if (existing_user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})) is not None:
+        return existing_user</code></pre>
 </details>
 </section>
 <section>
@@ -247,137 +260,158 @@ async def add_user(userInfo: dict):
     Returns:
         JSON object with created user and 201 status.
     &#34;&#34;&#34;
-    firstname = userInfo[&#39;firstname&#39;]
-    lastname = userInfo[&#39;lastname&#39;]
+    fullname = userInfo[&#39;fullname&#39;]
+    uid = userInfo[&#39;uid&#39;]
     email = userInfo[&#39;email&#39;]
-    user = UserModel(firstname= firstname, lastname=lastname, email=email)
+    password = userInfo[&#39;password&#39;]
+    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
     new_user = jsonable_encoder(user)
     inserted_user = await db[&#34;users&#34;].insert_one(new_user)
     created_user = await db[&#34;users&#34;].find_one({&#34;_id&#34;: inserted_user.inserted_id})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_user)</code></pre>
 </details>
 </dd>
-<dt id="main.delete_user"><code class="name flex">
-<span>async def <span class="ident">delete_user</span></span>(<span>username: str)</span>
+<dt id="main.check_email"><code class="name flex">
+<span>async def <span class="ident">check_email</span></span>(<span>email: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Delete a user from the database</p>
+<div class="desc"><p>Check that a user with a given email does not already exist.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>username</code></strong> :&ensp;<code>str</code></dt>
-<dd>A string containing the username of the user to delete.</dd>
+<dt><strong><code>email</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string containing the email to be checked.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>The final status of the delete.</p></div>
+<p>True if the email is unique, False if it already exists.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/deleteuser/{username}&#34;, response_description=&#34;Delete a user&#34;)
-async def delete_user(username: str):
+<pre><code class="python">@app.get(&#34;/checkemail/{email}&#34;, response_description=&#34;Check that a user with a given email does not already exist&#34;)
+async def check_email(email: str):
     &#34;&#34;&#34;
-    Delete a user from the database
+    Check that a user with a given email does not already exist.
 
     Args:
-        username (str): A string containing the username of the user to delete.
+        email (str): A string containing the email to be checked.
 
     Returns:
-        The final status of the delete.
+        True if the email is unique, False if it already exists.
     &#34;&#34;&#34;
-    delete_result = await db[&#34;users&#34;].delete_one({&#34;username&#34;: username})
-    if delete_result.deleted_count &gt;= 1:
-        return f&#34;Successfully deleted user {username}&#34;
-    return f&#34;User {username} does not exist&#34;</code></pre>
+    user = await db[&#34;users&#34;].find_one({&#34;email&#34;: email})
+    if user is not None:
+        return False
+    return True</code></pre>
 </details>
 </dd>
-<dt id="main.read_root"><code class="name flex">
-<span>async def <span class="ident">read_root</span></span>(<span>)</span>
+<dt id="main.check_password"><code class="name flex">
+<span>async def <span class="ident">check_password</span></span>(<span>userInfo: dict)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Checks if the password is correct for the given user.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>userInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dict containing the user's information.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if the password matches, and False if it does not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/&#34;, tags=[&#34;root&#34;])
-async def read_root():
-    print(&#34;read_root&#34;)
-    return {&#34;message&#34;: &#34;Hello World :)&#34;}</code></pre>
+<pre><code class="python">@app.post(&#34;/checkpassword&#34;, response_description=&#34;Check if password is correct.&#34;)
+async def check_password(userInfo: dict):
+    &#34;&#34;&#34;
+    Checks if the password is correct for the given user.
+    
+    Args:
+        userInfo (dict): A dict containing the user&#39;s information.
+
+    Returns:
+        True if the password matches, and False if it does not.
+    &#34;&#34;&#34;
+    uid = userInfo[&#39;uid&#39;]
+    password = userInfo[&#39;password&#39;]
+    user = await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})
+    
+    if password == user[&#34;password&#34;]:
+        return True
+    return False</code></pre>
 </details>
 </dd>
-<dt id="main.signup_test"><code class="name flex">
-<span>async def <span class="ident">signup_test</span></span>(<span>)</span>
+<dt id="main.check_uid"><code class="name flex">
+<span>async def <span class="ident">check_uid</span></span>(<span>uid: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check that a user with a given UID does not already exist.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>uid</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string containing the UID to be checked.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if the UID is unique, False if it already exists.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/signup&#34;)
-async def signup_test():
-    print(&#34;/signup&#34;)
-    return {&#39;Signup&#39; : &#39;Hello World!&#39;}</code></pre>
-</details>
-</dd>
-<dt id="main.test"><code class="name flex">
-<span>async def <span class="ident">test</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.get(&#34;/login&#34;)
-async def test():
-    print(&#34;/login&#34;)
-    return {&#39;login&#39; : &#34;hello world&#34;}</code></pre>
+<pre><code class="python">@app.get(&#34;/checkuid/{uid}&#34;, response_description=&#34;Check that a user with a given UID does not already exist&#34;)
+async def check_uid(uid: str):
+    &#34;&#34;&#34;
+    Check that a user with a given UID does not already exist.
+
+    Args:
+        uid (str): A string containing the UID to be checked.
+
+    Returns:
+        True if the UID is unique, False if it already exists.
+    &#34;&#34;&#34;
+    user = await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})
+    if user is not None:
+        return False
+    return True</code></pre>
 </details>
 </dd>
 <dt id="main.update_user"><code class="name flex">
-<span>async def <span class="ident">update_user</span></span>(<span>username: str)</span>
+<span>async def <span class="ident">update_user</span></span>(<span>uid: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Update a user's information in the database.</p>
+<div class="desc"><p>Update the user with the given UID.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>username</code></strong> :&ensp;<code>str</code></dt>
-<dd>A string containing the username of the user to update.</dd>
+<dt><strong><code>uid</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string containing the user's UID.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>The updated user's information.</p></div>
+<p>The updated user information.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/updateuser/{username}&#34;, response_description=&#34;Update user with given username&#34;)
-async def update_user(username: str):
+<pre><code class="python">@app.get(&#34;/updateuser/{uid}&#34;, response_description=&#34;Update user with given uid&#34;)
+async def update_user(uid: str):
     &#34;&#34;&#34;
-    Update a user&#39;s information in the database.
+    Update the user with the given UID.
 
     Args:
-        username (str): A string containing the username of the user to update.
+        uid (str): A string containing the user&#39;s UID.
 
     Returns:
-        The updated user&#39;s information.
+        The updated user information.
     &#34;&#34;&#34;
-    new_random_username = &#34;new_username_&#34; + str(random.randint(1,100))
-    updated_user_info = UpdateUserModel(username=new_random_username)
+    new_random_uid = &#34;new_uid_&#34; + str(random.randint(1,100))
+    updated_user_info = UpdateUserModel(uid=new_random_uid)
     # Don&#39;t want to update empty fields, only grab the fields with values.
-    print(updated_user_info)
-    print(updated_user_info.dict())
-    print(updated_user_info.dict().items())
     updated_fields = {k: v for k, v in updated_user_info.dict().items() if v is not None}
-    print(updated_fields)
 
     if len(updated_fields) &gt;= 1:
-        update_result = await db[&#34;users&#34;].update_one({&#34;username&#34;: username}, {&#34;$set&#34;: updated_fields})
+        update_result = await db[&#34;users&#34;].update_one({&#34;uid&#34;: uid}, {&#34;$set&#34;: updated_fields})
         if update_result.modified_count == 1:
-            if (updated_user := await db[&#34;users&#34;].find_one({&#34;username&#34;: new_random_username})) is not None:
+            if (updated_user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: new_random_uid})) is not None:
                 return updated_user
         
-    if (existing_user := await db[&#34;users&#34;].find_one({&#34;username&#34;: username})) is not None:
+    if (existing_user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})) is not None:
         return existing_user</code></pre>
 </details>
 </dd>
@@ -405,14 +439,14 @@ async def view_all_users():
 </details>
 </dd>
 <dt id="main.view_user"><code class="name flex">
-<span>async def <span class="ident">view_user</span></span>(<span>username: str)</span>
+<span>async def <span class="ident">view_user</span></span>(<span>uid: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>View a specific user in the database.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>username</code></strong> :&ensp;<code>str</code></dt>
-<dd>A string containing the requested user's username.</dd>
+<dt><strong><code>uid</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string containing the requested user's UID.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>The requested user's information.</p></div>
@@ -420,22 +454,22 @@ async def view_all_users():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/viewuser/{username}&#34;, response_description=&#34;View user with given username&#34;)
-async def view_user(username: str):
+<pre><code class="python">@app.get(&#34;/viewuser/{uid}&#34;, response_description=&#34;View user with given username&#34;)
+async def view_user(uid: str):
     &#34;&#34;&#34;
     View a specific user in the database.
 
     Args:
-        username (str): A string containing the requested user&#39;s username.
+        uid (str): A string containing the requested user&#39;s UID.
 
     Returns:
         The requested user&#39;s information.
     &#34;&#34;&#34;
     matching_users = []
-    if (user := await db[&#34;users&#34;].find_one({&#34;username&#34;: username})) is not None:
+    if (user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})) is not None:
         matching_users.append(user)
     if len(matching_users) == 0:
-        raise HTTPException(status_code=404, detail=f&#34;User with username {username} not found&#34;)
+        raise HTTPException(status_code=404, detail=f&#34;User with UID {uid} not found&#34;)
     return matching_users</code></pre>
 </details>
 </dd>
@@ -597,9 +631,10 @@ def validate(cls, v):
 </summary>
 <pre><code class="python">class UserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
-    firstname: str
-    lastname: str
+    fullname: str
+    uid: str
     email: str
+    password: str
 
     class Config:
         allow_population_by_field_name = True
@@ -621,7 +656,7 @@ def validate(cls, v):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="main.UserModel.firstname"><code class="name">var <span class="ident">firstname</span> : str</code></dt>
+<dt id="main.UserModel.fullname"><code class="name">var <span class="ident">fullname</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -629,7 +664,11 @@ def validate(cls, v):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="main.UserModel.lastname"><code class="name">var <span class="ident">lastname</span> : str</code></dt>
+<dt id="main.UserModel.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.UserModel.uid"><code class="name">var <span class="ident">uid</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -647,10 +686,9 @@ def validate(cls, v):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="main.add_user" href="#main.add_user">add_user</a></code></li>
-<li><code><a title="main.delete_user" href="#main.delete_user">delete_user</a></code></li>
-<li><code><a title="main.read_root" href="#main.read_root">read_root</a></code></li>
-<li><code><a title="main.signup_test" href="#main.signup_test">signup_test</a></code></li>
-<li><code><a title="main.test" href="#main.test">test</a></code></li>
+<li><code><a title="main.check_email" href="#main.check_email">check_email</a></code></li>
+<li><code><a title="main.check_password" href="#main.check_password">check_password</a></code></li>
+<li><code><a title="main.check_uid" href="#main.check_uid">check_uid</a></code></li>
 <li><code><a title="main.update_user" href="#main.update_user">update_user</a></code></li>
 <li><code><a title="main.view_all_users" href="#main.view_all_users">view_all_users</a></code></li>
 <li><code><a title="main.view_user" href="#main.view_user">view_user</a></code></li>
@@ -675,12 +713,13 @@ def validate(cls, v):
 </li>
 <li>
 <h4><code><a title="main.UserModel" href="#main.UserModel">UserModel</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="main.UserModel.Config" href="#main.UserModel.Config">Config</a></code></li>
 <li><code><a title="main.UserModel.email" href="#main.UserModel.email">email</a></code></li>
-<li><code><a title="main.UserModel.firstname" href="#main.UserModel.firstname">firstname</a></code></li>
+<li><code><a title="main.UserModel.fullname" href="#main.UserModel.fullname">fullname</a></code></li>
 <li><code><a title="main.UserModel.id" href="#main.UserModel.id">id</a></code></li>
-<li><code><a title="main.UserModel.lastname" href="#main.UserModel.lastname">lastname</a></code></li>
+<li><code><a title="main.UserModel.password" href="#main.UserModel.password">password</a></code></li>
+<li><code><a title="main.UserModel.uid" href="#main.UserModel.uid">uid</a></code></li>
 </ul>
 </li>
 </ul>
