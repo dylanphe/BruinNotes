@@ -33,3 +33,57 @@ Unlike shared cloud storage products such as Google Drive, BruinNotes enables us
 
 As all users are permitted to upload notes and indicate their roles in the class, unwanted mistakes may occur. The report feature enables users to notify potentially incorrect or suspicious information. Upon receiving a report, the BruinNotes team will review the classes and notes in question and act on them if necessary.
 
+## Running the Application
+
+Clone the Repository:
+
+##### `git clone https://github.com/dylanphe/BruinNotes.git`
+
+##### `cd BruinNotes`
+
+##### `npm install`
+
+### To run the Frontend (React):
+
+##### `cd client`
+
+##### `npm install`
+
+##### `npm start`
+
+The app should be accessible at
+[http://localhost:3000](http://localhost:3000) so you can view it in the browser.
+
+### To setup the Backend:
+
+##### Open a second command line to run the backend server.
+
+##### `cd server`
+
+##### Create a .env file in the server folder. Add your mongodb uri to the .env file (which can be created at https://cloud.mongodb.com/) like the following:
+`MONGO_DB_URI=<YOUR_MONGO_DB_URI_HERE>`
+
+##### Replace <YOUR_MONGO_DB_URI_HERE> with the MONGO_DB_URI you obtained from the database you created at https://cloud.mongodb.com/
+
+### Afterwards, to run the backend (Evicorn and MongoDB):
+
+##### You must have python installed on your machine along with Python evicorn, fastAPI, Motor, Typing, Pydantic, PyMongo, etc., installed.
+
+### To install Python evicorn, fastAPI, Motor, etc.,
+
+##### In another command line run as administrator, execute the following commands
+
+##### `pip install evicorn`
+
+##### `pip install evicorn[standard]`
+
+##### `pip install [library]`
+
+### To start the server
+
+##### `evicorn main:app --reload`
+
+This will run the backend on [http://localhost:5000](http://localhost:5000)
+
+Once both the front end and backend are running, the application will be fully useable.
+
