@@ -223,23 +223,7 @@ async def update_user(uid: str):
                 return updated_user
         
     if (existing_user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})) is not None:
-        return existing_user
-
-# Test Code
-@app.get(&#34;/&#34;, tags=[&#34;root&#34;])
-async def read_root():
-    print(&#34;read_root&#34;)
-    return {&#34;message&#34;: &#34;Hello World&#34;}
-
-@app.get(&#34;/login&#34;)
-async def test():
-    print(&#34;/login&#34;)
-    return {&#39;login&#39; : &#34;hello world&#34;}
-
-@app.get(&#34;/Signup&#34;)
-async def signup_test():
-    print(&#34;/Signup&#34;)
-    return {&#39;Singup&#39; : &#39;Hello World!&#39;}</code></pre>
+        return existing_user</code></pre>
 </details>
 </section>
 <section>
@@ -387,51 +371,6 @@ async def check_uid(uid: str):
     if user is not None:
         return False
     return True</code></pre>
-</details>
-</dd>
-<dt id="main.read_root"><code class="name flex">
-<span>async def <span class="ident">read_root</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.get(&#34;/&#34;, tags=[&#34;root&#34;])
-async def read_root():
-    print(&#34;read_root&#34;)
-    return {&#34;message&#34;: &#34;Hello World&#34;}</code></pre>
-</details>
-</dd>
-<dt id="main.signup_test"><code class="name flex">
-<span>async def <span class="ident">signup_test</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.get(&#34;/Signup&#34;)
-async def signup_test():
-    print(&#34;/Signup&#34;)
-    return {&#39;Singup&#39; : &#39;Hello World!&#39;}</code></pre>
-</details>
-</dd>
-<dt id="main.test"><code class="name flex">
-<span>async def <span class="ident">test</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.get(&#34;/login&#34;)
-async def test():
-    print(&#34;/login&#34;)
-    return {&#39;login&#39; : &#34;hello world&#34;}</code></pre>
 </details>
 </dd>
 <dt id="main.update_user"><code class="name flex">
@@ -750,9 +689,6 @@ def validate(cls, v):
 <li><code><a title="main.check_email" href="#main.check_email">check_email</a></code></li>
 <li><code><a title="main.check_password" href="#main.check_password">check_password</a></code></li>
 <li><code><a title="main.check_uid" href="#main.check_uid">check_uid</a></code></li>
-<li><code><a title="main.read_root" href="#main.read_root">read_root</a></code></li>
-<li><code><a title="main.signup_test" href="#main.signup_test">signup_test</a></code></li>
-<li><code><a title="main.test" href="#main.test">test</a></code></li>
 <li><code><a title="main.update_user" href="#main.update_user">update_user</a></code></li>
 <li><code><a title="main.view_all_users" href="#main.view_all_users">view_all_users</a></code></li>
 <li><code><a title="main.view_user" href="#main.view_user">view_user</a></code></li>

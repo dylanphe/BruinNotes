@@ -196,19 +196,3 @@ async def update_user(uid: str):
         
     if (existing_user := await db["users"].find_one({"uid": uid})) is not None:
         return existing_user
-
-# Test Code
-@app.get("/", tags=["root"])
-async def read_root():
-    print("read_root")
-    return {"message": "Hello World"}
-
-@app.get("/login")
-async def test():
-    print("/login")
-    return {'login' : "hello world"}
-
-@app.get("/Signup")
-async def signup_test():
-    print("/Signup")
-    return {'Singup' : 'Hello World!'}
