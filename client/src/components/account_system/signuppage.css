@@ -8,19 +8,16 @@
 }
 
 .signup-box {
-    position: relative;
-    top: 10%;
+    margin-top: 5vh;
     background-color: white ;
     display: flex;
     flex-direction: column;
     width: 50vw;
-    height: 75vh;
     border-radius: 20px;
 }
 
 .signup-center-align {
-    position: relative;
-    top: 5%;
+    padding-top: 5%;
     text-align: center;
 }
 
@@ -31,10 +28,11 @@
     text-align: left;
 }
 
-.signup-right-align {
+.signup-sub-form-label {
+    font-size: small;
     padding-left: 20%;
     padding-right: 20%;
-    text-align: right;
+    text-align: left;
 }
 
 .signup-btn {
@@ -63,7 +61,8 @@
     width: 60%;
     font-size: medium;
     padding: 10px;
-    margin: 12px;
+    margin-top: 12px;
+    margin-bottom:12px;
     border: 1px solid black;
     border-radius: 5px;
     box-sizing: border-box;
@@ -74,14 +73,21 @@ box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
 
 #signup-show-pwd {
     position: relative;
+    bottom: 90px;
     right: 5px;
-    bottom: 43px;
     background-color: transparent;
     border: none;
 }
 
+.signup-form-label-right {
+    padding-left: 20%;
+    padding-right: 20%;
+    text-align: right;
+}
+
 .signup-soft-btn {
-    margin-top: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     background-color: transparent;
     color: black;
     border: none;
