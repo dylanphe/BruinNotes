@@ -1,0 +1,255 @@
+.quarterpage-main-body {
+    width: 100vw;
+    height: 100vh;
+    background-color:#2D68C4;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.quarterpage-nav-button {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    padding-left: 2%;
+    display: flex;
+    flex-direction: row;
+}
+
+.quarterpage-title-box {
+    width: 100vw;
+    height: 100px;
+    padding-top: 20px;
+}
+
+.quarterpage-body{
+    background-color:#FFFAF1;
+    width: 100vw;
+    height: 100vh;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+}
+
+.quarterpage-title {
+    text-align: center;
+    font-size: 2em;
+    color: #FFFAF1;
+    font-family: "Gloria Hallelujah";
+}
+
+.quarterpage-week-list {
+    /* position: relative; */
+    width: 95%;
+    min-width: 250px;
+    margin-top: 2.5%;    
+}
+
+.quarterpage-btn {
+    background-color: white;
+    color: #2D68C4;
+    font-weight: bolder;
+    font-size: 0.9em;
+    font-family: "Gloria Hallelujah";
+    border-style: none;
+    border-radius:40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px; 
+}
+
+.quarterpage-btn:hover {
+    background-color: #F2A900;
+    color: #2D68C4;
+}
+
+#quarterpage-week {
+    /* color: #2D68C4; */
+    background-color: #2D68C4;
+    color: #FFFAF1;
+    font-family: "Gloria Hallelujah";
+    font-size: large;
+    text-align: left;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    display: flex;
+}
+
+#quarterpage-week-num {
+    /* color: #2D68C4; */
+    width:80%;
+}
+
+#quarterpage-week-req {
+    /* color: #2D68C4; */
+    width:20%;
+    text-align: right;
+}
+
+#quarterpage-req-btn {
+    background-color: white;
+    color: #2D68C4;
+    font-size: 0.6em;
+    font-weight: bolder;
+    border-style: none;
+    border-radius:40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px; 
+    
+}
+
+#quarterpage-note-list {
+    background-color:#FFFAF1;
+    padding: 20px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 30px;
+    
+
+}
+
+#quarterpage-request-list {
+    background-color:#FFFAF1;
+    padding: 20px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 30px;
+}
+
+.txt-box {
+    width: 95%;
+    border-radius: 5px;
+
+}
+
+.note-nav-button {
+    display: flex;
+    flex-direction: row;
+    padding-top: 10px;
+    margin-bottom: 10px;
+}
+
+.note-lnk {
+    /* color: #2D68C4; */
+    color: #2D68C4;
+    font-family: "Gloria Hallelujah";
+    text-decoration: underline;
+    font-weight: bolder;
+    font-size: medium;
+    width: 85%;
+}
+
+.note-lnk:hover {
+    color: #F2A900;
+}
+
+.misc-button-list {
+    width: 15%;
+    min-width: 215px;
+    text-align:center;
+    background-color: #FFFAF1;
+    border-color: black;
+    border-width: 2px;
+    border-radius:40px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+
+}
+
+.misc-button {
+    margin-bottom: 5px;
+    margin-right: 10px;
+    margin-left:10px;
+    border-style: none;
+    background-color: transparent; 
+}
+
+#author-button {
+    background-color: #2D68C4;
+    color: white;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    margin-left: 5px;
+    margin-right: 5px
+}
+
+#like {
+    color:#2D68C4;
+    font-size: larger;
+}
+
+#like:hover {
+    color:#F2A900;
+}
+
+#dislike {
+    color:#cd5c5c;
+    font-size: larger;
+}
+
+#dislike:hover {
+    color:#F2A900;
+}
+
+.comments{
+    /* color:blue; */
+    background-color: transparent;
+    padding: 10px;
+}
+
+#comment {
+    font-size: larger;
+}
+
+#comment:hover {
+    color:#F2A900;
+}
+
+#cmt-input-box {
+    width: 100%;
+    border-radius: 15px;
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    background-color: white;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+}
+
+#cmt-box {
+    margin-top: 5px;
+    border-radius: 5px;
+    padding-left: 10px;
+    display: flex;
+
+}
+
+#user-box {
+    color:#2D68C4;
+    width: 15%;
+    text-align: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#user-cmt-box {
+    background-color: white;
+    color:black;
+    width: 85%;
+    border-radius: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+}

@@ -1,31 +1,41 @@
 .signup-body{
-    background-color:white;
+    background-color:#2D68C4;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
     width: 100vw;
     height: 100vh;
 }
 
-#title-txt{
-    font-family: "Gloria Hallelujah";
-    font-size: 60px;
-    color:#2D68C4;
-}
-
-#title-name:hover{
-    color:rgb(214, 213, 213);
-}
-
 .signup-box {
+    margin-top: 5vh;
+    background-color: white ;
     display: flex;
     flex-direction: column;
-    align-content: center;
+    width: 50vw;
+    border-radius: 20px;
 }
 
-.name-box {
-    display: flex;
-    flex-direction: row;
+.signup-center-align {
+    padding-top: 5%;
+    text-align: center;
 }
 
-.btn {
+.signup-form-label {
+    font-weight: bold;
+    padding-left: 20%;
+    padding-right: 20%;
+    text-align: left;
+}
+
+.signup-sub-form-label {
+    font-size: small;
+    padding-left: 20%;
+    padding-right: 20%;
+    text-align: left;
+}
+
+.signup-btn {
     background-color: #2D68C4;
     color: white;
     font-weight: bolder;
@@ -39,45 +49,55 @@
     padding-bottom: 10px; 
 }
 
-.btn:hover {
-    background-color: #F2A900;
-    color: #2D68C4;
-}
-
-.btn-list {
-    position: relative;
-    top: 8vh;
-    right: 7vh;
-    align-self: flex-end;
+.signup-btn:hover {
+    color: #F2A900;
 }
 
 #signup-btn {
+    width: 50%;
+}
+
+#signup-form-box {
+    width: 60%;
+    font-size: medium;
+    padding: 10px;
+    margin-top: 12px;
+    margin-bottom:12px;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-sizing: border-box;
+    -webkit-box-shadow:0px 0px 9px 3px rgba(57,125,209,0.35);
+-moz-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+}
+
+#signup-show-pwd {
     position: relative;
-    top: 5%;
+    bottom: 90px;
+    right: 5px;
+    background-color: transparent;
+    border: none;
 }
 
-#short-textbox {
-    width: 12%;
-    font-size: medium;
-    padding: 10px;
-    margin: 12px;
-    border: 1px solid black;
-    border-radius: 5px;
-    box-sizing: border-box;
-    -webkit-box-shadow:0px 0px 9px 3px rgba(57,125,209,0.35);
--moz-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+.signup-form-label-right {
+    padding-left: 20%;
+    padding-right: 20%;
+    text-align: right;
 }
 
-#long-textbox {
-    width: 40%;
-    font-size: medium;
-    padding: 10px;
-    margin: 12px;
-    border: 1px solid black;
-    border-radius: 5px;
-    box-sizing: border-box;
-    -webkit-box-shadow:0px 0px 9px 3px rgba(57,125,209,0.35);
--moz-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+.signup-soft-btn {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: transparent;
+    color: black;
+    border: none;
+    font-weight: bolder;
+    font-size: small;
+    font-family: "Gloria Hallelujah";
+    
+}
+
+.signup-soft-btn:hover {
+    text-decoration: underline;
+    color: #F2A900;
 }

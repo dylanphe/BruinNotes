@@ -29,7 +29,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# START MONGODB SKELETON CODE
 # Source: https://www.mongodb.com/developer/languages/python/python-quickstart-fastapi/
 class PyObjectId(ObjectId):
     @classmethod
@@ -48,9 +47,10 @@ class PyObjectId(ObjectId):
 
 class UserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    firstname: str
-    lastname: str
+    fullname: str
+    uid: str
     email: str
+    password: str
 
     class Config:
         allow_population_by_field_name = True
@@ -66,7 +66,7 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-# Add a database item
+# Add a new database item
 @app.post("/adduser", response_description="Add new user")
 async def add_user(userInfo: dict):
     """
@@ -78,10 +78,11 @@ async def add_user(userInfo: dict):
     Returns:
         JSON object with created user and 201 status.
     """
-    firstname = userInfo['firstname']
-    lastname = userInfo['lastname']
+    fullname = userInfo['fullname']
+    uid = userInfo['uid']
     email = userInfo['email']
-    user = UserModel(firstname= firstname, lastname=lastname, email=email)
+    password = userInfo['password']
+    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
     new_user = jsonable_encoder(user)
     inserted_user = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": inserted_user.inserted_id})
@@ -100,39 +101,39 @@ async def view_all_users():
     return users
 
 # View a specific database item
-@app.get("/viewuser/{username}", response_description="View user with given username")
-async def view_user(username: str):
+@app.get("/viewuser/{uid}", response_description="View user with given username")
+async def view_user(uid: str):
     """
     View a specific user in the database.
 
     Args:
-        username (str): A string containing the requested user's username.
+        uid (str): A string containing the requested user's UID.
 
     Returns:
         The requested user's information.
     """
     matching_users = []
-    if (user := await db["users"].find_one({"username": username})) is not None:
+    if (user := await db["users"].find_one({"uid": uid})) is not None:
         matching_users.append(user)
     if len(matching_users) == 0:
-        raise HTTPException(status_code=404, detail=f"User with username {username} not found")
+        raise HTTPException(status_code=404, detail=f"User with UID {uid} not found")
     return matching_users
 
 # Update a database item
-# TODO: Change to a PUT request, and pass in changed info.
-@app.get("/updateuser/{username}", response_description="Update user with given username")
-async def update_user(username: str):
+# # TODO: Change to a PUT request, and pass in changed info.
+@app.get("/updateuser/{uid}", response_description="Update user with given uid")
+async def update_user(uid: str):
     """
-    Update a user's information in the database.
+    Update the user with the given UID.
 
     Args:
-        username (str): A string containing the username of the user to update.
+        uid (str): A string containing the user's UID.
 
     Returns:
-        The updated user's information.
+        The updated user information.
     """
-    new_random_username = "new_username_" + str(random.randint(1,100))
-    updated_user_info = UpdateUserModel(username=new_random_username)
+    new_random_uid = "new_uid_" + str(random.randint(1,100))
+    updated_user_info = UpdateUserModel(uid=new_random_uid)
     # Don't want to update empty fields, only grab the fields with values.
     print(updated_user_info)
     print(updated_user_info.dict())
@@ -141,45 +142,26 @@ async def update_user(username: str):
     print(updated_fields)
 
     if len(updated_fields) >= 1:
-        update_result = await db["users"].update_one({"username": username}, {"$set": updated_fields})
+        update_result = await db["users"].update_one({"uid": uid}, {"$set": updated_fields})
         if update_result.modified_count == 1:
-            if (updated_user := await db["users"].find_one({"username": new_random_username})) is not None:
+            if (updated_user := await db["users"].find_one({"uid": new_random_uid})) is not None:
                 return updated_user
         
-    if (existing_user := await db["users"].find_one({"username": username})) is not None:
+    if (existing_user := await db["users"].find_one({"uid": uid})) is not None:
         return existing_user
 
-# Delete a database item
-# TODO: Change to a DELETE request, and pass in username to be deleted.
-@app.get("/deleteuser/{username}", response_description="Delete a user")
-async def delete_user(username: str):
-    """
-    Delete a user from the database
-
-    Args:
-        username (str): A string containing the username of the user to delete.
-
-    Returns:
-        The final status of the delete.
-    """
-    delete_result = await db["users"].delete_one({"username": username})
-    if delete_result.deleted_count >= 1:
-        return f"Successfully deleted user {username}"
-    return f"User {username} does not exist"
-
-# END MONGODB SKELETON CODE
-
+# Test Code
 @app.get("/", tags=["root"])
 async def read_root():
     print("read_root")
-    return {"message": "Hello World :)"}
+    return {"message": "Hello World"}
 
 @app.get("/login")
 async def test():
     print("/login")
     return {'login' : "hello world"}
 
-@app.get("/signup")
+@app.get("/Signup")
 async def signup_test():
-    print("/signup")
-    return {'Signup' : 'Hello World!'}
+    print("/Signup")
+    return {'Singup' : 'Hello World!'}

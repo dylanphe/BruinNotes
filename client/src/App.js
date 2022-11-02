@@ -1,14 +1,24 @@
 import React from 'react';
-import {Routes, Route} from "react-router-dom";
+import {BrowserRouter, Routes, Route} from "react-router-dom";
 import Loginpage from './components/account_system/loginpage';
 import Signuppage from './components/account_system/signuppage';
+import ForgetPasswordPage from './components/account_system/forgetpasswordpage';
+import Searchpage from './components/search_system/searchpage';
+import CoursePage from './components/class_system/coursepage';
+import CourseNotePage from './components/class_system/coursenotepage';
 
 function App() {
   return (
-    <Routes>
-      <Route path = "/" element={<Loginpage />} />
-      <Route path = "Signup" element={<Signuppage />} />
-    </Routes>
+    <BrowserRouter>
+        <Routes>
+          <Route path = "/" element={<Loginpage />} />
+          <Route path = "Signup" element={<Signuppage />} />
+          <Route path = "ForgetPassword" element={<ForgetPasswordPage />} />
+          <Route path = "SearchPage" element={<Searchpage />} />
+          <Route path = "/c/:coursename" element={<CoursePage />} />
+          <Route path = "c/:coursename/:instructor/:term" element={<CourseNotePage />} />
+        </Routes>
+    </BrowserRouter>
   );
 }
 
