@@ -66,11 +66,18 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-# Add a new database item
-# TODO: Change to a POST request, and pass in user's info.
+# Add a database item
 @app.post("/adduser", response_description="Add new user")
 async def add_user(userInfo: dict):
-    #random_username="test_user_" + str(random.randint(1,100))
+    """
+    Creates a new user and adds it to the database.
+    
+    Args:
+        userInfo (dict): A dict containing the user's information.
+
+    Returns:
+        JSON object with created user and 201 status.
+    """
     firstname = userInfo['firstname']
     lastname = userInfo['lastname']
     email = userInfo['email']
@@ -83,12 +90,27 @@ async def add_user(userInfo: dict):
 # View all database items
 @app.get("/viewallusers", response_description="View all users")
 async def view_all_users():
+    """
+    View all users currently in the database.
+
+    Returns:
+        A list containing the database's users.
+    """
     users = await db["users"].find().to_list(1000)
     return users
 
 # View a specific database item
 @app.get("/viewuser/{username}", response_description="View user with given username")
 async def view_user(username: str):
+    """
+    View a specific user in the database.
+
+    Args:
+        username (str): A string containing the requested user's username.
+
+    Returns:
+        The requested user's information.
+    """
     matching_users = []
     if (user := await db["users"].find_one({"username": username})) is not None:
         matching_users.append(user)
@@ -96,10 +118,19 @@ async def view_user(username: str):
         raise HTTPException(status_code=404, detail=f"User with username {username} not found")
     return matching_users
 
-# # Update a database item
-# # TODO: Change to a PUT request, and pass in changed info.
+# Update a database item
+# TODO: Change to a PUT request, and pass in changed info.
 @app.get("/updateuser/{username}", response_description="Update user with given username")
 async def update_user(username: str):
+    """
+    Update a user's information in the database.
+
+    Args:
+        username (str): A string containing the username of the user to update.
+
+    Returns:
+        The updated user's information.
+    """
     new_random_username = "new_username_" + str(random.randint(1,100))
     updated_user_info = UpdateUserModel(username=new_random_username)
     # Don't want to update empty fields, only grab the fields with values.
@@ -122,6 +153,15 @@ async def update_user(username: str):
 # TODO: Change to a DELETE request, and pass in username to be deleted.
 @app.get("/deleteuser/{username}", response_description="Delete a user")
 async def delete_user(username: str):
+    """
+    Delete a user from the database
+
+    Args:
+        username (str): A string containing the username of the user to delete.
+
+    Returns:
+        The final status of the delete.
+    """
     delete_result = await db["users"].delete_one({"username": username})
     if delete_result.deleted_count >= 1:
         return f"Successfully deleted user {username}"
