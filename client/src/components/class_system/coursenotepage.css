@@ -74,10 +74,38 @@
     font-family: "Gloria Hallelujah";
     font-size: large;
     text-align: left;
-    padding: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
+    display: flex;
+}
 
+#quarterpage-week-num {
+    /* color: #2D68C4; */
+    width:80%;
+}
+
+#quarterpage-week-req {
+    /* color: #2D68C4; */
+    width:20%;
+    text-align: right;
+}
+
+#quarterpage-req-btn {
+    background-color: white;
+    color: #2D68C4;
+    font-size: 0.6em;
+    font-weight: bolder;
+    border-style: none;
+    border-radius:40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px; 
+    
 }
 
 #quarterpage-note-list {
@@ -91,16 +119,19 @@
 
 }
 
+#quarterpage-request-list {
+    background-color:#FFFAF1;
+    padding: 20px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 30px;
+}
+
 .txt-box {
     width: 95%;
     border-radius: 5px;
 
-}
-
-.comments{
-    /* color:blue; */
-    background-color: transparent;
-    padding: 10px;
 }
 
 .note-nav-button {
@@ -127,14 +158,12 @@
 .misc-button-list {
     width: 15%;
     min-width: 215px;
-    display: flex;
-    flex-direction: row-reverse;
+    text-align:center;
     background-color: #FFFAF1;
     border-color: black;
     border-width: 2px;
     border-radius:40px;
-    box-shadow: -10px -10px 15px rgba(255,255,255,0.5),
-    10px 10px 15px rgba(70,70,70,0.12)
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
 
 }
 
@@ -174,8 +203,13 @@
     color:#F2A900;
 }
 
+.comments{
+    /* color:blue; */
+    background-color: transparent;
+    padding: 10px;
+}
+
 #comment {
-    padding-right: 10px;
     font-size: larger;
 }
 
@@ -185,13 +219,37 @@
 
 #cmt-input-box {
     width: 100%;
-    border-radius: 5px;
-    background-color: transparent;
+    border-radius: 15px;
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    background-color: white;
+    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
 }
 
 #cmt-box {
     margin-top: 5px;
-    color:black;
     border-radius: 5px;
     padding-left: 10px;
+    display: flex;
+
+}
+
+#user-box {
+    color:#2D68C4;
+    width: 15%;
+    text-align: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#user-cmt-box {
+    background-color: white;
+    color:black;
+    width: 85%;
+    border-radius: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
 }
