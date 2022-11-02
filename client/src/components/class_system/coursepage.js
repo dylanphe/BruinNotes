@@ -53,15 +53,15 @@ result = client[''][''].aggregate([
 const sampleCourseData = [{
     "instructor": "Kim, Miryung",
     "terms": ["Fall 2022", "Fall 2021"],
-    "colorCode": "color1",
+    "colorCode": 1,
   }, {
     "instructor": "DJ, JAYS",
     "terms": ["Spring 2022", "Fall 2022"],
-    "colorCode": "color2",
+    "colorCode": 2,
   }, {
     "instructor": "John Doe", 
     "terms": [],
-    "colorCode": "color3",
+    "colorCode": 3,
   }]
 
 // route: /c/:coursename
@@ -139,7 +139,7 @@ function CoursePage(props) {
     const newClassInfo = {
       instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
       term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
-      // colorCode: "color2", // temporarily set to color2. TODO: assign to different colors 
+      // colorCode: 2, // temporarily set to color2. TODO: assign to different colors 
     };
     console.log(newClassInfo);
     // await fetch('/Coursepage/add', {
@@ -159,7 +159,7 @@ function CoursePage(props) {
       let newProf = {
         instructor: newClassForm['fullname'], 
         terms: [(newClassForm['quarter'] + ' ' + newClassForm['year'])], 
-        colorCode: "color2" // temporarily set to color2. TODO: assign to different colors 
+        colorCode: 2 // temporarily set to color2. TODO: assign to different colors 
         ,
       };
       courseData.unshift(newProf);  
@@ -202,11 +202,12 @@ function CoursePage(props) {
   function professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
     let instructor = courseDataElement.instructor;
-    let instructorColor = courseDataElement.colorCode;
+    // let instructorColor = courseDataElement.colorCode;
+    let instructorColor = 'var(--color' + courseDataElement.colorCode + ')';
 
     return (
       <div key={instructor}>
-        <div id='coursepage-instructor' key={instructor}>
+        <div id='coursepage-instructor' style={{backgroundColor: instructorColor}} key={instructor}>
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
         </div>
