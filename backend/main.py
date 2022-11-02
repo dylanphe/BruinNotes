@@ -100,6 +100,38 @@ async def view_all_users():
     users = await db["users"].find().to_list(1000)
     return users
 
+@app.get("/checkuid/{uid}", response_description="Check that a user with a given UID does not already exist")
+async def check_uid(uid: str):
+    """
+    Check that a user with a given UID does not already exist.
+
+    Args:
+        uid (str): A string containing the UID to be checked.
+
+    Returns:
+        True if the UID is unique, False if it already exists.
+    """
+    user = await db["users"].find_one({"uid": uid})
+    if user is not None:
+        return False
+    return True
+
+@app.get("/checkemail/{email}", response_description="Check that a user with a given email does not already exist")
+async def check_email(email: str):
+    """
+    Check that a user with a given email does not already exist.
+
+    Args:
+        email (str): A string containing the email to be checked.
+
+    Returns:
+        True if the email is unique, False if it already exists.
+    """
+    user = await db["users"].find_one({"email": email})
+    if user is not None:
+        return False
+    return True
+
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given username")
 async def view_user(uid: str):
@@ -120,7 +152,7 @@ async def view_user(uid: str):
     return matching_users
 
 # Update a database item
-# # TODO: Change to a PUT request, and pass in changed info.
+# TODO: Change to a PUT request, and pass in changed info.
 @app.get("/updateuser/{uid}", response_description="Update user with given uid")
 async def update_user(uid: str):
     """
