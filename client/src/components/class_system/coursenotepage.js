@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {BiCommentAdd} from 'react-icons/bi';
-import SlidingPane from "react-sliding-pane";
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike} from 'react-icons/ai'; 
 import Button from 'react-bootstrap/esm/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -81,6 +80,8 @@ function Note(note) {
     </div>
   );
 }
+
+//create request function
 
 
 function CourseNotePage(props) {
