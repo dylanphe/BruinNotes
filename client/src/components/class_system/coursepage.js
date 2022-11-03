@@ -87,6 +87,8 @@ function CoursePage(props) {
   const handleCloseMsg = () => setShowMsg(false);
   const handleShowMsg = () => setShowMsg(true);
 
+  const num_colors = 6; 
+
   useEffect(() => {
     // ref: https://maxrozen.com/fetching-data-react-with-useeffect
     // async & await are just for display rn 
@@ -120,6 +122,10 @@ function CoursePage(props) {
   }
   console.log("professors:", getProfessors(courseData));
 
+  function colorNumToColorCode(colorNum) {
+    return 'var(--color' + colorNum + ')';
+  }
+
   // ref: https://learningprogramming.net/modern-web/react-functional-components/use-onsubmit-event-in-react-functional-components/
   const handleChange = (e) => {
     let name = e.target.name;
@@ -135,7 +141,6 @@ function CoursePage(props) {
     const isProfExist = (newClassForm['professor_select'] != null);
     // TODO: might need to assert that fullname == null whenever professor_select exists
     
-    // TODO: might become legacy 
     const newClassInfo = {
       instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
       term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
@@ -156,10 +161,16 @@ function CoursePage(props) {
     // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
     const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
     if (course_idx === -1) { // Add a new professor to courseData
+      let newColorCode = 1;
+      console.log("courseData.length:", courseData.length);
+      if (courseData.length) {
+        newColorCode = (courseData[0].colorCode + 4) % 6 + 1;
+        console.log("newColorCode", newColorCode);
+      }
       let newProf = {
         instructor: newClassForm['fullname'], 
         terms: [(newClassForm['quarter'] + ' ' + newClassForm['year'])], 
-        colorCode: 2 // temporarily set to color2. TODO: assign to different colors 
+        colorCode: newColorCode
         ,
       };
       courseData.unshift(newProf);  
@@ -203,7 +214,9 @@ function CoursePage(props) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
     let instructor = courseDataElement.instructor;
     // let instructorColor = courseDataElement.colorCode;
-    let instructorColor = 'var(--color' + courseDataElement.colorCode + ')';
+    // let instructorColor = 'var(--color' + courseDataElement.colorCode + ')';
+    let instructorColor = colorNumToColorCode(courseDataElement.colorCode);
+    // console.log("colorCode:", courseDataElement.colorCode);
 
     return (
       <div key={instructor}>
