@@ -69,7 +69,7 @@ function SignupPage() {
     // Arg:         String of symbols
     // Return:      Boolean
     function validateEmail() {
-        var emailPattern = new RegExp("^[\\w-\._]+@([\\w-]+\.)+ucla\.edu$");
+        var emailPattern = new RegExp("^[\\w-._]+@([\\w-]+.)+ucla.edu$");
         if (!email.match(emailPattern)) {
             return false;
         }
@@ -123,7 +123,7 @@ function SignupPage() {
         };
         
         const globalUnique = await getUnique();
-        if ((await globalUnique) == false) {
+        if ((await globalUnique) === false) {
             alert("UID already exist.")
             return false;
         }
@@ -140,7 +140,7 @@ function SignupPage() {
         };
         
         const globalUnique = await getUnique();
-        if ((await globalUnique) == false) {
+        if ((await globalUnique) === false) {
             alert("Email already exist.")
             return false;
         }
@@ -155,7 +155,9 @@ function SignupPage() {
         let resValidation = await handleSignupValidation();
         let resUniqueID = await uniqueUID();
         let resUniqueEmail = await uniqueEmail();
-
+        //console.log(resValidation);
+        //console.log(resUniqueID);
+        //console.log(resUniqueEmail);
         return (Boolean(resValidation) && Boolean(resUniqueID) && Boolean(resUniqueEmail));
     }
     //////////////////////////////////////////////////////////////////////////////
@@ -163,7 +165,7 @@ function SignupPage() {
     ////////////////////////////////////////////////////////////////////////////////
     function handleSubmit() {
         handleAllValidation().then(result => {
-            if (result == true) {
+            if (result === true) {
                 axios.post('http://127.0.0.1:8000/adduser', {'fullname': fullname, 'uid': uid, 'email': email, 'password': password})
                 .then(res => console.log(res));
                 navigate('/');

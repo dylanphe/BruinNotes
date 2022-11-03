@@ -193,6 +193,11 @@ function CoursePage(props) {
             </Modal.Header>
             <Modal.Body>
               <form>
+                <div className='modal-input-box'>
+                  <span>Add Quarter to an Existing Professor</span>
+                  <input type="checkbox" id="modal-input-label" onClick={checked}></input>
+                </div>
+                <br/>
                 {isModalInputTextShown && ( 
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Full Name</span>
@@ -212,11 +217,6 @@ function CoursePage(props) {
                   </div>
                 </div>
                 )}
-                <br/>
-                <div className='modal-input-box'>
-                  <span>Add Quarter to an Existing Professor</span>
-                  <input type="checkbox" id="modal-input-label" onClick={checked}></input>
-                </div>
                 <br/>
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Quarter</span>
