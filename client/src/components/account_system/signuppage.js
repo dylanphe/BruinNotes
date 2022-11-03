@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "@fontsource/gloria-hallelujah";
 import './signuppage.css';
-import axios from 'axios'
 
 // The function that toggles between themes
 function SignupPage() {
@@ -15,108 +14,166 @@ function SignupPage() {
         return 0;
     }
 
-    const [firstname, setFirstname] = React.useState('')
-    const [lastname, setLastname] = React.useState('')
-    const [email, setEmail] = React.useState('')
+    useEffect(() => {
+        testConnection();
+    }, []);
 
-    // const handleSubmit = (event) => {
-    //     const userInfo = {
-    //         'firstname': firstname,
-    //         'lastname': lastname,
-    //         'email': email
-    //     }
-
-    //     fetch("http://localhost:8000/adduser", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify(userInfo)
-    //     })
-    // }
+    //KeyPressed Enter == SignUp Button clicked
+    useEffect(() => {
+        const keyDownHandler = event => {
+            console.log('User pressed: ', event.key);
     
-    const handleSubmit = () => {
-         axios.post('http://127.0.0.1:8000/adduser', {'firstname': firstname, 'lastname': lastname, 'email': email})
-         .then(res => console.log(res))
-    }
-
-    //useEffect(() => {
-    //    testConnection();
-    //}, []);
+            if (event.key === 'Enter') {
+            event.preventDefault();
+            handleSubmit();
+            }
+        };
+    
+        document.addEventListener('keydown', keyDownHandler);
+    
+        return () => {
+            document.removeEventListener('keydown', keyDownHandler);
+        };
+    }, []);
 
     const [fullname, setFullname] = React.useState('')
     const [uid, setUID] = React.useState('')
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
 
-    //Check to see if fullname has both firstname and lastname
-    function validateFullName(name) {
+    ///////////////////////////////////////////////////////////
+    //Functions to validate user inputs////////////////////////
+    ///////////////////////////////////////////////////////////
+    // Description: Check to see if fullname has both firstname and lastname
+    // Return:      Boolean
+    function validateFullName() {
         var namePattern = new RegExp("[A-Za-z]+ [A-Za-z]+");
-        if (name.match(namePattern)) {
-            return true;
-        } else {
+        if (!fullname.match(namePattern)) {
             return false;
         }
+        return true;
     }
-
-    //Check to see if uid is valid (has all 9 digits and unique)
-    function validateUID(userid) {
+    ///////////////////////////////////////////////////////////
+    // Description: Check to see if uid has all 9 digits
+    // Arg:         String of digits
+    // Return:      Boolean
+    function validateUID() {
         var uidPattern = new RegExp("^\\d{9}$");
-        if (userid.match(uidPattern)) {
-
-            return true;
-        } else {
+        if (!uid.match(uidPattern)) {
             return false;
         }
+        return true;
     }
-
-    //Check to see if email is a valid UCLA email and if the email is unique
-    function validateEmail(userEmail) {
-        var emailPattern = new RegExp("^[\\w-\._]+@([\\w-]+\.)+ucla\.edu$");
-        if (userEmail.match(emailPattern)) {
-            return true;
-        } else {
+    ///////////////////////////////////////////////////////////
+    // Description: Check to see if email is a valid UCLA email
+    // Arg:         String of symbols
+    // Return:      Boolean
+    function validateEmail() {
+        var emailPattern = new RegExp("^[\\w-._]+@([\\w-]+.)+ucla.edu$");
+        if (!email.match(emailPattern)) {
             return false;
         }
+        return true;
     }
-
-    //Check to see if password requirements are met
-    function validatePassword(userPassword) {
+    /////////////////////////////////////////////////////////////////////
+    // Description: Check to see if all reuqirements are met for password
+    // Arg:         String of symbols
+    // Return:      Boolean
+    function validatePassword() {
         var passwordPattern = new RegExp("^(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$");
-        if (userPassword.match(passwordPattern)) {
-            return true;
-        } else {
+        if (!password.match(passwordPattern)) {
             return false;
         }
+        return true;
     }
-    
-    const handleSubmit = () => {
+    //Function to hold them togethers for strategies purpose
+    function handleSignupValidation() {
         //if users left any fields empty upon hitting signup
         if(!fullname || !uid || !email || !password) {
             alert('Please enter all fields.');
-            return;
+            return false;
         }
         else {
-            if(!validateFullName(fullname)) {
+            if(!validateFullName()) {
                 alert('Please enter both FRIST NAME and LAST NAME.');
-                return;
-            } else if (!validateUID(uid)){
+                return false;
+            } else if (!validateUID()) {
                 alert('Please enter a valid UID.');
-                return;
-            } else if (!validateEmail(email)){
+                return false;
+            } else if (!validateEmail()) {
                 alert('Please enter a valid UCLA Email Address.');
-                return;
-            } else if (!validatePassword(password)){
+                return false;
+            } else if (!validatePassword()){
                 alert('Please enter a valid password.');
-                return;
+                return false;
             } else {
+                return true;
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////
+    //Functions to check for unique UID and Email //////////
+    ///////////////////////////////
+    /////////////////////////
+    async function uniqueUID() {
+        const getUnique = async() => {
+            let unique;
+            unique = await axios.get('http://127.0.0.1:8000/checkuid/'+uid);
+            return unique.data;
+        };
+        
+        const globalUnique = await getUnique();
+        if ((await globalUnique) === false) {
+            alert("UID already exist.")
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    async function uniqueEmail() {
+        const getUnique = async() => {
+            let unique;
+            unique = await axios.get('http://127.0.0.1:8000/checkemail/'+email);
+            return unique.data;
+        };
+        
+        const globalUnique = await getUnique();
+        if ((await globalUnique) === false) {
+            alert("Email already exist.")
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    //////////////////////////////////////////////////////
+    // Function to handle all validations above at once
+    //////////////////////////////////////////////////////
+    async function handleAllValidation() {
+        let resValidation = await handleSignupValidation();
+        let resUniqueID = await uniqueUID();
+        let resUniqueEmail = await uniqueEmail();
+        //console.log(resValidation);
+        //console.log(resUniqueID);
+        //console.log(resUniqueEmail);
+        return (Boolean(resValidation) && Boolean(resUniqueID) && Boolean(resUniqueEmail));
+    }
+    //////////////////////////////////////////////////////////////////////////////
+    // This function is called when Sign Up button is clicked
+    ////////////////////////////////////////////////////////////////////////////////
+    function handleSubmit() {
+        handleAllValidation().then(result => {
+            if (result === true) {
                 axios.post('http://127.0.0.1:8000/adduser', {'fullname': fullname, 'uid': uid, 'email': email, 'password': password})
                 .then(res => console.log(res));
                 navigate('/');
             }
-
-        }
+        });
     }
 
-
+    //UI Data for passwordshown button and page routing
     const navigate = useNavigate();
     const [passwordShown, setPasswordShown] = useState(false);
     // Password toggle handler
@@ -136,10 +193,12 @@ function SignupPage() {
                     <input onChange={event => setUID(event.target.value)} id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
                     <div className='signup-form-label'>UCLA EMAIL</div>
                     <input onChange={event => setEmail(event.target.value)} id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
-                    <div className='signup-form-label'>PASSWORD</div>
+                    <div className='signup-form-label-pwd'>
+                        <div id='pwd-text'>PASSWORD</div>
+                        <div className='signup-form-label-right'><button id='signup-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
+                    </div>
                     <input onChange={event => setPassword(event.target.value)} id='signup-form-box' type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
-                    <div className='signup-sub-form-label'>Password must contain at least 6 characters consists of one uppercase letter, one digit, and one special symbols (!@#$%^&*)</div>
-                    <div className='signup-form-label-right'><button id='signup-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
+                    <div className='signup-sub-form-label'>Password must contain at least 6 characters consist of one uppercase letter, one digit, and one special symbols (!@#$%^&*)</div>
                     <button className="signup-btn" id="signup-btn" type="submit" onClick={handleSubmit}>SIGN UP</button>
                     <div><button className="signup-soft-btn" type="submit" onClick={()=>navigate("/")}>Already registered, sign in?</button></div>
                 </div>

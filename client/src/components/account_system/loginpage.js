@@ -1,12 +1,83 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {BsEyeFill, BsEyeSlashFill} from 'react-icons/bs';
 import "@fontsource/gloria-hallelujah";
 import './loginpage.css';
 
-// The function that toggles between themes
 function Loginpage() {
+    async function testConnection() {
+        const response = await fetch('/Login');
+        const data = await response.json();
+        console.log(data);
+        return 0;
+    }
+    useEffect(() => {
+        testConnection();
+    }, []);
 
+    //KeyPressed Enter == login Button clicked
+    useEffect(() => {
+        const keyDownHandler = event => {
+          console.log('User pressed: ', event.key);
+    
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            handleSubmit();
+          }
+        };
+    
+        document.addEventListener('keydown', keyDownHandler);
+    
+        return () => {
+          document.removeEventListener('keydown', keyDownHandler);
+        };
+    }, []);
+
+
+    const [uid, setUID] = React.useState('');
+    const [password, setPassword] = React.useState('');
+
+
+    ///////////////////////////////////////////////////////////
+    //Functions to validate user inputs////////////////////////
+    ///////////////////////////////////////////////////////////
+    // Description: Check to see if uid has all 9 digits
+    // Return:      Boolean
+    function validateInput() {
+        var uidPattern = new RegExp("^\\d{9}$");
+        if (!uid || !password) {
+            alert('Please enter all fields.');
+            return false;
+        } else { 
+            if (!uid.match(uidPattern)) {
+                alert('Please enter a valid UID.');
+                return false;
+            }
+        }
+        return true;
+    }
+    //////////////////////////////////////////////////////////////////////////////
+    // This function is called when Sign Up button is clicked
+    ////////////////////////////////////////////////////////////////////////////////
+    function handleSubmit () {
+        if(!validateInput()) {
+            return;
+        }
+        else {
+            axios.post('http://127.0.0.1:8000/checkpassword', {'fullname': null, 'uid': uid, 'email': null, 'password': password})
+            .then(res => {
+                if (res.data === true) {
+                    navigate('Searchpage');
+                } else {
+                    alert("Wrong UID and Password. Please re-enter the information.");
+                    return;
+                }
+            })
+        }
+    }
+
+    //UI Data for passwordshown button and page routing
     const navigate = useNavigate();
     const [passwordShown, setPasswordShown] = useState(false);
     // Password toggle handler
@@ -16,18 +87,17 @@ function Loginpage() {
         setPasswordShown(!passwordShown);
     };
 
-
     return (
         <div className='login-body'>
             <div className= "login-top-btn">
                 <button className="login-btn" type="submit" onClick={()=>navigate("Signup")}>SIGN UP</button>
             </div>
             <p id="login-title-name">BruinNotes</p>
-            <input className="login-txtbox"  type="number" placeholder="Enter 9 digits UID"/>
-            <input className="login-txtbox" type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
+            <input className="login-txtbox" onChange={event => setUID(event.target.value)}  type="number" placeholder="Enter 9 digits UID"/>
+            <input className="login-txtbox" onChange={event => setPassword(event.target.value)} type={passwordShown ? "text" : "password"} placeholder="Enter Password"/>
             <div id="login-link-box"><button id='login-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>
             <div id="login-link-box"><button id="login-link-btn" onClick={()=>navigate("ForgetPassword")}>Forget Password?</button></div>
-            <button className="login-btn" id="login-btm-btn" type="submit" onClick={()=>navigate("Searchpage")}>LOG IN</button>
+            <button className="login-btn" id="login-btm-btn" type="submit" onClick={handleSubmit}>LOG IN</button>
         </div>
     );
 }
