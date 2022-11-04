@@ -6,9 +6,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-import './coursepage.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import HomeBtn from './homebtn';
+import {ImArrowUpLeft2} from 'react-icons/im'; 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './coursepage.css';
+
 
 // Sample data structure (subject to change)
 // Based on the class diagrams and mockups in the proposal 
@@ -23,6 +25,7 @@ const sampleCourseBucket = {
     {"id": 5, "term": "Fall 2022", "instructor": "DJ, JAYS"}
 	]
 };
+
 
 /* To convert the above to the below using mongodb pipeline 
 from pymongo import MongoClient
@@ -62,7 +65,9 @@ const sampleCourseData = [{
     "instructor": "John Doe", 
     "terms": [],
     "colorCode": 3,
-  }]
+}];
+
+const sampleCourseDataEmt = [];
 
 // route: /c/:coursename
 function CoursePage(props) {
@@ -94,9 +99,11 @@ function CoursePage(props) {
     // async & await are just for display rn 
     async function getCourseData()  {
       const response = await sampleCourseData;
+      // const response = await sampleCourseDataEmt;
       const data = response;
       setCourseData(data);
       console.log('getCourseData'); //debug
+      console.log("courseData.length:", courseData.length);
     };
 
     getCourseData();
@@ -117,13 +124,18 @@ function CoursePage(props) {
 
   // debug
   console.log("courseData", courseData);
-  if (courseData.length) {
+  if (courseData.length >= 2) {
+    console.log("courseData.length:", courseData.length);
     console.log(courseData[1].instructor);
   }
   console.log("professors:", getProfessors(courseData));
 
   function colorNumToColorCode(colorNum) {
     return 'var(--color' + colorNum + ')';
+  }
+
+  function validateYear(year) {
+    return true;
   }
 
   // ref: https://learningprogramming.net/modern-web/react-functional-components/use-onsubmit-event-in-react-functional-components/
@@ -250,12 +262,21 @@ function CoursePage(props) {
     setModalInputSelectShown(!isModalInputSelectShown);
   }
 
+  function NoClass() { 
+    return (
+    <div id='no-class'>
+      No professor for this course yet ... <br />
+      Add a professor today <ImArrowUpLeft2 />
+    </div>);
+  }
+
   // require('react-dom');
   // window.React2 = require('react');
   // console.log(window.React1 === window.React2);
 
   return (
     <div className='coursepage-main-body'>
+      
       <div className='coursepage-title-box'>
         <h1 className='coursepage-title'>{coursename}</h1>
         <div className='coursepage-nav-button'>
@@ -263,6 +284,7 @@ function CoursePage(props) {
         </div>
       </div>
       <div className='coursepage-body'>
+        {!courseData.length && <NoClass />}
         <> {/* ref: https://react-bootstrap.github.io/components/modal/ */}
           <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
