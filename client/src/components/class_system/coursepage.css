@@ -60,7 +60,7 @@
 
 #coursepage-instructor {
     /* color: #2D68C4; */
-    background-color: var(--colorCode);
+    background-color: var(--colorCode); /* overwritten in coursepage.js */
     color: #FFFAF1;
     font-family: "Gloria Hallelujah";
     font-size: large;
@@ -165,4 +165,14 @@ a:hover {
     position: absolute;
     top: 20px;
     right: 25px;
+}
+
+
+#no-class {
+    margin: 18% auto;
+    color: #2D68C4;
+    font-family: "Gloria Hallelujah";
+    font-weight: bolder;
+    font-size: x-large;
+    text-align: center;
 }
