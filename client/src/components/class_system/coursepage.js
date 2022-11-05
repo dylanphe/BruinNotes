@@ -135,7 +135,8 @@ function CoursePage(props) {
   }
 
   function validateYear(year) {
-    return true;
+    const pattern = '^[1-2][0-9]{3}$';
+    return (!year || year.match(pattern));
   }
 
   // ref: https://learningprogramming.net/modern-web/react-functional-components/use-onsubmit-event-in-react-functional-components/
@@ -176,7 +177,7 @@ function CoursePage(props) {
       let newColorCode = 1;
       console.log("courseData.length:", courseData.length);
       if (courseData.length) {
-        newColorCode = (courseData[0].colorCode + 4) % 6 + 1;
+        newColorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
         console.log("newColorCode", newColorCode);
       }
       let newProf = {
@@ -212,6 +213,8 @@ function CoursePage(props) {
       setCourseData(courseData);
     }
     // /////////////////////////////////////////////////////////
+
+    setNewClassForm({});
   }
 
   //const color1= '#6B8E23';
@@ -236,7 +239,7 @@ function CoursePage(props) {
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
         </div>
-        <div id="coursepage-term-list">
+        <div id="coursepage-term-list" >
           <ul className='term-under-instructor'>
             {courseDataElement.terms.map((term) => 
               <li key={term} className='lnk'>
@@ -270,6 +273,14 @@ function CoursePage(props) {
     </div>);
   }
 
+  function QuarterChkBox() {
+    return (['Fall', 'Winter', 'Spring', 'Summer'].map((term) => 
+      <span key={term} className="modal-qtr">
+        <label htmlFor={term}>{term}</label>{'   '}
+        <input type="checkbox" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
+      </span>))
+  }
+
   // require('react-dom');
   // window.React2 = require('react');
   // console.log(window.React1 === window.React2);
@@ -284,7 +295,7 @@ function CoursePage(props) {
         </div>
       </div>
       <div className='coursepage-body'>
-        {!courseData.length && <NoClass />}
+        {!courseData.length ? <NoClass /> : null}
         <> {/* ref: https://react-bootstrap.github.io/components/modal/ */}
           <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
@@ -320,7 +331,8 @@ function CoursePage(props) {
                 <br/>
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Quarter</span>
-                  <input type="text" name="quarter" id="modal-input" placeholder="Fall/Winter/Spring/Summer" onChange={handleChange}></input>
+                  {/* <input type="text" name="quarter" id="modal-input" placeholder="Fall/Winter/Spring/Summer" onChange={handleChange}></input> */}
+                  <QuarterChkBox />
                 </div>
                 <br/>
                 <div className='modal-input-box'>
