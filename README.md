@@ -73,15 +73,15 @@ The app should be accessible at
 
 ##### In another command line run as administrator, execute the following commands
 
-##### `pip install evicorn`
+##### `pip install uvicorn`
 
-##### `pip install evicorn[standard]`
+##### `pip install uvicorn[standard]`
 
 ##### `pip install [library]`
 
 ### To start the server
 
-##### `evicorn main:app --reload`
+##### `uvicorn main:app --reload`
 
 This will run the backend on [http://localhost:5000](http://localhost:5000)
 
