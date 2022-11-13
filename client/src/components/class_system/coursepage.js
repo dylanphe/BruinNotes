@@ -277,7 +277,7 @@ function CoursePage(props) {
     return (['Fall', 'Winter', 'Spring', 'Summer'].map((term) => 
       <span key={term} className="modal-qtr">
         <label htmlFor={term}>{term}</label>{'   '}
-        <input type="checkbox" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
+        <input type="radio" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
       </span>))
   }
 
