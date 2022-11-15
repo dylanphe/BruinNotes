@@ -11,7 +11,6 @@ import {ImArrowUpLeft2} from 'react-icons/im';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './coursepage.css';
 
-
 // Sample data structure (subject to change)
 // Based on the class diagrams and mockups in the proposal 
 const sampleCourseBucket = {
@@ -76,6 +75,8 @@ function CoursePage(props) {
   // let location = useLocation();
   let coursename = params.coursename;
   console.log(params.coursename);    // debug
+
+  console.log(props.uid);
 
   const [courseData, setCourseData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -277,7 +278,7 @@ function CoursePage(props) {
     return (['Fall', 'Winter', 'Spring', 'Summer'].map((term) => 
       <span key={term} className="modal-qtr">
         <label htmlFor={term}>{term}</label>{'   '}
-        <input type="checkbox" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
+        <input type="radio" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
       </span>))
   }
 

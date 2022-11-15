@@ -5,7 +5,7 @@ import "@fontsource/gloria-hallelujah";
 import './searchpage.css';
 
 // The function that toggles between themes
-function Searchpage() {
+function Searchpage(props) {
 
     const navigate = useNavigate();
     const [passwordShown, setPasswordShown] = useState(false);
@@ -16,6 +16,7 @@ function Searchpage() {
         setPasswordShown(!passwordShown);
     };
 
+    console.log(props.uid);
 
     return (
         <div className='search-body'>

@@ -5,7 +5,7 @@ import {BsEyeFill, BsEyeSlashFill} from 'react-icons/bs';
 import "@fontsource/gloria-hallelujah";
 import './loginpage.css';
 
-function Loginpage() {
+function Loginpage(props) {
     async function testConnection() {
         const response = await fetch('/Login');
         const data = await response.json();
@@ -68,6 +68,7 @@ function Loginpage() {
             axios.post('http://127.0.0.1:8000/checkpassword', {'fullname': null, 'uid': uid, 'email': null, 'password': password})
             .then(res => {
                 if (res.data === true) {
+                    props.onLogin(uid);
                     navigate('Searchpage');
                 } else {
                     alert("Wrong UID and Password. Please re-enter the information.");
