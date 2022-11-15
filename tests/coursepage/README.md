@@ -1,4 +1,4 @@
-# Course Page Unit Test
+# Course Page Unit Test 
 
 ## Test 1 - Courses that does not have instructors or terms
 

@@ -11,7 +11,6 @@ import {ImArrowUpLeft2} from 'react-icons/im';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './coursepage.css';
 
-
 // Sample data structure (subject to change)
 // Based on the class diagrams and mockups in the proposal 
 const sampleCourseBucket = {
@@ -76,6 +75,8 @@ function CoursePage(props) {
   // let location = useLocation();
   let coursename = params.coursename;
   console.log(params.coursename);    // debug
+
+  console.log(props.uid);
 
   const [courseData, setCourseData] = useState([]);
   const [loading, setLoading] = useState(true);
