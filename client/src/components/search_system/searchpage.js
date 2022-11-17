@@ -17,12 +17,20 @@ function Searchpage() {
     };
 
 
+
     return (
         <div className='search-body'>
             <span className= "search-btn-list">
                 <button className="search-btn" type="submit" onClick={()=>navigate("/")}>LOG OUT</button>
             </span>
             <p id="search-title-name">BruinNotes</p>
+
+            <div className="topnav">
+                <a className="active" href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+                 <input type="text" placeholder="Search.." />
+            </div>
         </div>
     );
 }
