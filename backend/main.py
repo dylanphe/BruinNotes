@@ -9,6 +9,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
+from verify_email import verify_email
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
@@ -116,19 +117,22 @@ async def check_uid(uid: str):
         return False
     return True
 
-@app.get("/checkemail/{email}", response_description="Check that a user with a given email does not already exist")
+@app.get("/checkemail/{email}", response_description="Check that an email exists and a user with a given email does not already exist")
 async def check_email(email: str):
     """
-    Check that a user with a given email does not already exist.
+    Check that a user with a given email does not already exist and the email exists.
 
     Args:
         email (str): A string containing the email to be checked.
 
     Returns:
-        True if the email is unique, False if it already exists.
+        True if the email is unique and exists, False if either condition fails.
     """
     user = await db["users"].find_one({"email": email})
     if user is not None:
+        return False
+    
+    if not verify_email(email, debug=True):
         return False
     return True
 
