@@ -67,10 +67,41 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class CommentModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    username: str
+    comment: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class NoteModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    _id: int
+    url: str
+    author: str
+    role: str
+    title: str
+    date: str
+    week: int
+    commentList: List[CommentModel]
+    likes: int
+    dislikes: int
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
 class CourseModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     courseName: str
-    quarter: str
+    instructor: str
+    term: str
+    colorCode: int
+    notes: List[NoteModel]
 
     class Config:
         allow_population_by_field_name = True
@@ -215,7 +246,7 @@ async def update_user(uid: str):
 ### END ACCOUNT SYSTEM API ###
 
 
-### START SEARCH PAGE API ###
+### START COURSES API ###
 @app.post("/addcourse", response_description="Add new course")
 async def add_course(courseInfo: dict):
     """
@@ -227,9 +258,15 @@ async def add_course(courseInfo: dict):
     Returns:
         JSON object with created course and 201 status.
     """
-    courseName = courseInfo['bcourseName']
+    courseName = courseInfo['courseName']
+    instructor = courseInfo['instructor']
     quarter = courseInfo['quarter']
-    course = CourseModel(courseName=courseName, quarter=quarter)
+    year = courseInfo['year']
+    colorCode = courseInfo['colorCode']
+
+    term = str(quarter) + " " + str(year)
+
+    course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode, notes=[])
     new_course = jsonable_encoder(course)
     inserted_course = await db["courses"].insert_one(new_course)
     created_course = await db["courses"].find_one({"_id": inserted_course.inserted_id})
@@ -249,9 +286,9 @@ async def search_courses(courseName: str):
     query = {"courseName": {"$regex": courseName, "$options": "i"}}
     courses = await db["courses"].find(query).to_list(1000)
     return courses
-### END SEARCH PAGE API ###
+### END COURSES API ###
 
 
-### START COURSE PAGE API ###
+### START COMMENTS API ###
 
-### END COURSE PAGE API ###
+### END COMMENTS PAGE API ###
