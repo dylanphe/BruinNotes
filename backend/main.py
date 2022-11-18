@@ -234,6 +234,21 @@ async def add_course(courseInfo: dict):
     inserted_course = await db["courses"].insert_one(new_course)
     created_course = await db["courses"].find_one({"_id": inserted_course.inserted_id})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)
+
+@app.get("/searchcourses/{courseName}", response_description="View courses with matching names")
+async def search_courses(courseName: str):
+    """
+    View all courses matching the courseName in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses.
+    """
+    query = {"courseName": {"$regex": courseName, "$options": "i"}}
+    courses = await db["courses"].find(query).to_list(1000)
+    return courses
 ### END SEARCH PAGE API ###
 
 
