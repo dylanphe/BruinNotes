@@ -9,6 +9,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
+from verify_email import verify_email
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
@@ -66,6 +67,17 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class CourseModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    courseName: str
+    quarter: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+### START ACCOUNT SYSTEM API ###
 # Add a new database item
 @app.post("/adduser", response_description="Add new user")
 async def add_user(userInfo: dict):
@@ -116,19 +128,22 @@ async def check_uid(uid: str):
         return False
     return True
 
-@app.get("/checkemail/{email}", response_description="Check that a user with a given email does not already exist")
+@app.get("/checkemail/{email}", response_description="Check that an email exists and a user with a given email does not already exist")
 async def check_email(email: str):
     """
-    Check that a user with a given email does not already exist.
+    Check that a user with a given email does not already exist and the email exists.
 
     Args:
         email (str): A string containing the email to be checked.
 
     Returns:
-        True if the email is unique, False if it already exists.
+        True if the email is unique and exists, False if either condition fails.
     """
     user = await db["users"].find_one({"email": email})
     if user is not None:
+        return False
+    
+    if not verify_email(email, debug=True):
         return False
     return True
 
@@ -196,3 +211,47 @@ async def update_user(uid: str):
         
     if (existing_user := await db["users"].find_one({"uid": uid})) is not None:
         return existing_user
+
+### END ACCOUNT SYSTEM API ###
+
+
+### START SEARCH PAGE API ###
+@app.post("/addcourse", response_description="Add new course")
+async def add_course(courseInfo: dict):
+    """
+    Creates a new course and adds it to the database.
+    
+    Args:
+        courseInfo (dict): A dict containing the course's information.
+
+    Returns:
+        JSON object with created course and 201 status.
+    """
+    courseName = courseInfo['bcourseName']
+    quarter = courseInfo['quarter']
+    course = CourseModel(courseName=courseName, quarter=quarter)
+    new_course = jsonable_encoder(course)
+    inserted_course = await db["courses"].insert_one(new_course)
+    created_course = await db["courses"].find_one({"_id": inserted_course.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)
+
+@app.get("/searchcourses/{courseName}", response_description="View courses with matching names")
+async def search_courses(courseName: str):
+    """
+    View all courses matching the courseName in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses.
+    """
+    query = {"courseName": {"$regex": courseName, "$options": "i"}}
+    courses = await db["courses"].find(query).to_list(1000)
+    return courses
+### END SEARCH PAGE API ###
+
+
+### START COURSE PAGE API ###
+
+### END COURSE PAGE API ###
