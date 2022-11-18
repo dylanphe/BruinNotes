@@ -67,6 +67,17 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class CourseModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    courseName: str
+    quarter: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+### START ACCOUNT SYSTEM API ###
 # Add a new database item
 @app.post("/adduser", response_description="Add new user")
 async def add_user(userInfo: dict):
@@ -200,3 +211,32 @@ async def update_user(uid: str):
         
     if (existing_user := await db["users"].find_one({"uid": uid})) is not None:
         return existing_user
+
+### END ACCOUNT SYSTEM API ###
+
+
+### START SEARCH PAGE API ###
+@app.post("/addcourse", response_description="Add new course")
+async def add_course(courseInfo: dict):
+    """
+    Creates a new course and adds it to the database.
+    
+    Args:
+        courseInfo (dict): A dict containing the course's information.
+
+    Returns:
+        JSON object with created course and 201 status.
+    """
+    courseName = courseInfo['bcourseName']
+    quarter = courseInfo['quarter']
+    course = CourseModel(courseName=courseName, quarter=quarter)
+    new_course = jsonable_encoder(course)
+    inserted_course = await db["courses"].insert_one(new_course)
+    created_course = await db["courses"].find_one({"_id": inserted_course.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)
+### END SEARCH PAGE API ###
+
+
+### START COURSE PAGE API ###
+
+### END COURSE PAGE API ###
