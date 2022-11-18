@@ -70,7 +70,9 @@ class UpdateUserModel(BaseModel):
 class CourseModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     courseName: str
-    quarter: str
+    instructor: str
+    term: str
+    colorCode: int
 
     class Config:
         allow_population_by_field_name = True
@@ -227,9 +229,15 @@ async def add_course(courseInfo: dict):
     Returns:
         JSON object with created course and 201 status.
     """
-    courseName = courseInfo['bcourseName']
+    courseName = courseInfo['courseName']
+    instructor = courseInfo['instructor']
     quarter = courseInfo['quarter']
-    course = CourseModel(courseName=courseName, quarter=quarter)
+    year = courseInfo['year']
+    colorCode = courseInfo['colorCode']
+
+    term = str(quarter) + " " + str(year)
+
+    course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode)
     new_course = jsonable_encoder(course)
     inserted_course = await db["courses"].insert_one(new_course)
     created_course = await db["courses"].find_one({"_id": inserted_course.inserted_id})
