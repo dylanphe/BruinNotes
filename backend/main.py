@@ -9,7 +9,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
-from verify_email import verify_email
+from verify_email import verify_email_async
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
@@ -143,9 +143,9 @@ async def check_email(email: str):
     if user is not None:
         return False
     
-    if not verify_email(email, debug=True):
-        return False
-    return True
+    email_valid = await verify_email_async(email)
+    
+    return email_valid
 
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given username")
