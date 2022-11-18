@@ -95,6 +95,16 @@ class NoteModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class NoteRequestModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    requestMsg: str
+    week: int
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
 class CourseModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     courseName: str
@@ -102,6 +112,7 @@ class CourseModel(BaseModel):
     term: str
     colorCode: int
     notes: List[NoteModel]
+    noteRequests: List[NoteRequestModel]
 
     class Config:
         allow_population_by_field_name = True
@@ -266,7 +277,7 @@ async def add_course(courseInfo: dict):
 
     term = str(quarter) + " " + str(year)
 
-    course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode, notes=[])
+    course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode, notes=[], noteRequests=[])
     new_course = jsonable_encoder(course)
     inserted_course = await db["courses"].insert_one(new_course)
     created_course = await db["courses"].find_one({"_id": inserted_course.inserted_id})
@@ -290,5 +301,72 @@ async def search_courses(courseName: str):
 
 
 ### START COMMENTS API ###
+# TODO: implement this endpoint
+@app.post("/addcomment", response_description="Add new comment")
+async def add_comment(commentInfo: dict):
+    """
+    Creates a new comment and adds it to a note in the database.
+    
+    Args:
+        commentInfo (dict): A dict containing the comment's information.
 
+    Returns:
+        JSON object with created comment and 201 status.
+    """
+    return 0
 ### END COMMENTS PAGE API ###
+
+
+### START NOTES API ###
+# TODO: implement this endpoint
+@app.post("/addnote", response_description="Add new note")
+async def add_note(noteInfo: dict):
+    """
+    Creates a new note and adds it to a course in the database.
+    
+    Args:
+        noteInfo (dict): A dict containing the note's information.
+
+    Returns:
+        JSON object with created note and 201 status.
+    """
+    return 0
+
+# TODO: implement this endpoint
+@app.post("/addnoterequest", response_description="Add new note request")
+async def add_note_request(noteRequestInfo: dict):
+    """
+    Creates a new note request and adds it to a course in the database.
+    
+    Args:
+        noteInfo (dict): A dict containing the note's information.
+
+    Returns:
+        JSON object with created note request and 201 status.
+    """
+    return 0
+
+# TODO: (possibly) add in way to delete note requests
+
+# TODO: implement this endpoint
+@app.get("/increaselikes", response_description="Increase likes on a note")
+async def increase_likes():
+    """
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    """
+    return 0
+
+# TODO: implement this endpoint
+@app.get("/increasedislikes", response_description="Increase dislikes on a note")
+async def increase_dislikes():
+    """
+    Increases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    """
+    return 0
+### END NOTES API ###
