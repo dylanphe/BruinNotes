@@ -120,6 +120,15 @@ class CourseModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class CourseNameModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    courseName: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
 ### START ACCOUNT SYSTEM API ###
 # Add a new database item
 @app.post("/adduser", response_description="Add new user")
@@ -263,6 +272,40 @@ async def update_user(uid: str):
 
 
 ### START COURSES API ###
+@app.post("/addcoursename", response_description="Add a new course name")
+async def add_course(courseInfo: dict):
+    """
+    Adds a new course name to the database.
+    
+    Args:
+        courseInfo (dict): A dict containing the course's name.
+
+    Returns:
+        JSON object with created course name and 201 status.
+    """
+    courseName = courseInfo['courseName']
+
+    course = CourseNameModel(courseName=courseName)
+    new_course = jsonable_encoder(course)
+    inserted_course = await db["courseNames"].insert_one(new_course)
+    created_course = await db["courseNames"].find_one({"_id": inserted_course.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)
+
+@app.get("/searchcoursenames/{courseName}", response_description="View matching course names")
+async def search_course_names(courseName: str):
+    """
+    View all matching course names in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses with matching names.
+    """
+    query = {"courseName": {"$regex": courseName, "$options": "i"}}
+    courses = await db["courseNames"].find(query).to_list(1000)
+    return courses
+
 @app.post("/addcourse", response_description="Add new course")
 async def add_course(courseInfo: dict):
     """
