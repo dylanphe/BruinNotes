@@ -330,7 +330,19 @@ async def add_note(noteInfo: dict):
     Returns:
         JSON object with created note and 201 status.
     """
-    return 0
+    url = noteInfo['url']
+    author = noteInfo['author']
+    role = noteInfo['role']
+    title = noteInfo['title']
+    date = noteInfo['date']
+    week = noteInfo['week']
+    commentList = noteInfo['commentList']
+
+    note = NoteModel(url=url, author=author,role=role,title=title,date=date,week=week,commentList=commentList,likes=0, dislikes=0)
+    new_note = jsonable_encoder(note)
+    inserted_note = await db["notes"].insert_one(new_note)
+    created_note = await db["notes"].find_one({"_id": inserted_note.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_note)
 
 # TODO: implement this endpoint
 @app.post("/addnoterequest", response_description="Add new note request")
@@ -349,24 +361,36 @@ async def add_note_request(noteRequestInfo: dict):
 # TODO: (possibly) add in way to delete note requests
 
 # TODO: implement this endpoint
-@app.get("/increaselikes", response_description="Increase likes on a note")
-async def increase_likes():
+@app.put("/increaselikes/{id}", response_description="Increase likes on a note")
+async def increase_likes(id):
     """
     Increases the like count on a note.
 
     Returns:
         Updated like count on the note.
     """
-    return 0
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        likes = note['likes']
+        updated_note = await db['notes'].update_one({'_id': id}, {'$set': {'likes':likes+1}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=likes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
 # TODO: implement this endpoint
-@app.get("/increasedislikes", response_description="Increase dislikes on a note")
-async def increase_dislikes():
+@app.put("/increasedislikes/{id}", response_description="Increase dislikes on a note")
+async def increase_dislikes(id):
     """
     Increases the dislike count on a note.
 
     Returns:
         Updated dislike count on the note.
     """
-    return 0
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        dislikes = note['dislikes']
+        updated_note = await db['notes'].update_one({'_id': id}, {'$set': {'dislikes':dislikes+1}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 ### END NOTES API ###
