@@ -10,6 +10,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from verify_email import verify_email_async
+import bcrypt
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
@@ -51,7 +52,7 @@ class UserModel(BaseModel):
     fullname: str
     uid: str
     email: str
-    password: str
+    key: str
 
     class Config:
         allow_population_by_field_name = True
@@ -136,7 +137,10 @@ async def add_user(userInfo: dict):
     uid = userInfo['uid']
     email = userInfo['email']
     password = userInfo['password']
-    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
+
+    salt = bcrypt.gensalt()
+    key = bcrypt.hashpw(password.encode('utf-8'), salt)
+    user = UserModel(fullname=fullname, uid=uid, email=email, key=key)
     new_user = jsonable_encoder(user)
     inserted_user = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": inserted_user.inserted_id})
@@ -222,8 +226,9 @@ async def check_password(userInfo: dict):
     uid = userInfo['uid']
     password = userInfo['password']
     user = await db["users"].find_one({"uid": uid})
-    
-    if password == user["password"]:
+
+    key = user['key']
+    if bcrypt.checkpw(password.encode('utf-8'), key.encode('utf-8')):
         return True
     return False
 
