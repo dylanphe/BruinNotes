@@ -9,7 +9,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
-from verify_email import verify_email_async
+#from verify_email import verify_email_async
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
@@ -185,9 +185,11 @@ async def check_email(email: str):
     if user is not None:
         return False
     
-    email_valid = await verify_email_async(email)
+    #email_valid = await verify_email_async(email)
     
-    return email_valid
+    #return email_valid
+    
+    return True
 
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given username")
@@ -301,9 +303,8 @@ async def search_courses(courseName: str):
 
 
 ### START COMMENTS API ###
-# TODO: implement this endpoint
 @app.post("/addcomment", response_description="Add new comment")
-async def add_comment(commentInfo: dict):
+async def add_comment(noteInfo: dict, commentInfo: dict):
     """
     Creates a new comment and adds it to a note in the database.
     
@@ -313,12 +314,25 @@ async def add_comment(commentInfo: dict):
     Returns:
         JSON object with created comment and 201 status.
     """
-    return 0
+    name = commentInfo['username']
+    content = commentInfo['comment']
+    
+    comment = CommentModel(username=name, comment=content)
+    new_comment = jsonable_encoder(comment)
+    
+    noteId = noteInfo["_id"]
+    note = await db["notes"].find_one({"_id": noteId})
+    
+    currentCommentList = note['commentList']
+    currentCommentList.append(new_comment)
+    
+    updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"commentList":currentCommentList}})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    
 ### END COMMENTS PAGE API ###
 
 
 ### START NOTES API ###
-# TODO: implement this endpoint
 @app.post("/addnote", response_description="Add new note")
 async def add_note(noteInfo: dict):
     """
@@ -330,9 +344,24 @@ async def add_note(noteInfo: dict):
     Returns:
         JSON object with created note and 201 status.
     """
-    return 0
 
-# TODO: implement this endpoint
+    url = noteInfo['url']
+    author = noteInfo['author']
+    role = noteInfo['role']
+    title = noteInfo['title']
+    date = noteInfo['date']
+    week = noteInfo['week']
+    commentList = []
+    likes = 0
+    dislikes = 0
+    
+    note = NoteModel(url=url, author=author, role=role, title=title, date=date, week=week, commentList=commentList, likes=likes, dislikes=dislikes)
+    new_note = jsonable_encoder(note)
+    inserted_note = await db['notes'].insert_one(new_note)
+    created_note = await db['notes'].find_one({"_id": inserted_note.inserted_id})
+    
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_note)
+
 @app.post("/addnoterequest", response_description="Add new note request")
 async def add_note_request(noteRequestInfo: dict):
     """
@@ -344,29 +373,42 @@ async def add_note_request(noteRequestInfo: dict):
     Returns:
         JSON object with created note request and 201 status.
     """
-    return 0
+    requestMsg = noteRequestInfo['requestMsg']
+    week = noteRequestInfo['week']
+    
+    noteRequest = NoteRequestModel(requestMsg=requestMsg, week=week)
+    new_noteRequest = jsonable_encoder(noteRequest)
+    inserted_noteRequest = await db['noteRequests'].insert_one(new_noteRequest)
+    created_noteRequest = await db['noteRequests'].find_one({"_id": inserted_noteRequest.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_noteRequest)
 
 # TODO: (possibly) add in way to delete note requests
 
-# TODO: implement this endpoint
 @app.get("/increaselikes", response_description="Increase likes on a note")
-async def increase_likes():
+async def increase_likes(noteInfo: dict):
     """
     Increases the like count on a note.
 
     Returns:
         Updated like count on the note.
     """
-    return 0
+    id = noteInfo['_id']
+    await db["notes"].update_one({"_id": id}, {"$inc": {"likes":1}})
+    updated_note = await db["notes"].find_one({"_id": id})
+    
+    return updated_note["likes"]
 
-# TODO: implement this endpoint
 @app.get("/increasedislikes", response_description="Increase dislikes on a note")
-async def increase_dislikes():
+async def increase_dislikes(noteInfo: dict):
     """
     Increases the dislike count on a note.
 
     Returns:
         Updated dislike count on the note.
     """
-    return 0
+    id = noteInfo['_id']
+    await db["notes"].update_one({"_id": id}, {"$inc": {"likes":-1}})
+    updated_note = await db["notes"].find_one({"_id": id})
+    
+    return updated_note["likes"]
 ### END NOTES API ###
