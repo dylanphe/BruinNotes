@@ -9,7 +9,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
-#from verify_email import verify_email_async
+from verify_email import verify_email_async
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
@@ -185,11 +185,9 @@ async def check_email(email: str):
     if user is not None:
         return False
     
-    #email_valid = await verify_email_async(email)
+    email_valid = await verify_email_async(email)
     
-    #return email_valid
-    
-    return True
+    return email_valid
 
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given username")
@@ -380,6 +378,23 @@ async def add_note_request(noteRequestInfo: dict):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_noteRequest)
 
 # TODO: (possibly) add in way to delete note requests
+@app.put("/deletenoterequest/{id}", response_description="Delete note request from database")
+async def delete_note_request(id):
+    """
+    Remove note request from the database.
+
+    Returns:
+        HTTP 200 OK upon success
+        HTTP 404 NOT FOUND if id isn't valid
+    """
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        await db['notes'].remove({'_id': id})
+        msg = "Successfully removed note request"
+        return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
+    else: 
+        msg = "note with ID not found"
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
 
 @app.put("/increaselikes/{id}", response_description="Increase likes on a note")
 async def increase_likes(id):
@@ -397,7 +412,6 @@ async def increase_likes(id):
             return JSONResponse(status_code=status.HTTP_200_OK, content=likes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
-# TODO: implement this endpoint
 @app.put("/increasedislikes/{id}", response_description="Increase dislikes on a note")
 async def increase_dislikes(id):
     """
