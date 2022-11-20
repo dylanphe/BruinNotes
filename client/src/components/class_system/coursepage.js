@@ -3,69 +3,50 @@
 //        https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
 import React, {useState, useEffect} from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-import HomeBtn from './homebtn';
 import {ImArrowUpLeft2} from 'react-icons/im'; 
+import HomeBtn from './homebtn';
+import dataToCourses from './datatocourse.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './coursepage.css';
 
-// Sample data structure (subject to change)
-// Based on the class diagrams and mockups in the proposal 
-const sampleCourseBucket = {
-	"department": "COM SCI",
-	"courseNumber": 130,
-	"courseList": [
-    {"id": 1, "term": "Fall 2022", "instructor": "Kim, Miryung"},
-    {"id": 2, "term": "Fall 2021", "instructor": "Kim, Miryung"}, 
-    {"id": 3, "instructor": "John Doe"}, 
-    {"id": 4, "term": "Spring 2022", "instructor": "DJ, JAYS"},
-    {"id": 5, "term": "Fall 2022", "instructor": "DJ, JAYS"}
-	]
-};
-
-
-/* To convert the above to the below using mongodb pipeline 
-from pymongo import MongoClient
-
-# Requires the PyMongo package.
-# https://api.mongodb.com/python/current
-
-client = MongoClient('')
-result = client[''][''].aggregate([
-    {
-        '$unwind': {
-            'path': '$courseList'
-        }
-    }, {
-        '$group': {
-            '_id': '$courseList.instructor', 
-            'terms': {
-                '$push': '$courseList.term'
-            }
-        }
-    }, {
-        '$addFields': {
-            'instructor': '$_id'
-        }
-    }
-])
-*/
-const sampleCourseData = [{
+/*
+Expected data structure from get:
+[{
+    "courseName": "COM SCI 130",
     "instructor": "Kim, Miryung",
-    "terms": ["Fall 2022", "Fall 2021"],
+    "term": "Fall 2022"
     "colorCode": 1,
+    "notes": [...],
   }, {
+    "courseName": "COM SCI 130",
+    "instructor": "Kim, Miryung",
+    "term": "Fall 2021"
+    "colorCode": 1,
+    "notes": [...],
+  }, {
+    "courseName": "COM SCI 130",
     "instructor": "DJ, JAYS",
-    "terms": ["Spring 2022", "Fall 2022"],
+    "term": "Spring 2022",
     "colorCode": 2,
+    "notes": [...],
   }, {
+    "courseName": "COM SCI 130",
+    "instructor": "DJ, JAYS",
+    "term": "Spring 2021"
+    "colorCode": 2,
+    "notes": [...],
+  }, {
+    "courseName": "COM SCI 130",
     "instructor": "John Doe", 
-    "terms": [],
+    "term": "",
     "colorCode": 3,
+    "notes": [...],
 }];
-
+*/
 const sampleCourseDataEmt = [];
 
 // route: /c/:coursename
@@ -95,18 +76,33 @@ function CoursePage(props) {
 
   const num_colors = 6; 
 
-  useEffect(() => {
-    // ref: https://maxrozen.com/fetching-data-react-with-useeffect
-    // async & await are just for display rn 
-    async function getCourseData()  {
-      const response = await sampleCourseData;
-      // const response = await sampleCourseDataEmt;
-      const data = response;
-      setCourseData(data);
-      console.log('getCourseData'); //debug
-      console.log("courseData.length:", courseData.length);
-    };
 
+  // const dataToCourses = (data) => {
+
+  // }
+
+  // ref: https://maxrozen.com/fetching-data-react-with-useeffect
+  //      https://axios-http.com/docs/example
+  //      https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises
+  async function getCourseData()  {
+    console.log('getCourseData'); 
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/searchcourses/{coursename}`)
+      ;
+      // const response = await sampleCourseDataEmt;
+      // console.log(response);
+      const data = await response.data;
+      const courses = dataToCourses(data, compareTerms);
+      console.log("courses:", courses);
+      setCourseData(courses);
+      console.log("courseData.length:", courseData.length);      
+    } 
+    catch (error) {
+      console.error("Could not get courses:", error);
+    }
+  };
+
+  useEffect(() => {
     getCourseData();
     console.log('useEffect'); //debug
   }, []);
@@ -146,6 +142,23 @@ function CoursePage(props) {
     let value = e.target.value;
     newClassForm[name] = value;
     setNewClassForm(newClassForm);
+  }
+
+  function compareTerms(term1, term2) { 
+    function compareQuarter(q1, q2) { 
+      const qToInt = {'Winter': 0, 'Spring': 1, 'Summer': 2, 'Fall': 3};
+      const q1int = qToInt[q1], q2int = qToInt[q2];
+      return q1int - q2int;
+    }
+    // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split 
+    // ASSUME a "quarter year" string. (ASSUME input validation)
+    const [qtr1, yr1] = term1.split(' ');
+    const [qtr2, yr2] = term2.split(' ');
+    if (yr1 !== yr2) {
+      return yr1 - yr2;
+    } else {
+      return compareQuarter(qtr1, qtr2);
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -194,22 +207,6 @@ function CoursePage(props) {
       courseData[course_idx].terms.push(newClassForm['quarter'] + ' ' + newClassForm['year']);
       let l2 = courseData[course_idx].terms.length; 
       console.log("l:", l, "l2:", l2);
-      function compareTerms(term1, term2) { 
-        function compareQuarter(q1, q2) { 
-          const qToInt = {'Winter': 0, 'Spring': 1, 'Summer': 2, 'Fall': 3};
-          const q1int = qToInt[q1], q2int = qToInt[q2];
-          return q1int - q2int;
-        }
-        // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split 
-        // ASSUME a "quarter year" string. (ASSUME input validation)
-        const [qtr1, yr1] = term1.split(' ');
-        const [qtr2, yr2] = term2.split(' ');
-        if (yr1 !== yr2) {
-          return yr1 - yr2;
-        } else {
-          return compareQuarter(qtr1, qtr2);
-        }
-      }
       courseData[course_idx].terms.sort(compareTerms).reverse();
       setCourseData(courseData);
     }
