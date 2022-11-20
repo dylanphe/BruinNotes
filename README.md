@@ -58,16 +58,16 @@ The app should be accessible at
 
 ##### Open a second command line to run the backend server.
 
-##### `cd server`
+##### `cd backend`
 
-##### Create a .env file in the server folder. Add your mongodb uri to the .env file (which can be created at https://cloud.mongodb.com/) like the following:
+##### Create a .env file in the backend folder. Add your mongodb uri to the .env file (which can be created at https://cloud.mongodb.com/) like the following:
 `MONGO_DB_URI=<YOUR_MONGO_DB_URI_HERE>`
 
 ##### Replace <YOUR_MONGO_DB_URI_HERE> with the MONGO_DB_URI you obtained from the database you created at https://cloud.mongodb.com/
 
 ### Afterwards, to run the backend (Evicorn and MongoDB):
 
-##### You must have python installed on your machine along with Python evicorn, fastAPI, Motor, Typing, Pydantic, PyMongo, etc., installed.
+##### You must have python installed on your machine along with Python uvicorn, fastAPI, Motor, Typing, Pydantic, PyMongo, etc., installed.
 
 ### To install Python evicorn, fastAPI, Motor, etc.,
 

@@ -32,7 +32,7 @@ function Loginpage(props) {
         return () => {
           document.removeEventListener('keydown', keyDownHandler);
         };
-    }, []);
+    });
 
 
     const [uid, setUID] = React.useState('');
@@ -46,15 +46,10 @@ function Loginpage(props) {
     // Return:      Boolean
     function validateInput() {
         var uidPattern = new RegExp("^\\d{9}$");
-        if (!uid || !password) {
-            alert('Please enter all fields.');
-            return false;
-        } else { 
             if (!uid.match(uidPattern)) {
                 alert('Please enter a valid UID.');
                 return false;
             }
-        }
         return true;
     }
     //////////////////////////////////////////////////////////////////////////////
@@ -67,6 +62,7 @@ function Loginpage(props) {
         else {
             axios.post('http://127.0.0.1:8000/checkpassword', {'fullname': null, 'uid': uid, 'email': null, 'password': password})
             .then(res => {
+                console.log(res.data)
                 if (res.data === true) {
                     props.onLogin(uid);
                     navigate('Searchpage');

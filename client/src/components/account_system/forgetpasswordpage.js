@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {BsEyeFill, BsEyeSlashFill} from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import "@fontsource/gloria-hallelujah";
@@ -69,6 +69,7 @@ function ForgetPasswordPage() {
                         </div>
                     )}  
                     <div className="forgetpassword-soft-btn-right-align"><button className="forgetpassword-soft-btn" type="submit" onClick={()=>navigate("/")}>Return to sign in page!</button></div>
+                    <span>"Page is Under Construction"</span>
                 </div>
             </div>
         </div>
