@@ -1,7 +1,7 @@
 // TODO: report page button 
 // TODO: IMPORTANT: where to show note requests?
 
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import {BiCommentAdd} from 'react-icons/bi';
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike} from 'react-icons/ai'; 
@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/esm/Button';
 import Modal from 'react-bootstrap/Modal';
 import './coursenotepage.css';
 import HomeBtn from './homebtn';
+import axios from 'axios';
 
 const sampleNotes = [{
   '_id': 0,
@@ -85,6 +86,7 @@ function Note(note) {
 
 
 function CourseNotePage(props) {
+
   const params = useParams();
   console.log(params);
   console.log(props.uid);
@@ -92,6 +94,9 @@ function CourseNotePage(props) {
   const authorTypes = ['Student', 'TA', 'Professor'];
 
   const [requestMsg, setRequestMsg] = useState("");
+  const [reqWeek, setReqWeek] = useState();
+  const [reqList, setReqList] = useState([]);
+
   const [addForm, setAddForm] = useState({}); // fields: notelink, namelink. authortype
   const [showReq, setShowReq] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
@@ -116,10 +121,35 @@ function CourseNotePage(props) {
     return notes.map((note) => Note(note));
   }
 
-  const handleSubmitReq = (e) => {
+  async function searchReq() {
+    let items = [];
+    axios.post('http://127.0.0.1:8000/searchnoterequests', {'courseName': courseName,'instructor': instructor, 'term': term})
+    .then(res => {
+        if (res.data.length !== 0)
+        {
+            res.data.map((courseDataElement) => {
+                items.push(courseDataElement.courseName);
+            });
+            //console.log(items);
+            setReqList(items);
+            console.log(reqList);
+        }
+    })
+  }
+
+  useEffect(() => {
+      searchReq();
+  }, []);
+
+  const handleSubmitReq = () => {
     // e.preventDefault();
-    console.log(requestMsg);
-    handleCloseReq();
+    if (reqWeek >= 1 && reqWeek <= 10) {
+      axios.post('http://127.0.0.1:8000/addnoterequest', {'courseName': courseName,'instructor': instructor, 'term': term, 'requestMsg': requestMsg, 'week': reqWeek})
+      .then((res) => {
+        console.log(res);
+      });
+      handleCloseReq();
+    }
   };
 
   const handleChangeAdd = (e) => {
@@ -153,7 +183,7 @@ function CourseNotePage(props) {
         <div className='quarterpage-week-list'>
           <div id='quarterpage-week'>
             <div id='quarterpage-week-num'>
-              {!panelOpen ? "Week 1" : "Week 1's requests"}
+              {!panelOpen ? "Notes" : "Notes' requests"}
             </div>
             <div id='quarterpage-week-req'>
               <button id="quarterpage-req-btn" onClick={openReqPanel}>Requests</button>
@@ -163,9 +193,15 @@ function CourseNotePage(props) {
             <Notes />
           </div> 
           )}
-          {hideNote && (<div id="quarterpage-request-list">
-            <Notes />
-            sdasd
+          {hideNote && (
+          <div id="quarterpage-request-list">
+            {
+                reqList.map((c) =>
+                    <div>
+                      {c.requestMsg}
+                    </div>
+                )
+            }
           </div>
           )}
         </div>
@@ -211,7 +247,7 @@ function CourseNotePage(props) {
             <br />
             <div className='modal-input-box'>
               <span id='modal-input-label'>Week</span>
-              <input type="number" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='1, 2, 3,...'></input>
+              <input type="number" id='modal-input' name="namelink" onChange={(e) => setReqWeek(e.target.value)} placeholder='1, 2, 3,...'></input>
             </div>
           </Modal.Body>
           <Modal.Footer>
