@@ -489,5 +489,26 @@ async def increase_dislikes(id):
         updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'dislikes':1}})
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
-    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)\
+        
+@app.post("/searchnote", response_description="Search for notes that match courseName, professor, and quarter")
+async def search_note_by_fields(courseName, instructor, term):
+    """
+    Search note by string fields
+    
+    Returns:
+        A list of all notes that match these fields
+    """
+    
+    query =  {'$and': 
+            [
+                {"courseName": {"$regex": courseName, "$options": "i"}},
+                {"instructor": {"$regex": instructor, "$options": "i"}},
+                {"term": {"$regex": term, "$options": "i"}}
+            ]
+            }
+        
+    matchingNotes = await db['notes'].find(query).to_list(1000)
+    return matchingNotes
+    
 ### END NOTES API ###
