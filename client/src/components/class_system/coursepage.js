@@ -91,7 +91,8 @@ function CoursePage(props) {
   async function getCourseData()  {
     console.log('getCourseData'); 
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/searchcourses/{coursename}`)
+      const url = "http://127.0.0.1:8000/searchcourses/" + coursename;
+      const response = await axios.get(url)
       ;
       // const response = await sampleCourseDataEmt;
       // console.log(response);
@@ -185,13 +186,12 @@ function CoursePage(props) {
 
     const inputValidateResult = validateAddCourseInput(newClassIntermediate);
     const isInputValidate = (inputValidateResult.isInstructorValid && inputValidateResult.isQuarterValid && inputValidateResult.isYearValid);
+    console.log(isInputValidate);
     if (!inputValidateResult.isInstructorValid) {
       setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
-      return;
     }
     else if (!inputValidateResult.isQuarterValid) {
       setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
-      return; 
     }
     else if (!inputValidateResult.isYearValid) {
       setYearInvalidMsg(inputValidateResult.yearValidateMessage);
@@ -201,7 +201,7 @@ function CoursePage(props) {
 
       // Get colorCode 
       let colorCode = 1;
-      const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
+      const course_idx = courseData.findIndex((course) => course.instructor === newClassIntermediate['instructor']);
       if (course_idx === -1) { // Generate a new colorCode for a new professor 
         console.log("courseData.length:", courseData.length);
         if (courseData.length) {
@@ -221,10 +221,19 @@ function CoursePage(props) {
         "colorCode": colorCode
       };
 
-      console.log(newClassSubmit);
-      // submit form ...
+      console.log("newClassSubmit", newClassSubmit);
+      axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
+      .then(response => {
+        console.log(response);
+        setModalInputTextShown(true);
+        setModalInputSelectShown(false);
+        handleClose();
+        setShowMsg(true);
+      })
+      .then(() => {getCourseData()})
     }
 
+    /*
     const newClassInfo = {
       instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
       term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
@@ -268,6 +277,7 @@ function CoursePage(props) {
       setCourseData(courseData);
     }
     // /////////////////////////////////////////////////////////
+    */
 
     setNewClassForm({});
   }

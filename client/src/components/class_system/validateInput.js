@@ -70,4 +70,4 @@ function validateAddCourseInput(input) {
   return result;
 }
 
-export default {validateYear, validateAddCourseInput};
+export default validateAddCourseInput;
