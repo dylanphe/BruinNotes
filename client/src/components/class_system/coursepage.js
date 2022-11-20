@@ -10,6 +10,7 @@ import Modal from 'react-bootstrap/Modal';
 import {ImArrowUpLeft2} from 'react-icons/im'; 
 import HomeBtn from './homebtn';
 import dataToCourses from './datatocourse.js';
+import validateAddCourseInput from './validateInput.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './coursepage.css';
 
@@ -67,6 +68,9 @@ function CoursePage(props) {
   // const [msg, setMsg] = useState("hiiii");  // TODO: change default message
   let msg = "hiiiiii"; // TODO: change default message
   const [showMsg, setShowMsg] = useState(false);
+  const [instructorInvalidMsg, setInstructorInvalidMsg] = useState("");
+  const [quarterInvalidMsg, setQuarterInvalidMsg] = useState("");
+  const [yearInvalidMsg, setYearInvalidMsg] = useState("");
 
   // TODO: maybe refactoring into functions handleClose(para) and handleShow(para)? 
   const handleClose = () => setShow(false);
@@ -131,11 +135,6 @@ function CoursePage(props) {
     return 'var(--color' + colorNum + ')';
   }
 
-  function validateYear(year) {
-    const pattern = '^[1-2][0-9]{3}$';
-    return (!year || year.match(pattern));
-  }
-
   // ref: https://learningprogramming.net/modern-web/react-functional-components/use-onsubmit-event-in-react-functional-components/
   const handleChange = (e) => {
     let name = e.target.name;
@@ -161,6 +160,16 @@ function CoursePage(props) {
     }
   }
 
+
+  /* Expected submit format:
+  {
+    instructor: "Kim, Miryung",
+    quarter: "Fall",
+    year: "2022",
+    courseName: "COM SCI 130"
+    colorCode: 1
+  }
+  */
   const handleSubmit = async (e) => {
     // !TODO: validate input 
     // e.preventDefault();
@@ -168,6 +177,54 @@ function CoursePage(props) {
     const isProfExist = (newClassForm['professor_select'] != null);
     // TODO: might need to assert that fullname == null whenever professor_select exists
     
+    const newClassIntermediate = {
+      instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
+      quarter: newClassForm['quarter'], 
+      year: newClassForm['year']
+    };
+
+    const inputValidateResult = validateAddCourseInput(newClassIntermediate);
+    const isInputValidate = (inputValidateResult.isInstructorValid && inputValidateResult.isQuarterValid && inputValidateResult.isYearValid);
+    if (!inputValidateResult.isInstructorValid) {
+      setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
+      return;
+    }
+    else if (!inputValidateResult.isQuarterValid) {
+      setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
+      return; 
+    }
+    else if (!inputValidateResult.isYearValid) {
+      setYearInvalidMsg(inputValidateResult.yearValidateMessage);
+    }
+    else {  // Input is valid
+      setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg(""); 
+
+      // Get colorCode 
+      let colorCode = 1;
+      const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
+      if (course_idx === -1) { // Generate a new colorCode for a new professor 
+        console.log("courseData.length:", courseData.length);
+        if (courseData.length) {
+          colorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
+          console.log("newColorCode", colorCode);
+        }
+      }
+      else {  // Use the existing color code
+        colorCode = courseData[course_idx].colorCode;
+      }
+
+      const newClassSubmit = {
+        "instructor": newClassIntermediate["instructor"],
+        "quarter": newClassIntermediate["quarter"], 
+        "year": newClassIntermediate["year"],
+        "courseName": coursename,
+        "colorCode": colorCode
+      };
+
+      console.log(newClassSubmit);
+      // submit form ...
+    }
+
     const newClassInfo = {
       instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
       term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
