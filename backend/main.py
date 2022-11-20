@@ -80,6 +80,9 @@ class CommentModel(BaseModel):
 
 class NoteModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    courseName: str
+    instructor: str
+    term: str
     _id: int
     url: str
     author: str
@@ -98,6 +101,9 @@ class NoteModel(BaseModel):
 
 class NoteRequestModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    courseName: str
+    instructor: str
+    term: str
     requestMsg: str
     week: int
 
@@ -112,8 +118,6 @@ class CourseModel(BaseModel):
     instructor: str
     term: str
     colorCode: int
-    notes: List[NoteModel]
-    noteRequests: List[NoteRequestModel]
 
     class Config:
         allow_population_by_field_name = True
@@ -198,9 +202,7 @@ async def check_email(email: str):
     if user is not None:
         return False
     
-    email_valid = await verify_email_async(email)
-    
-    return email_valid
+    #return (await verify_email_async(email))
 
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given username")
@@ -328,6 +330,10 @@ async def add_course(courseInfo: dict):
     colorCode = courseInfo['colorCode']
 
     term = str(quarter) + " " + str(year)
+    
+    courseExists = await db["courses"].find_one({"courseName": courseName, "instructor": instructor, "term": term, "colorCode": colorCode})
+    if courseExists is not None:
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content="A course with this information already exists.")
 
     course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode, notes=[], noteRequests=[])
     new_course = jsonable_encoder(course)
@@ -347,7 +353,7 @@ async def search_courses(courseName: str):
         The requested courses.
     """
     query = {"courseName": {"$regex": courseName, "$options": "i"}}
-    courses = await db["courses"].find(query).to_list(1000)
+    courses = await db["courseNames"].find(query).to_list(1000)
     return courses
 ### END COURSES API ###
 
@@ -394,7 +400,9 @@ async def add_note(noteInfo: dict):
     Returns:
         JSON object with created note and 201 status.
     """
-
+    courseName = noteInfo['courseName']
+    instructor = noteInfo['instructor']
+    term = noteInfo['term']
     url = noteInfo['url']
     author = noteInfo['author']
     role = noteInfo['role']
@@ -403,7 +411,7 @@ async def add_note(noteInfo: dict):
     week = noteInfo['week']
     commentList = noteInfo['commentList']
 
-    note = NoteModel(url=url, author=author,role=role,title=title,date=date,week=week,commentList=commentList,likes=0, dislikes=0)
+    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author,role=role,title=title,date=date,week=week,commentList=commentList,likes=0, dislikes=0)
     new_note = jsonable_encoder(note)
     inserted_note = await db["notes"].insert_one(new_note)
     created_note = await db["notes"].find_one({"_id": inserted_note.inserted_id})
@@ -420,10 +428,13 @@ async def add_note_request(noteRequestInfo: dict):
     Returns:
         JSON object with created note request and 201 status.
     """
+    courseName = noteRequestInfo['courseName']
+    instructor = noteRequestInfo['instructor']
+    term = noteRequestInfo['term']
     requestMsg = noteRequestInfo['requestMsg']
     week = noteRequestInfo['week']
     
-    noteRequest = NoteRequestModel(requestMsg=requestMsg, week=week)
+    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week)
     new_noteRequest = jsonable_encoder(noteRequest)
     inserted_noteRequest = await db['noteRequests'].insert_one(new_noteRequest)
     created_noteRequest = await db['noteRequests'].find_one({"_id": inserted_noteRequest.inserted_id})
