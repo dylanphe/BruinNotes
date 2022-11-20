@@ -285,6 +285,10 @@ async def add_course(courseInfo: dict):
     """
     courseName = courseInfo['courseName']
 
+    courseExists = await db["courseNames"].find_one({"courseName": courseName})
+    if courseExists is not None:
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content="A course with this name already exists.")
+
     course = CourseNameModel(courseName=courseName)
     new_course = jsonable_encoder(course)
     inserted_course = await db["courseNames"].insert_one(new_course)
