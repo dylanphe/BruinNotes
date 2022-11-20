@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {useNavigate, Link, useParams} from 'react-router-dom';
+import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -11,19 +11,6 @@ import LogoutBtn from './logoutbtn';
 
 // The function that toggles between themes
 function Searchpage() {
-    /*async function testConnection() {
-        const response = await fetch('/SearchPage');
-        const data = await response.json();
-        console.log(data);
-        return 0;
-    }
-
-    useEffect(() => {
-        //testConnection();
-    }, []);*/
-
-    const navigate = useNavigate();
-    let params = useParams;
     const [show, setShow] = useState(false);
 
     const [showMsg, setShowMsg] = useState(false);
@@ -321,8 +308,8 @@ function Searchpage() {
                     <input className='searchbar' type="text" onChange={event => searchlist(event)} placeholder="Search"/>
                     {showRes && (<div className="dropdown-content">
                         {
-                            searchItems.map((c) => 
-                                <button className ="search-item" onClick={()=>navigate('/c/'+{c})}>{c}</button>
+                            searchItems.map((c) =>
+                                <Link className ="search-item" to={"".concat("/c/",c)}>{c}</Link>
                             )
                         }
                     </div>)}

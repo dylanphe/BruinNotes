@@ -7,16 +7,10 @@ import './signuppage.css';
 
 // The function that toggles between themes
 function SignupPage() {
-    async function testConnection() {
-        const response = await fetch('/Signup');
-        const data = await response.json();
-        console.log(data);
-        return 0;
-    }
-
-    useEffect(() => {
-        testConnection();
-    }, []);
+    const [fullname, setFullname] = React.useState('')
+    const [uid, setUID] = React.useState('')
+    const [email, setEmail] = React.useState('')
+    const [password, setPassword] = React.useState('')
 
     //KeyPressed Enter == SignUp Button clicked
     useEffect(() => {
@@ -24,8 +18,7 @@ function SignupPage() {
             console.log('User pressed: ', event.key);
     
             if (event.key === 'Enter') {
-            event.preventDefault();
-            handleSubmit();
+                handleSubmit();
             }
         };
     
@@ -34,12 +27,7 @@ function SignupPage() {
         return () => {
             document.removeEventListener('keydown', keyDownHandler);
         };
-    }, []);
-
-    const [fullname, setFullname] = React.useState('')
-    const [uid, setUID] = React.useState('')
-    const [email, setEmail] = React.useState('')
-    const [password, setPassword] = React.useState('')
+    });
 
     ///////////////////////////////////////////////////////////
     //Functions to validate user inputs////////////////////////
@@ -168,7 +156,7 @@ function SignupPage() {
     //////////////////////////////////////////////////////////////////////////////
     // This function is called when Sign Up button is clicked
     ////////////////////////////////////////////////////////////////////////////////
-    function handleSubmit() {
+    async function handleSubmit() {
         handleAllValidation().then(result => {
             if (result === true) {
                 axios.post('http://127.0.0.1:8000/adduser', {'fullname': fullname, 'uid': uid, 'email': email, 'password': password})

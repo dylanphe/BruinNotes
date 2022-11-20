@@ -6,16 +6,6 @@ import "@fontsource/gloria-hallelujah";
 import './loginpage.css';
 
 function Loginpage() {
-    async function testConnection() {
-        const response = await fetch('/Login');
-        const data = await response.json();
-        console.log(data);
-        return 0;
-    }
-    useEffect(() => {
-        testConnection();
-    }, []);
-
     //KeyPressed Enter == login Button clicked
     useEffect(() => {
         const keyDownHandler = event => {
@@ -32,7 +22,7 @@ function Loginpage() {
         return () => {
           document.removeEventListener('keydown', keyDownHandler);
         };
-    }, []);
+    });
 
 
     const [uid, setUID] = React.useState('');
@@ -46,15 +36,10 @@ function Loginpage() {
     // Return:      Boolean
     function validateInput() {
         var uidPattern = new RegExp("^\\d{9}$");
-        if (!uid || !password) {
-            alert('Please enter all fields.');
-            return false;
-        } else { 
             if (!uid.match(uidPattern)) {
                 alert('Please enter a valid UID.');
                 return false;
             }
-        }
         return true;
     }
     //////////////////////////////////////////////////////////////////////////////
