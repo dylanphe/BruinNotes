@@ -72,6 +72,35 @@
 box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
 }
 
+#signup-form-box-name {
+    text-transform: capitalize;
+    width: 60%;
+    font-size: medium;
+    padding: 10px;
+    margin-top: 12px;
+    margin-bottom:12px;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-sizing: border-box;
+    -webkit-box-shadow:0px 0px 9px 3px rgba(57,125,209,0.35);
+-moz-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+}
+
+#signup-form-box-email {
+    width: 60%;
+    font-size: medium;
+    padding: 10px;
+    margin-top: 12px;
+    margin-bottom:12px;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-sizing: border-box;
+    -webkit-box-shadow:0px 0px 9px 3px rgba(57,125,209,0.35);
+-moz-box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+box-shadow: 0px 0px 9px 3px rgba(57,125,209,0.35);
+}
+
 #signup-show-pwd {
     background-color: transparent;
     border: none;

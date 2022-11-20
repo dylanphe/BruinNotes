@@ -47,7 +47,7 @@ function SignupPage() {
     // Description: Check to see if fullname has both firstname and lastname
     // Return:      Boolean
     function validateFullName() {
-        var namePattern = new RegExp("[A-Za-z]+ [A-Za-z]+");
+        var namePattern = new RegExp("^(?=.*[A-Za-z])[A-Za-z]+ [A-Za-z]+$");
         if (!fullname.match(namePattern)) {
             return false;
         }
@@ -97,16 +97,20 @@ function SignupPage() {
             if(!validateFullName()) {
                 alert('Please enter both FRIST NAME and LAST NAME.');
                 return false;
-            } else if (!validateUID()) {
+            }
+            if (!validateUID()) {
                 alert('Please enter a valid UID.');
                 return false;
-            } else if (!validateEmail()) {
+            } 
+            if (!validateEmail()) {
                 alert('Please enter a valid UCLA Email Address.');
                 return false;
-            } else if (!validatePassword()){
+            }
+            if (!validatePassword()){
                 alert('Please enter a valid password.');
                 return false;
-            } else {
+            } 
+            if (validateFullName() && validateUID() && validateEmail() && validatePassword()) {
                 return true;
             }
         }
@@ -152,12 +156,13 @@ function SignupPage() {
     // Function to handle all validations above at once
     //////////////////////////////////////////////////////
     async function handleAllValidation() {
-        let resValidation = await handleSignupValidation();
+        let resValidation = handleSignupValidation();
         let resUniqueID = await uniqueUID();
         let resUniqueEmail = await uniqueEmail();
         //console.log(resValidation);
         //console.log(resUniqueID);
         //console.log(resUniqueEmail);
+        //return (Boolean(resValidation) && Boolean(resUniqueID));
         return (Boolean(resValidation) && Boolean(resUniqueID) && Boolean(resUniqueEmail));
     }
     //////////////////////////////////////////////////////////////////////////////
@@ -188,11 +193,11 @@ function SignupPage() {
             <div className='signup-box'>
                 <div className='signup-center-align'>
                     <div className='signup-form-label'>FULL NAME</div>
-                    <input onChange={event => setFullname(event.target.value)} id='signup-form-box'  type="text" placeholder="Enter Full Name (Firstname Lastname)"/>
+                    <input onChange={event => setFullname(event.target.value)} id='signup-form-box-name'  type="text" placeholder="Enter Full Name (Firstname Lastname)"/>
                     <div className='signup-form-label'>UID</div>
                     <input onChange={event => setUID(event.target.value)} id='signup-form-box' type="number" placeholder="Enter 9-digits UID"/>
                     <div className='signup-form-label'>UCLA EMAIL</div>
-                    <input onChange={event => setEmail(event.target.value)} id='signup-form-box' type="text" placeholder="Enter UCLA Email Address"/>
+                    <input onChange={event => setEmail(event.target.value.toLocaleLowerCase())} id='signup-form-box-email' type="text" placeholder="Enter UCLA Email Address"/>
                     <div className='signup-form-label-pwd'>
                         <div id='pwd-text'>PASSWORD</div>
                         <div className='signup-form-label-right'><button id='signup-show-pwd' onClick={togglePassword}>{passwordShown === false ? <BsEyeFill /> : <BsEyeSlashFill />}</button></div>

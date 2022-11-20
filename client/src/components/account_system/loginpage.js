@@ -67,6 +67,7 @@ function Loginpage() {
         else {
             axios.post('http://127.0.0.1:8000/checkpassword', {'fullname': null, 'uid': uid, 'email': null, 'password': password})
             .then(res => {
+                console.log(res.data)
                 if (res.data === true) {
                     navigate('Searchpage');
                 } else {

@@ -91,6 +91,12 @@
     box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
 }
 
+#search-modal-input {
+  text-transform: uppercase;
+  width: 70%;
+  border-radius: 10px;
+}
+
 .dropbtn {
     /* background-color: #04AA6D; */
     /* color: white; */
@@ -119,7 +125,7 @@
   
   /* Dropdown Content (Hidden by Default) */
   .dropdown-content {
-    display: none;
+    display: block;
     background-color: #f1f1f1;
     width: 100%;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -138,10 +144,6 @@
   .dropdown-content a:hover {background-color: #ddd;}
   
   /* Show the dropdown menu on hover */
-  .dropdown:hover .dropdown-content {display: block;}
-  
-  /* Change the background color of the dropdown button when the dropdown content is shown */
-  .dropdown:hover .dropbtn {background-color: #3e8e41;}
 
   .searchpage-btn {
     background-color: white;
@@ -168,4 +170,20 @@
     float: left;
     padding: 20px;
     /* border: 2px solid red; */
+}
+
+.search-item {
+  font-family: "Gloria Hallelujah";
+  width:100%;
+  color: black;
+  text-align: left;
+  padding: 10px 10px;
+  text-decoration: none;
+  font-size: small;
+  border-style: none;
+}
+
+.search-item:hover {
+  background-color: #ddd;
+  color: black;
 }
