@@ -25,8 +25,8 @@ function Loginpage() {
     });
 
 
-    const [uid, setUID] = React.useState('');
-    const [password, setPassword] = React.useState('');
+    const [uid, setUID] = React.useState();
+    const [password, setPassword] = React.useState();
 
 
     ///////////////////////////////////////////////////////////
@@ -36,10 +36,16 @@ function Loginpage() {
     // Return:      Boolean
     function validateInput() {
         var uidPattern = new RegExp("^\\d{9}$");
+        if (!uid || !password) {
+            alert('Please Enter all field');
+            return;
+
+        } else {
             if (!uid.match(uidPattern)) {
                 alert('Please enter a valid UID.');
                 return false;
             }
+        }
         return true;
     }
     //////////////////////////////////////////////////////////////////////////////
@@ -52,13 +58,12 @@ function Loginpage() {
         else {
             axios.post('http://127.0.0.1:8000/checkpassword', {'fullname': null, 'uid': uid, 'email': null, 'password': password})
             .then(res => {
-                console.log(res.data)
-                if (res.data === true) {
-                    navigate('Searchpage');
-                } else {
+                console.log(res.data);
+                if (res.data === false) {
                     alert("Wrong UID and Password. Please re-enter the information.");
                     return;
                 }
+                navigate("/Searchpage");
             })
         }
     }

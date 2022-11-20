@@ -255,6 +255,8 @@ function Searchpage() {
         return false;
     }
 
+    
+
     function handleSubmit() {
         if (validateCourse()) {
             axios.post('http://127.0.0.1:8000/addcoursename', {'courseName': course+' '+code})
@@ -275,7 +277,7 @@ function Searchpage() {
         setSearch(event.target.value.toLocaleUpperCase());
         let items = [];
         if (!search[1]) {
-            setShowRes(false);
+            setsearchItems([]);
             return;
         } else {
             //console.log(search);
