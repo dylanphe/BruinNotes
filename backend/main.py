@@ -489,7 +489,7 @@ async def increase_dislikes(id):
             return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)\
         
-@app.post("/searchnote", response_description="Search for notes that match courseName, professor, and quarter")
+@app.get("/searchnote/{courseName}/{instructor}/{term}", response_description="Search for notes that match courseName, professor, and quarter")
 async def search_note_by_fields(courseName, instructor, term):
     """
     Search note by string fields
@@ -508,5 +508,25 @@ async def search_note_by_fields(courseName, instructor, term):
         
     matchingNotes = await db['notes'].find(query).to_list(1000)
     return matchingNotes
+
+@app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
+async def search_note_requests_by_fields(courseName, instructor, term):
+    """
+    Search note requests by string fields
+    
+    Returns:
+        A list of all note requests that match these fields
+    """
+
+    query =  {'$and': 
+            [
+                {"courseName": {"$regex": courseName, "$options": "i"}},
+                {"instructor": {"$regex": instructor, "$options": "i"}},
+                {"term": {"$regex": term, "$options": "i"}}
+            ]
+            }
+
+    matchingNoteRequests = await db['noteRequests'].find(query).to_list(1000)
+    return matchingNoteRequests
     
 ### END NOTES API ###

@@ -97,6 +97,7 @@ function CourseNotePage(props) {
   const [noteWeek, setNoteWeek] = useState();
   const [user, setUser] = useState([]);
   const [authorType, setAuthorType] = useState('');
+  const [noteList, setNoteList] = useState([]);
 
   async function handleSelect() {
     const sb = document.querySelector('#modal-select');
@@ -114,13 +115,45 @@ function CourseNotePage(props) {
     .then( (res) => {
       setUser(res.data.at(0));
     })
-    /*var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
-    today = mm + '/' + dd + '/' + yyyy;
-    console.log(today);*/
-    //console.log(courseName);
+  }, []);
+
+  async function searchNote() {
+    let items = [];
+    axios.get('http://127.0.0.1:8000/searchnote/'+courseName+'/'+instructor+'/'+term)
+    .then(res => {
+        console.log(res.data);
+        /*if (res.data.length !== 0)
+        {
+            res.data.map((courseDataElement) => {
+                items.push(courseDataElement.courseName);
+            });
+            //console.log(items);
+            setReqList(items);
+            console.log(reqList);
+        }*/
+    })
+  }
+
+  async function searchNoteReq() {
+    let items = [];
+    axios.get('http://127.0.0.1:8000/searchnoterequest/'+courseName+'/'+instructor+'/'+term)
+    .then(res => {
+        console.log(res.data);
+        /*if (res.data.length !== 0)
+        {
+            res.data.map((courseDataElement) => {
+                items.push(courseDataElement.courseName);
+            });
+            //console.log(items);
+            setReqList(items);
+            console.log(reqList);
+        }*/
+    })
+  }
+
+  useEffect(() => {
+      searchNote();
+      searchNoteReq();
   });
 
   const handleSubmitAdd = () => {
@@ -131,13 +164,6 @@ function CourseNotePage(props) {
     today = mm + '/' + dd + '/' + yyyy;
 
     var userName = user.fullname
-    console.log(courseName)
-    console.log(noteWeek)
-    console.log(term)
-    console.log(userName)
-    console.log(noteTitle)
-    console.log(noteLink)
-    console.log(authorType)
 
     if (noteWeek >= 1 && noteWeek <= 10) {
       axios.post('http://127.0.0.1:8000/addnote', {'courseName': courseName, 'instructor': instructor, 'term': term, 
@@ -153,9 +179,9 @@ function CourseNotePage(props) {
       .then((res) => {
         console.log(res);
       });
-      //handleCloseReq();
+      handleCloseReq();
     }
-    //handleCloseAdd();
+    handleCloseAdd();
   }
 
   const [requestMsg, setRequestMsg] = useState("");
