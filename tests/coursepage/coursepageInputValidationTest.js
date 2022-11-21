@@ -3,7 +3,7 @@ import {validateAddCourseInput} from "../../client/src/components/class_system/v
 let inputs = [
   {}, // f
   {"instructor": ""}, // f
-  {"instructor": "ABC"},  // t
+  {"instructor": "ABC"},  // f
   {"instructor": "ABC", "quarter": "Spring"}, // f
   {"instructor": "ABC", "quarter": "Spring", "year": "2000"}, // t
   {"instructor": "ABC", "year": "2000"}, // f

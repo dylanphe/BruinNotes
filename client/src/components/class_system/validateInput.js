@@ -22,40 +22,31 @@ function validateAddCourseInput(input) {
   // The instructor field is required 
   let result = {};
 
+  // All fields required 
+
   // Validate instructor
   result["isInstructorValid"] = (input.instructor !== undefined && input.instructor !== "");
   result["instructorValidateMessage"] = (result["isInstructorValid"] ? "" : "Name is required"); 
   
-  // Validate quarter and year
-  // quarter is valid exactly when (quarter and year are both undefined) or ((quarter and year are both defined) and (quarter is either "Fall" or "Winter" or "Spring" or "Summer"))
-  if (input.quarter === undefined && input.year === undefined) {
-    result["isQuarterValid"] = true; 
-    result["isYearValid"] = true;
-    result["quarterValidateMessage"] = "";
-    result["yearValidateMessage"] = "";
-  } 
-  else if (input.quarter !== undefined && input.year !== undefined) {
-    result["isQuarterValid"] = true; // The input format is asserted by the form =)
-    result["quarterValidateMessage"] = "";
-    result["isYearValid"] = validateYear(input.year);
-    result["yearValidateMessage"] = ( result["isYearValid"] ? "" : "Format: yyyy");
-  } 
-  else if (input.quarter !== undefined && input.year === undefined) {
-    result["isQuarterValid"] = true; // The input format is asserted by the form =)
-    result["quarterValidateMessage"] = "";
-    result["isYearValid"] = false;
-    result["yearValidateMessage"] = "Year is required for the corresponding quarter";
-  } 
-  else if (input.quarter === undefined && input.year !== undefined) {
+  // Validate quarter 
+  if (input.quarter === undefined) {
     result["isQuarterValid"] = false; 
-    result["quarterValidateMessage"] = "Quarter is required for the corresponding year";
+    result["quarterValidateMessage"] = "Quarter is required";
+  } 
+  else {
+    result["isQuarterValid"] = true; // The input format is asserted by the form =)
+    result["quarterValidateMessage"] = "";
+  } 
+
+  // Validate year
+  if (input.year === undefined) {
+    result["isYearValid"] = false;
+    result["yearValidateMessage"] = "Year is required";
+  } 
+  else {
     result["isYearValid"] = validateYear(input.year);
     result["yearValidateMessage"] = ( result["isYearValid"] ? "" : "Year format: yyyy");
   } 
-  else {
-    console.error("Hey the logic is wrong");
-    return {};
-  }
 
   // console.log(result);
   const fields = ["isInstructorValid", "isQuarterValid", "isYearValid", 
