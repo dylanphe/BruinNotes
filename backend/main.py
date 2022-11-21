@@ -105,6 +105,7 @@ class NoteRequestModel(BaseModel):
     term: str
     requestMsg: str
     week: int
+    uid: str
 
     class Config:
         allow_population_by_field_name = True
@@ -432,8 +433,9 @@ async def add_note_request(noteRequestInfo: dict):
     term = noteRequestInfo['term']
     requestMsg = noteRequestInfo['requestMsg']
     week = noteRequestInfo['week']
+    uid = noteRequestInfo['uid']
     
-    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week)
+    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week, uid=uid)
     new_noteRequest = jsonable_encoder(noteRequest)
     inserted_noteRequest = await db['noteRequests'].insert_one(new_noteRequest)
     created_noteRequest = await db['noteRequests'].find_one({"_id": inserted_noteRequest.inserted_id})
@@ -451,7 +453,11 @@ async def delete_note_request(id):
     """
     note = await db['noteRequests'].find_one({"_id": id})
     if note:
+<<<<<<< Updated upstream
         await db['noteRequests'].remove({'_id': id})
+=======
+        await db['noteRequests'].delete_one({'_id': id})
+>>>>>>> Stashed changes
         msg = "Successfully removed note request"
         return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
     else: 
