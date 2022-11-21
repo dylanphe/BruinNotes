@@ -58,7 +58,7 @@ function CourseNotePage(props) {
     return (
       <div key={note._id}>
         <div className="note-nav-button">
-          <a href={note.url} target="_blank" className="note-lnk">{title}</a>
+          <a href={note.url} target="_blank" id={note.role} className="note-lnk">{title}</a>
           <div className='misc-button-list'>
             <button className='misc-button' id="like" onClick={toggleLikes}>{showLikes === false ? <AiOutlineLike/> : <AiFillLike />} {note.likes}</button>  
             <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button> 
