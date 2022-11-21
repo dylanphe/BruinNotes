@@ -509,7 +509,7 @@ async def search_note_by_fields(courseName, instructor, term):
             ]
             }
         
-    matchingNotes = await db['notes'].find(query).to_list(1000)
+    matchingNotes = await db['notes'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNotes
 
 @app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
@@ -529,7 +529,7 @@ async def search_note_requests_by_fields(courseName, instructor, term):
             ]
             }
 
-    matchingNoteRequests = await db['noteRequests'].find(query).to_list(1000)
+    matchingNoteRequests = await db['noteRequests'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNoteRequests
  
 ### END NOTES API ###
