@@ -105,6 +105,7 @@ class NoteRequestModel(BaseModel):
     term: str
     requestMsg: str
     week: int
+    uid: str
 
     class Config:
         allow_population_by_field_name = True
@@ -433,8 +434,9 @@ async def add_note_request(noteRequestInfo: dict):
     term = noteRequestInfo['term']
     requestMsg = noteRequestInfo['requestMsg']
     week = noteRequestInfo['week']
+    uid = noteRequestInfo['uid']
     
-    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week)
+    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week, uid=uid)
     new_noteRequest = jsonable_encoder(noteRequest)
     inserted_noteRequest = await db['noteRequests'].insert_one(new_noteRequest)
     created_noteRequest = await db['noteRequests'].find_one({"_id": inserted_noteRequest.inserted_id})
@@ -452,7 +454,7 @@ async def delete_note_request(id):
     """
     note = await db['noteRequests'].find_one({"_id": id})
     if note:
-        await db['noteRequests'].remove({'_id': id})
+        await db['noteRequests'].delete_one({'_id': id})
         msg = "Successfully removed note request"
         return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
     else: 
@@ -475,6 +477,22 @@ async def increase_likes(id):
             return JSONResponse(status_code=status.HTTP_200_OK, content=likes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
+@app.put("/decreaselikes/{id}", response_description="Decrease likes on a note")
+async def decrase_likes(id):
+    """
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    """
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        likes = note['likes']
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'likes':-1}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=likes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
 @app.put("/increasedislikes/{id}", response_description="Increase dislikes on a note")
 async def increase_dislikes(id):
     """
@@ -489,7 +507,23 @@ async def increase_dislikes(id):
         updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'dislikes':1}})
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
-    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)\
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
+@app.put("/decreasedislikes/{id}", response_description="Decrease dislikes on a note")
+async def decrease_dislikes(id):
+    """
+    Decreases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    """
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        dislikes = note['dislikes']
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'dislikes':-1}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
         
 @app.get("/searchnote/{courseName}/{instructor}/{term}", response_description="Search for notes that match courseName, professor, and quarter")
 async def search_note_by_fields(courseName, instructor, term):
@@ -508,7 +542,7 @@ async def search_note_by_fields(courseName, instructor, term):
             ]
             }
         
-    matchingNotes = await db['notes'].find(query).to_list(1000)
+    matchingNotes = await db['notes'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNotes
 
 @app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
@@ -528,7 +562,9 @@ async def search_note_requests_by_fields(courseName, instructor, term):
             ]
             }
 
-    matchingNoteRequests = await db['noteRequests'].find(query).to_list(1000)
+    matchingNoteRequests = await db['noteRequests'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNoteRequests
+ 
+ 
  
 ### END NOTES API ###

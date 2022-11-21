@@ -283,7 +283,7 @@ function Searchpage(props) {
         } else {
             //console.log(search);
             setShowRes(true);
-            axios.get('http://127.0.0.1:8000/searchcourses/'+search)
+            axios.get('http://127.0.0.1:8000/searchcoursenames/'+search)
             .then(res => {
                 if (res.data.length !== 0)
                 {
