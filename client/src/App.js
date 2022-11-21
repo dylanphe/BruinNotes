@@ -14,9 +14,9 @@ function App() {
           <Route path = "/" element={<Loginpage />} />
           <Route path = "Signup" element={<Signuppage />} />
           <Route path = "ForgetPassword" element={<ForgetPasswordPage />} />
-          <Route path = "SearchPage" element={<Searchpage />} />
-          <Route path = "/c/:coursename" element={<CoursePage />} />
-          <Route path = "c/:coursename/:instructor/:term" element={<CourseNotePage />} />
+          <Route path = "/:uid/" element={<Searchpage />} />
+          <Route path = "/:uid/:coursename" element={<CoursePage />} />
+          <Route path = "/:uid/:coursename/:instructor/:term" element={<CourseNotePage />} />
         </Routes>
     </BrowserRouter>
   );

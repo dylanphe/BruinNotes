@@ -75,6 +75,7 @@ function CoursePage(props) {
   let params = useParams();
   // let location = useLocation();
   let coursename = params.coursename;
+  let uid = params.uid;
   console.log(params.coursename);    // debug
 
   const [courseData, setCourseData] = useState([]);
@@ -241,7 +242,7 @@ function CoursePage(props) {
             {courseDataElement.terms.map((term) => 
               <li key={term} className='lnk'>
                 {/* <Link to={"".concat("/c/", coursename, "/", instructor, "/", term)} className='lnk'>{term}</Link> */}
-                <Link className="lnk" to={"".concat("/c/", coursename, "/", instructor, "/", term)}>{term}</Link>
+                <Link className="lnk" to={"".concat("/", uid, "/", coursename, "/", instructor, "/", term)}>{term}</Link>
               </li>)}
           </ul>
         </div>

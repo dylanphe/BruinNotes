@@ -83,7 +83,6 @@ class NoteModel(BaseModel):
     courseName: str
     instructor: str
     term: str
-    _id: int
     url: str
     author: str
     role: str
@@ -409,9 +408,8 @@ async def add_note(noteInfo: dict):
     title = noteInfo['title']
     date = noteInfo['date']
     week = noteInfo['week']
-    commentList = noteInfo['commentList']
 
-    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author,role=role,title=title,date=date,week=week,commentList=commentList,likes=0, dislikes=0)
+    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author,role=role,title=title,date=date,week=week,commentList=[],likes=0, dislikes=0)
     new_note = jsonable_encoder(note)
     inserted_note = await db["notes"].insert_one(new_note)
     created_note = await db["notes"].find_one({"_id": inserted_note.inserted_id})
