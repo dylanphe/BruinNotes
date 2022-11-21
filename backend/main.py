@@ -453,11 +453,7 @@ async def delete_note_request(id):
     """
     note = await db['noteRequests'].find_one({"_id": id})
     if note:
-<<<<<<< Updated upstream
-        await db['noteRequests'].remove({'_id': id})
-=======
         await db['noteRequests'].delete_one({'_id': id})
->>>>>>> Stashed changes
         msg = "Successfully removed note request"
         return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
     else: 
