@@ -68,6 +68,17 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class ProfessorModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    name: str
+    avgRating: float
+    numRating: int
+    
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
 class CommentModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     username: str
@@ -477,7 +488,7 @@ async def increase_likes(id):
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
 @app.put("/decreaselikes/{id}", response_description="Decrease likes on a note")
-async def decrase_likes(id):
+async def decrease_likes(id):
     """
     Increases the like count on a note.
 
@@ -563,7 +574,83 @@ async def search_note_requests_by_fields(courseName, instructor, term):
 
     matchingNoteRequests = await db['noteRequests'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNoteRequests
- 
- 
- 
 ### END NOTES API ###
+
+### START PROF API ###
+@app.post("/addprofessor/{name}")
+async def add_professor(name):
+    """Checks if a professor exists, and adds it to the database if not.
+
+    Args:
+        name: The name of the professor
+    """
+    if (await db["professors"].find_one({"name": name}) is not None):
+        msg = "Professor with this name already exists in the database"
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=msg)
+        
+    prof = ProfessorModel(name=name, avgRating=0, numRating=0)
+    new_prof = jsonable_encoder(prof)
+    inserted_prof = await db["professors"].insert_one(new_prof)
+    created_prof = await db["professors"].find_one({"_id": inserted_prof.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_prof)
+    
+
+@app.put("/addrating/{prof_name}/{newRating}")
+async def add_rating(profName, newRating):
+    """adds new rating to the professor
+
+    Args:
+        profName (str): name of the professor
+        newRating (float): new incoming rating of the professor, which is 
+                        a number between 0.5 and 5
+
+    Returns:
+        Updated rating of the professor
+    """
+    prof = db["professors"].find_one({"name": profName})
+    if (prof is None):
+        msg = "Professor with this name not found in the database"
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    numRating = prof['numRating']
+    avgRating = prof['avgRating']
+    newRating = (numRating*avgRating + newRating)/(numRating+1)
+    updated_prof_rating = await db['notes'].update({"numRating":numRating+1}, {"avgRating":newRating})
+    if (updated_prof_rating):
+        return JSONResponse(status_code=status.HTTP_200_OK, content="{:.1f}".format(newRating))
+    
+@app.put("/updaterating/{prof_name}/{prevRating}/{newRating}")
+async def update_rating(profName, prevRating, newRating):
+    """updates preexisting rating to a new rating for a professor
+
+    Args:
+        profName (str): name of the professor
+        newRating (float): new incoming rating of the professor, which is 
+                        a number between 0.5 and 5. This replaces a
+                        pre-existing rating for the professor
+
+    Returns:
+        Updated rating of the professor
+    """
+    prof = db["professors"].find_one({"name": profName})
+    if (prof is None):
+        msg = "Professor with this name not found in the database"
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    numRating = prof['numRating']
+    avgRating = prof['avgRating']
+    newRating = (numRating*avgRating - prevRating + newRating)/(numRating)
+    updated_prof_rating = await db['notes'].update_one({"avgRating":newRating})
+    if (updated_prof_rating):
+        return JSONResponse(status_code=status.HTTP_200_OK, content="{:.1f}".format(newRating))
+
+@app.get("/getrating/{prof_name}")
+async def get_prof_rating(profName):
+    prof = db["professors"].find_one({"name": profName})
+    if (prof is None):
+        msg = "Professor with this name not found in the database"
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    rating = prof['avgRating']
+    return JSONResponse(status_code=status.HTTP_200_OK, content="{:.1f}".format(rating))
+### END PROF API ###
