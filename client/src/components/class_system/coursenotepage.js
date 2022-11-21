@@ -58,6 +58,11 @@ function CourseNotePage(props) {
 
   //Add Notes and Display notes
   const params = useParams();
+<<<<<<< HEAD
+=======
+  // console.log(props.uid);
+  //console.log(params);
+>>>>>>> 81efea262711b75f55ba5e927983e0606bc5c62c
   const courseName = params.coursename, instructor = params.instructor, term = params.term, uidParams = params.uid;
   const authorTypes = ['Student', 'TA', 'Professor'];
   const [noteLink, setNoteLink] = useState('');

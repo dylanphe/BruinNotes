@@ -5,7 +5,7 @@ import {BsEyeFill, BsEyeSlashFill} from 'react-icons/bs';
 import "@fontsource/gloria-hallelujah";
 import './loginpage.css';
 
-function Loginpage() {
+function Loginpage(props) {
     //KeyPressed Enter == login Button clicked
     useEffect(() => {
         const keyDownHandler = event => {
@@ -63,6 +63,7 @@ function Loginpage() {
                     alert("Wrong UID and Password. Please re-enter the information.");
                     return;
                 }
+                // props.onLogin(uid);
                 const uidparams = String(uid);
                 navigate('/'+uidparams+'/');
             })
