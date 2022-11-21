@@ -88,6 +88,7 @@ function Note(note) {
 function CourseNotePage(props) {
 
   const params = useParams();
+  // console.log(props.uid);
   //console.log(params);
   const courseName = params.coursename, instructor = params.instructor, term = params.term, uidParams = params.uid;
   const authorTypes = ['Student', 'TA', 'Professor'];

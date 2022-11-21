@@ -10,12 +10,13 @@ import LogoutBtn from './logoutbtn';
 // import '../class_system/coursepage.css';
 
 // The function that toggles between themes
-function Searchpage() {
+function Searchpage(props) {
     const [show, setShow] = useState(false);
 
     const [showMsg, setShowMsg] = useState(false);
     let msg = "hiiiiii"; // TODO: change default message
 
+    console.log(props.uid);
     const handleShow = () => setShow(true);
     const handleClose = () => setShow(false);
     const handleCloseMsg = () => setShowMsg(false);

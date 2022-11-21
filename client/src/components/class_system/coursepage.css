@@ -138,6 +138,17 @@ ul.term-under-instructor li {
     border-width: 2px;
 }
 
+.modal-qtr {
+    margin: 0px 7px;
+}
+
+.modal-qtr-chk-box {
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    vertical-align: middle;
+}
+
 .lnk {
     /* color: #2D68C4; */
     color: #2D68C4;

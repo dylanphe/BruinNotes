@@ -329,7 +329,7 @@ async def add_course(courseInfo: dict):
     colorCode = courseInfo['colorCode']
 
     term = str(quarter) + " " + str(year)
-    
+
     courseExists = await db["courses"].find_one({"courseName": courseName, "instructor": instructor, "term": term, "colorCode": colorCode})
     if courseExists is not None:
         return JSONResponse(status_code=status.HTTP_409_CONFLICT, content="A course with this information already exists.")
@@ -352,7 +352,8 @@ async def search_courses(courseName: str):
         The requested courses.
     """
     query = {"courseName": {"$regex": courseName, "$options": "i"}}
-    courses = await db["courseNames"].find(query).to_list(1000)
+    # courses = await db["courseNames"].find(query).to_list(1000)
+    courses = await db["courses"].find(query).to_list(1000)
     return courses
 ### END COURSES API ###
 
@@ -448,13 +449,13 @@ async def delete_note_request(id):
         HTTP 200 OK upon success
         HTTP 404 NOT FOUND if id isn't valid
     """
-    note = await db['notes'].find_one({"_id": id})
+    note = await db['noteRequests'].find_one({"_id": id})
     if note:
-        await db['notes'].remove({'_id': id})
+        await db['noteRequests'].remove({'_id': id})
         msg = "Successfully removed note request"
         return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
     else: 
-        msg = "note with ID not found"
+        msg = "note request with ID not found"
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
 
 @app.put("/increaselikes/{id}", response_description="Increase likes on a note")
@@ -528,5 +529,5 @@ async def search_note_requests_by_fields(courseName, instructor, term):
 
     matchingNoteRequests = await db['noteRequests'].find(query).to_list(1000)
     return matchingNoteRequests
-    
+ 
 ### END NOTES API ###

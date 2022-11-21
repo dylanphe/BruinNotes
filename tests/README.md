@@ -1,4 +1,4 @@
-# Tests
+# Tests 
 
 This directory is for test cases for the BruinNotes application. A description of our current testing status on various features can be found below:
 
