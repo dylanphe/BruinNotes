@@ -10,47 +10,6 @@ import Modal from 'react-bootstrap/Modal';
 import './coursenotepage.css';
 import HomeBtn from './homebtn';
 import axios from 'axios';
-
-function Note(note) {
-  const [showComments, setShowComments] = useState(false);
-  const [showLikes, setShowLikes] = useState(false);
-  const [showDislikes, setShowDislikes] = useState(false);
-  const toggleDislikes = () => setShowDislikes(!showDislikes);
-  const toggleLikes = () => setShowLikes(!showLikes);
-  const toggleComments = () => setShowComments(!showComments);
-  let title = note.author + ": " + note.title + " | Week " + note.week + " (" + note.role + ")";
-  let comments = note.commentList;
-  
-  return (
-    <div key={note._id}>
-      <div className="note-nav-button">
-        <a href={note.url} target="_blank" className="note-lnk">{title}</a>
-        <div className='misc-button-list'>
-          <button className='misc-button' id="like" onClick={toggleLikes}>{showLikes === false ? <AiOutlineLike/> : <AiFillLike />} {note.likes}</button>  
-          <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button> 
-          <button className='misc-button' id='comment' onClick={toggleComments}> <BiCommentAdd/> </button> 
-        </div>
-      </div>
-      <div style={{display: showComments ? 'block' : 'none'}}>
-        <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
-        <div className='comments'>
-          {comments.map((comment, idx) => 
-            <div id='cmt-box' key={idx}>
-              <div id='user-box'>
-                <b>{comment.username}</b>
-              </div>
-              <div id='user-cmt-box'>
-                {comment.comment}
-              </div>
-            </div>
-          )}
-        </div>          
-      </div>  
-      <hr/>
-    </div>
-  );
-}
-
 //create request function
 
 
@@ -58,11 +17,6 @@ function CourseNotePage(props) {
 
   //Add Notes and Display notes
   const params = useParams();
-<<<<<<< HEAD
-=======
-  // console.log(props.uid);
-  //console.log(params);
->>>>>>> 81efea262711b75f55ba5e927983e0606bc5c62c
   const courseName = params.coursename, instructor = params.instructor, term = params.term, uidParams = params.uid;
   const authorTypes = ['Student', 'TA', 'Professor'];
   const [noteLink, setNoteLink] = useState('');
@@ -71,6 +25,46 @@ function CourseNotePage(props) {
   const [user, setUser] = useState([]);
   const [authorType, setAuthorType] = useState('');
   const [noteList, setNoteList] = useState([]);
+
+  function Note(note) {
+    const [showComments, setShowComments] = useState(false);
+    const [showLikes, setShowLikes] = useState(false);
+    const [showDislikes, setShowDislikes] = useState(false);
+    const toggleDislikes = () => setShowDislikes(!showDislikes);
+    const toggleLikes = () => setShowLikes(!showLikes);
+    const toggleComments = () => setShowComments(!showComments);
+    let title = note.author + ": " + note.title + " | Week " + note.week + " (" + note.role + ")";
+    let comments = note.commentList;
+    
+    return (
+      <div key={note._id}>
+        <div className="note-nav-button">
+          <a href={note.url} target="_blank" className="note-lnk">{title}</a>
+          <div className='misc-button-list'>
+            <button className='misc-button' id="like" onClick={toggleLikes}>{showLikes === false ? <AiOutlineLike/> : <AiFillLike />} {note.likes}</button>  
+            <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button> 
+            <button className='misc-button' id='comment' onClick={toggleComments}> <BiCommentAdd/> </button> 
+          </div>
+        </div>
+        <div style={{display: showComments ? 'block' : 'none'}}>
+          <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
+          <div className='comments'>
+            {comments.map((comment, idx) => 
+              <div id='cmt-box' key={idx}>
+                <div id='user-box'>
+                  <b>{comment.username}</b>
+                </div>
+                <div id='user-cmt-box'>
+                  {comment.comment}
+                </div>
+              </div>
+            )}
+          </div>          
+        </div>  
+        <hr/>
+      </div>
+    );
+  }
 
   async function handleSelect() {
     const sb = document.querySelector('#modal-select');
@@ -102,6 +96,9 @@ function CourseNotePage(props) {
             //console.log(items);
             setNoteList(items);
             //console.log(noteList);
+        }
+        else {
+          setNoteList([]);
         }
     })
   }
@@ -141,25 +138,9 @@ function CourseNotePage(props) {
   const [reqWeek, setReqWeek] = useState();
   const [reqList, setReqList] = useState([]);
   const [reqDelete, setReqDelete] = useState();
-
   const [showReq, setShowReq] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-
-  const handleOpenDelete = () => {setShowDelete(true);}
-  const handleCloseDelete = () => {setShowDelete(false);}
-  const handleOpenReq = () => {setShowReq(true);}
-  const handleCloseReq = () => {setShowReq(false);}
-  const handleOpenAdd = () => {setShowAdd(true);}
-  const handleCloseAdd = () => {setShowAdd(false);}
-
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [hideNote, setHideNote] = useState(false);
-
-  const openReqPanel = () => {
-    setPanelOpen(!panelOpen);
-    setHideNote(!hideNote);
-  }
 
   function RequestWithDelete(req) {
     let reqMsg = req.requestMsg;
@@ -182,6 +163,21 @@ function CourseNotePage(props) {
     );
   }
 
+  const handleOpenDelete = () => {setShowDelete(true);}
+  const handleCloseDelete = () => {setShowDelete(false);}
+  const handleOpenReq = () => {setShowReq(true);}
+  const handleCloseReq = () => {setShowReq(false);}
+  const handleOpenAdd = () => {setShowAdd(true);}
+  const handleCloseAdd = () => {setShowAdd(false);}
+
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [hideNote, setHideNote] = useState(false);
+
+  const openReqPanel = () => {
+    setPanelOpen(!panelOpen);
+    setHideNote(!hideNote);
+  }
+
 
   const Requests = () => {
     return reqList.map((req) => RequestWithDelete(req));
@@ -200,6 +196,7 @@ function CourseNotePage(props) {
     axios.put("/deletenoterequest/"+reqID)
     .then(res => {
       console.log(res);
+      handleCloseDelete();
       searchNoteReq();
     })
   }
@@ -216,6 +213,9 @@ function CourseNotePage(props) {
           //console.log(items);
           setReqList(items);
           console.log(reqList);
+      }
+      else {
+        setReqList([]);
       }
     })
   }
