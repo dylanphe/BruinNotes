@@ -246,7 +246,7 @@ function CourseNotePage(props) {
 
   return (
     <div className='quarterpage-main-body'>
-      <HomeBtn />
+      <HomeBtn uid={uidParams}/>
       <div className='quarterpage-title-box'>
         <h1 className='quarterpage-title'>{courseName} {term} {instructor}</h1>
         <div className='quarterpage-nav-button'>
