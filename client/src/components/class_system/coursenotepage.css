@@ -151,6 +151,15 @@
     width: 85%;
 }
 
+.note-req {
+    /* color: #2D68C4; */
+    color: #2D68C4;
+    font-family: "Gloria Hallelujah";
+    font-weight: bolder;
+    font-size: medium;
+    width: 100%;
+}
+
 .note-lnk:hover {
     color: #F2A900;
 }
@@ -165,6 +174,12 @@
     border-radius:40px;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
 
+}
+
+.solve-button-list {
+    display: flex;
+    flex-direction: row;
+    font-size: large;
 }
 
 .misc-button {
@@ -210,6 +225,24 @@
 }
 
 #dislike:hover {
+    color:#F2A900;
+}
+
+#share {
+    color:#2D68C4;
+    font-size: larger;
+}
+
+#share:hover {
+    color:#F2A900;
+}
+
+#delete {
+    color:#cd5c5c;
+    font-size: larger;
+}
+
+#delete:hover {
     color:#F2A900;
 }
 
@@ -267,4 +300,20 @@
 #modal-select {
     width: 70%;
     border-radius: 10px;
+}
+
+#btn-yes {
+    background-color:#cd5c5c;
+}
+
+#btn-yes:hover {
+    background-color:#F2A900;
+}
+
+#btn-no {
+    background-color:#2D68C4;
+}
+
+#btn-no:hover {
+    background-color:#F2A900;
 }
