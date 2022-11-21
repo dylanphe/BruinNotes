@@ -357,7 +357,8 @@ async def search_courses(courseName: str):
         The requested courses.
     """
     query = {"courseName": {"$regex": courseName, "$options": "i"}}
-    courses = await db["courseNames"].find(query).to_list(1000)
+    # courses = await db["courseNames"].find(query).to_list(1000)
+    courses = await db["courses"].find(query).to_list(1000)
     return courses
 ### END COURSES API ###
 

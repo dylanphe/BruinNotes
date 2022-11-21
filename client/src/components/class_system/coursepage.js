@@ -50,7 +50,7 @@ Expected data structure from get:
 */
 const sampleCourseDataEmt = [];
 
-// route: /c/:coursename
+// route: /:uid/:coursename
 function CoursePage(props) {
   
   let params = useParams();
@@ -98,6 +98,8 @@ function CoursePage(props) {
       // const response = await sampleCourseDataEmt;
       // console.log(response);
       const data = await response.data;
+      console.log("response:", response);
+      console.log("data:", data);
       const courses = dataToCourses(data, compareTerms);
       console.log("courses:", courses);
       setCourseData(courses);
@@ -222,10 +224,10 @@ function CoursePage(props) {
         "colorCode": colorCode
       };
 
-      console.log("newClassSubmit", newClassSubmit);
+      console.log("newClassSubmit:", newClassSubmit);
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
       .then(response => {
-        console.log(response);
+        console.log("post response:", response);
         setModalInputTextShown(true);
         setModalInputSelectShown(false);
         handleClose();

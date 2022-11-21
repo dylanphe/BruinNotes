@@ -89,12 +89,14 @@ const dataToCourses = (data, compareTerms) => {
   const courses = {}; // intermediate data structure: {"John Doe": {"terms": [], "colorCode": 3}}
   const courseList = [];
   data.forEach(element => {
-    const currentInstructor = element.instructor;
-    if (courses[currentInstructor] === undefined) {  // If the current instructor is not in the courses object, initialize it
-      courses[currentInstructor] = {"terms": (element["term"] === "" ? [] : [element["term"]]), "colorCode": element["colorCode"]};
-    } else {  // If the current instructor is already initialized, then just update the terms (since we assumed the colorCode is unchanged)
-      if (element["term"] !== "") {
-        courses[currentInstructor]["terms"].push(element["term"]);
+    if (element.instructor !== undefined) {
+      const currentInstructor = element.instructor;
+      if (courses[currentInstructor] === undefined) {  // If the current instructor is not in the courses object, initialize it
+        courses[currentInstructor] = {"terms": (element["term"] === "" ? [] : [element["term"]]), "colorCode": element["colorCode"]};
+      } else {  // If the current instructor is already initialized, then just update the terms (since we assumed the colorCode is unchanged)
+        if (element["term"] !== "") {
+          courses[currentInstructor]["terms"].push(element["term"]);
+        }
       }
     }
   });
