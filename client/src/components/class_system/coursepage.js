@@ -1,4 +1,4 @@
-// TODOs: Input validation 
+// TODOs: Handle the case when the user inputs an existing professor name but not quarter or year
 //        More tests on the comparator function
 //        https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
 import React, {useState, useEffect} from 'react';
@@ -66,6 +66,9 @@ function CoursePage(props) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
   const [newClassForm, setNewClassForm] = useState({});
+  // const [inputInstructor, setInputInstructor] = useState("");
+  // const [inputQuarter, setInputQuarter] = useState("");
+  // const [inputYear, setInputYear] = useState("");
   // const [msg, setMsg] = useState("hiiii");  // TODO: change default message
   let msg = "hiiiiii"; // TODO: change default message
   const [showMsg, setShowMsg] = useState(false);
@@ -74,17 +77,16 @@ function CoursePage(props) {
   const [yearInvalidMsg, setYearInvalidMsg] = useState("");
 
   // TODO: maybe refactoring into functions handleClose(para) and handleShow(para)? 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false); 
+    setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg("");
+    setNewClassForm({});
+  };
   const handleShow = () => setShow(true);
   const handleCloseMsg = () => setShowMsg(false);
   const handleShowMsg = () => setShowMsg(true);
 
-  const num_colors = 6; 
-
-
-  // const dataToCourses = (data) => {
-
-  // }
+  const num_colors = 6;
 
   // ref: https://maxrozen.com/fetching-data-react-with-useeffect
   //      https://axios-http.com/docs/example
@@ -147,6 +149,7 @@ function CoursePage(props) {
     let value = e.target.value;
     newClassForm[name] = value;
     setNewClassForm(newClassForm);
+    console.log("newClassForm in handleChange:", newClassForm);
   }
 
   function compareTerms(term1, term2) { 
@@ -176,9 +179,11 @@ function CoursePage(props) {
     colorCode: 1
   }
   */
-  const handleSubmit = async (e) => {
+  const handleSubmit =  (e) => {
     // !TODO: validate input 
     // e.preventDefault();
+    setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg("");
+
     console.log("newClassForm:", newClassForm);
     const isProfExist = (newClassForm['professor_select'] != null);
     // TODO: might need to assert that fullname == null whenever professor_select exists
@@ -192,14 +197,23 @@ function CoursePage(props) {
     const inputValidateResult = validateAddCourseInput(newClassIntermediate);
     const isInputValidate = (inputValidateResult.isInstructorValid && inputValidateResult.isQuarterValid && inputValidateResult.isYearValid);
     console.log(isInputValidate);
-    if (!inputValidateResult.isInstructorValid) {
-      setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
-    }
-    else if (!inputValidateResult.isQuarterValid) {
-      setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
-    }
-    else if (!inputValidateResult.isYearValid) {
-      setYearInvalidMsg(inputValidateResult.yearValidateMessage);
+    if (!isInputValidate) {
+      console.log("inputValidateResult:", inputValidateResult);
+      if (!inputValidateResult.isInstructorValid) {
+        console.log(1);
+        setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
+      }
+      if (!inputValidateResult.isQuarterValid) {
+        console.log(2);
+        setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
+        // console.log(quarterInvalidMsg);
+      }
+      if (!inputValidateResult.isYearValid) {
+        console.log(3);
+        setYearInvalidMsg(inputValidateResult.yearValidateMessage);
+        // console.log(yearInvalidMsg);
+      }   
+      console.log("invalid", instructorInvalidMsg, quarterInvalidMsg, yearInvalidMsg);   
     }
     else {  // Input is valid
       setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg(""); 
@@ -236,6 +250,8 @@ function CoursePage(props) {
         setShowMsg(true);
       })
       .then(() => {getCourseData()})
+
+      setNewClassForm({});
     }
 
     /*
@@ -284,7 +300,7 @@ function CoursePage(props) {
     // /////////////////////////////////////////////////////////
     */
 
-    setNewClassForm({});
+    
   }
 
   //const color1= '#6B8E23';
@@ -343,14 +359,6 @@ function CoursePage(props) {
     </div>);
   }
 
-  function QuarterChkBox() {
-    return (['Fall', 'Winter', 'Spring', 'Summer'].map((term) => 
-      <span key={term} className="modal-qtr">
-        <label htmlFor={term}>{term}</label>{'   '}
-        <input type="radio" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
-      </span>))
-  }
-
   // require('react-dom');
   // window.React2 = require('react');
   // console.log(window.React1 === window.React2);
@@ -398,17 +406,25 @@ function CoursePage(props) {
                   </div>
                 </div>
                 )}
+                <span className='invalidMsg'>{instructorInvalidMsg !== "" ? instructorInvalidMsg : "  "}</span>
                 <br/>
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Quarter</span>
                   {/* <input type="text" name="quarter" id="modal-input" placeholder="Fall/Winter/Spring/Summer" onChange={handleChange}></input> */}
-                  <QuarterChkBox />
+                  {/* <QuarterChkBox /> */}
+                  {['Fall', 'Winter', 'Spring', 'Summer'].map((term) => 
+                    <span key={term} className="modal-qtr">
+                      <label htmlFor={term}>{term}</label>{'   '}
+                      <input type="radio" name='quarter' className="modal-qtr-chk-box" value={term} onClick={handleChange}></input>
+                    </span>)}
                 </div>
+                <span className='invalidMsg'>{quarterInvalidMsg !== "" ? quarterInvalidMsg : "  "}</span>
                 <br/>
                 <div className='modal-input-box'>
                   <span id='modal-input-label'>Year</span>
                   <input type="number" name='year' min="1900" max="2099" step="1" id="modal-input" placeholder="YYYY" onChange={handleChange}></input> 
                 </div>
+                <span className='invalidMsg'>{yearInvalidMsg !== "" ? yearInvalidMsg : < br />}</span>
               </Form>
             </Modal.Body>
             <Modal.Footer>

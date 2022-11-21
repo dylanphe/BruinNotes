@@ -38,19 +38,19 @@ function validateAddCourseInput(input) {
     result["isQuarterValid"] = true; // The input format is asserted by the form =)
     result["quarterValidateMessage"] = "";
     result["isYearValid"] = validateYear(input.year);
-    result["yearValidateMessage"] = ( result["isYearValid"] ? "" : "format: yyyy");
+    result["yearValidateMessage"] = ( result["isYearValid"] ? "" : "Format: yyyy");
   } 
   else if (input.quarter !== undefined && input.year === undefined) {
     result["isQuarterValid"] = true; // The input format is asserted by the form =)
     result["quarterValidateMessage"] = "";
     result["isYearValid"] = false;
-    result["yearValidateMessage"] = "year is required for the corresponding quarter";
+    result["yearValidateMessage"] = "Year is required for the corresponding quarter";
   } 
   else if (input.quarter === undefined && input.year !== undefined) {
     result["isQuarterValid"] = false; 
-    result["quarterValidateMessage"] = "quarter is required for the corresponding year";
+    result["quarterValidateMessage"] = "Quarter is required for the corresponding year";
     result["isYearValid"] = validateYear(input.year);
-    result["yearValidateMessage"] = ( result["isYearValid"] ? "" : "format: yyyy");
+    result["yearValidateMessage"] = ( result["isYearValid"] ? "" : "Year format: yyyy");
   } 
   else {
     console.error("Hey the logic is wrong");

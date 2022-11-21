@@ -187,3 +187,8 @@ a:hover {
     font-size: x-large;
     text-align: center;
 }
+
+.invalidMsg {
+    color: #EC7063;
+    padding: 40px;
+}
