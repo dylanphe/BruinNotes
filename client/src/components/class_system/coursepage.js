@@ -179,7 +179,7 @@ function CoursePage(props) {
   const handleSubmit = async (e) => {
     // !TODO: validate input 
     // e.preventDefault();
-    console.log(newClassForm);
+    console.log("newClassForm:", newClassForm);
     const isProfExist = (newClassForm['professor_select'] != null);
     // TODO: might need to assert that fullname == null whenever professor_select exists
     
