@@ -58,7 +58,7 @@ function CoursePage(props) {
   let coursename = params.coursename;
   let uid = params.uid;
   console.log(params.coursename);    // debug
-
+  console.log(params.uid);
   console.log(props.uid);
 
   const [courseData, setCourseData] = useState([]);
@@ -453,7 +453,7 @@ function CoursePage(props) {
         <div className='coursepage-class-list'>
           <Professors />
         </div>
-        <HomeBtn/>
+        <HomeBtn uid={uid}/>
       </div>
     </div>
   ); 
