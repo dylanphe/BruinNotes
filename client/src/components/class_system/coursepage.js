@@ -58,7 +58,7 @@ function CoursePage(props) {
   let coursename = params.coursename;
   let uid = params.uid;
   console.log(params.coursename);    // debug
-
+  console.log(params.uid);
   console.log(props.uid);
 
   const [courseData, setCourseData] = useState([]);
@@ -86,7 +86,7 @@ function CoursePage(props) {
   const handleCloseMsg = () => setShowMsg(false);
   const handleShowMsg = () => setShowMsg(true);
 
-  const num_colors = 6;
+  const num_colors = 10;
 
   // ref: https://maxrozen.com/fetching-data-react-with-useeffect
   //      https://axios-http.com/docs/example
@@ -224,7 +224,8 @@ function CoursePage(props) {
       if (course_idx === -1) { // Generate a new colorCode for a new professor 
         console.log("courseData.length:", courseData.length);
         if (courseData.length) {
-          colorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
+          // colorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
+          colorCode = courseData.length % num_colors + 1;
           console.log("newColorCode", colorCode);
         }
       }
@@ -242,6 +243,7 @@ function CoursePage(props) {
 
       console.log("newClassSubmit:", newClassSubmit);
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
+      // axios.post("http://localhost:8000/addcourse", newClassSubmit)
       .then(response => {
         console.log("post response:", response);
         setModalInputTextShown(true);
@@ -249,9 +251,9 @@ function CoursePage(props) {
         handleClose();
         setShowMsg(true);
       })
-      .then(() => {getCourseData()})
+      .then(() => {getCourseData(); setNewClassForm({});})
 
-      setNewClassForm({});
+      
     }
 
     /*
@@ -451,7 +453,7 @@ function CoursePage(props) {
         <div className='coursepage-class-list'>
           <Professors />
         </div>
-        <HomeBtn/>
+        <HomeBtn uid={uid}/>
       </div>
     </div>
   ); 
