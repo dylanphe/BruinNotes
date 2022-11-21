@@ -88,15 +88,60 @@ function Note(note) {
 function CourseNotePage(props) {
 
   const params = useParams();
-  console.log(params);
+  //console.log(params);
   const courseName = params.coursename, instructor = params.instructor, term = params.term;
   const authorTypes = ['Student', 'TA', 'Professor'];
+
+  const [noteLink, setNoteLink] = useState('');
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteWeek, setNoteWeek] = useState('');
+  const [authorType, setAuthorType] = useState('');
+
+  async function handleSelect() {
+    const sb = document.querySelector('#modal-select');
+    setAuthorType(sb.value);
+  }
+
+  const notes = sampleNotes;
+
+  const Notes = () => {
+    return notes.map((note) => Note(note));
+  }
+
+  useEffect(() => {
+
+  });
+
+  const handleSubmitAdd = () => {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    today = mm + '/' + dd + '/' + yyyy;
+
+    if (noteWeek >= 1 && noteWeek <= 10) {
+      /*axios.post('http://127.0.0.1:8000/addnote', { 'courseName': courseName, 
+                                                    'instructor': instructor, 
+                                                    'term': term, 
+                                                    'url': noteLink, 
+                                                    'author': ,
+                                                    'vrole': authorType, 
+                                                    'title': noteTitle,
+                                                    'date' : today,
+                                                    'week' : noteWeek,
+                                                    'commentList': []})
+      .then((res) => {
+        console.log(res);
+      });*/
+      handleCloseReq();
+    }
+    handleCloseAdd();
+  }
 
   const [requestMsg, setRequestMsg] = useState("");
   const [reqWeek, setReqWeek] = useState();
   const [reqList, setReqList] = useState([]);
 
-  const [addForm, setAddForm] = useState({}); // fields: notelink, namelink. authortype
   const [showReq, setShowReq] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
 
@@ -104,7 +149,6 @@ function CourseNotePage(props) {
   const handleCloseReq = () => {setShowReq(false);}
   const handleOpenAdd = () => {setShowAdd(true);}
   const handleCloseAdd = () => {setShowAdd(false);}
-  const handleChangeReq = (e) => {setRequestMsg(e.target.value);}
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [hideNote, setHideNote] = useState(false);
@@ -114,13 +158,7 @@ function CourseNotePage(props) {
     setHideNote(!hideNote);
   }
 
-  const notes = sampleNotes;
-
-  const Notes = () => {
-    return notes.map((note) => Note(note));
-  }
-
-  async function searchReq() {
+  /*async function searchReq() {
     let items = [];
     axios.post('http://127.0.0.1:8000/searchnoterequests', {'courseName': courseName,'instructor': instructor, 'term': term})
     .then(res => {
@@ -139,6 +177,14 @@ function CourseNotePage(props) {
   useEffect(() => {
       searchReq();
   }, []);
+  
+  {
+      reqList.map((c) =>
+          <div>
+            {c.requestMsg}
+          </div>
+      )
+  }*/
 
   const handleSubmitReq = () => {
     // e.preventDefault();
@@ -150,21 +196,6 @@ function CourseNotePage(props) {
       handleCloseReq();
     }
   };
-
-  const handleChangeAdd = (e) => {
-    addForm[e.target.name] = e.target.value;
-    setAddForm(addForm);
-  }
-  const handleClickAuthorType = (at) => {
-    addForm['authortype'] = at;
-    setAddForm(addForm);
-  }
-
-  const handleSubmitAdd = (e) => {
-    // e.preventDefault();
-    console.log(addForm);
-    handleCloseAdd();
-  }
 
   // console.log(requestMsg);
 
@@ -194,13 +225,7 @@ function CourseNotePage(props) {
           )}
           {hideNote && (
           <div id="quarterpage-request-list">
-            {
-                reqList.map((c) =>
-                    <div>
-                      {c.requestMsg}
-                    </div>
-                )
-            }
+
           </div>
           )}
         </div>
@@ -212,22 +237,25 @@ function CourseNotePage(props) {
           </Modal.Header>
           <Modal.Body>
             <label htmlFor='notelink'>Insert link below...</label>
-            <textarea autoFocus type="text" name="notelink" className='txt-box' onChange={handleChangeAdd}></textarea>
+            <textarea autoFocus type="text" name="notelink" className='txt-box' onChange={event => setNoteLink(event.target.value)}></textarea>
             <br /> <br />
             <div className='modal-input-box'>
               <span id='modal-input-label'>Title</span>
-              <input type="text" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='Lecture1, Discussion1,...'></input>
+              <input type="text" id='modal-input' name="namelink" onChange={(e) => setNoteTitle(e.target.value)} placeholder='Lecture1, Discussion1,...'></input>
             </div>
             <br />
             <div className='modal-input-box'>
               <span id='modal-input-label'>Week</span>
-              <input type="number" id='modal-input' name="namelink" onChange={handleChangeAdd} placeholder='1, 2, 3,...'></input>
+              <input type="number" id='modal-input' name="namelink" onChange={(e) => setNoteWeek(e.target.value)} placeholder='1, 2, 3,...'></input>
             </div>
             <br />
             <div className='modal-input-box'>
               <span id='modal-input-label'>Author Type</span>
-              {/* <button> Student </button> <button> TA </button> <button> Professor </button> */}
-              {authorTypes.map((at, idx) => (<button id='author-button' key={at} onClick={() => handleClickAuthorType(at)}> {at} </button>))}
+              <select name="author_select" id='modal-select' onChange={handleSelect}>
+                <option value="select">Select an Author Type</option>
+                {/* <option value="javascript">JavaScript</option>  TODO */}
+                {authorTypes.map((at, idx) => (<option value={at} key={at}>{at}</option>))}
+              </select>
             </div>
           </Modal.Body>
           <Modal.Footer>

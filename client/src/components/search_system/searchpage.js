@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link,  useParams} from 'react-router-dom';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -311,7 +311,7 @@ function Searchpage() {
                     {showRes && (<div className="dropdown-content">
                         {
                             searchItems.map((c) =>
-                                <Link className ="search-item" to={"".concat("/c/",c)}>{c}</Link>
+                                <Link className ="search-item" to={"".concat(c)}>{c}</Link>
                             )
                         }
                     </div>)}
