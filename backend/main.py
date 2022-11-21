@@ -450,13 +450,13 @@ async def delete_note_request(id):
         HTTP 200 OK upon success
         HTTP 404 NOT FOUND if id isn't valid
     """
-    note = await db['notes'].find_one({"_id": id})
+    note = await db['noteRequests'].find_one({"_id": id})
     if note:
-        await db['notes'].remove({'_id': id})
+        await db['noteRequests'].remove({'_id': id})
         msg = "Successfully removed note request"
         return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
     else: 
-        msg = "note with ID not found"
+        msg = "note request with ID not found"
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
 
 @app.put("/increaselikes/{id}", response_description="Increase likes on a note")
@@ -510,5 +510,25 @@ async def search_note_by_fields(courseName, instructor, term):
         
     matchingNotes = await db['notes'].find(query).to_list(1000)
     return matchingNotes
+
+@app.post("/searchnoterequest", response_description="Search for note requests that match courseName, professor, and quarter")
+async def search_note_requests_by_fields(courseName, instructor, term):
+    """
+    Search note requests by string fields
     
+    Returns:
+        A list of all note requests that match these fields
+    """
+    
+    query =  {'$and': 
+            [
+                {"courseName": {"$regex": courseName, "$options": "i"}},
+                {"instructor": {"$regex": instructor, "$options": "i"}},
+                {"term": {"$regex": term, "$options": "i"}}
+            ]
+            }
+        
+    matchingNoteRequests = await db['noteRequests'].find(query).to_list(1000)
+    return matchingNoteRequests
+ 
 ### END NOTES API ###
