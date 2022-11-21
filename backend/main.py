@@ -329,10 +329,6 @@ async def add_course(courseInfo: dict):
     colorCode = courseInfo['colorCode']
 
     term = str(quarter) + " " + str(year)
-    
-    courseExists = await db["courses"].find_one({"courseName": courseName, "instructor": instructor, "term": term, "colorCode": colorCode})
-    if courseExists is not None:
-        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content="A course with this information already exists.")
 
     courseExists = await db["courses"].find_one({"courseName": courseName, "instructor": instructor, "term": term, "colorCode": colorCode})
     if courseExists is not None:
@@ -494,7 +490,7 @@ async def increase_dislikes(id):
             return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)\
         
-@app.post("/searchnote", response_description="Search for notes that match courseName, professor, and quarter")
+@app.get("/searchnote/{courseName}/{instructor}/{term}", response_description="Search for notes that match courseName, professor, and quarter")
 async def search_note_by_fields(courseName, instructor, term):
     """
     Search note by string fields
@@ -514,7 +510,7 @@ async def search_note_by_fields(courseName, instructor, term):
     matchingNotes = await db['notes'].find(query).to_list(1000)
     return matchingNotes
 
-@app.post("/searchnoterequest", response_description="Search for note requests that match courseName, professor, and quarter")
+@app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
 async def search_note_requests_by_fields(courseName, instructor, term):
     """
     Search note requests by string fields
@@ -522,7 +518,7 @@ async def search_note_requests_by_fields(courseName, instructor, term):
     Returns:
         A list of all note requests that match these fields
     """
-    
+
     query =  {'$and': 
             [
                 {"courseName": {"$regex": courseName, "$options": "i"}},
@@ -530,7 +526,7 @@ async def search_note_requests_by_fields(courseName, instructor, term):
                 {"term": {"$regex": term, "$options": "i"}}
             ]
             }
-        
+
     matchingNoteRequests = await db['noteRequests'].find(query).to_list(1000)
     return matchingNoteRequests
  
