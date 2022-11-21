@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 
-function HomeBtn() {
+function HomeBtn(props) {
   const navigate = useNavigate();
   return (
     <button id='home-btn' className='coursepage-btn' onClick={() => navigate("/Searchpage")}>
