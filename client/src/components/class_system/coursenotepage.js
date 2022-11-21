@@ -89,12 +89,13 @@ function CourseNotePage(props) {
 
   const params = useParams();
   //console.log(params);
-  const courseName = params.coursename, instructor = params.instructor, term = params.term;
+  const courseName = params.coursename, instructor = params.instructor, term = params.term, uidParams = params.uid;
   const authorTypes = ['Student', 'TA', 'Professor'];
 
   const [noteLink, setNoteLink] = useState('');
   const [noteTitle, setNoteTitle] = useState('');
-  const [noteWeek, setNoteWeek] = useState('');
+  const [noteWeek, setNoteWeek] = useState();
+  const [user, setUser] = useState([]);
   const [authorType, setAuthorType] = useState('');
 
   async function handleSelect() {
@@ -109,7 +110,17 @@ function CourseNotePage(props) {
   }
 
   useEffect(() => {
-
+    axios.get('http://127.0.0.1:8000/viewuser/'+uidParams)
+    .then( (res) => {
+      setUser(res.data.at(0));
+    })
+    /*var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    today = mm + '/' + dd + '/' + yyyy;
+    console.log(today);*/
+    //console.log(courseName);
   });
 
   const handleSubmitAdd = () => {
@@ -119,23 +130,32 @@ function CourseNotePage(props) {
     var yyyy = today.getFullYear();
     today = mm + '/' + dd + '/' + yyyy;
 
+    var userName = user.fullname
+    console.log(courseName)
+    console.log(noteWeek)
+    console.log(term)
+    console.log(userName)
+    console.log(noteTitle)
+    console.log(noteLink)
+    console.log(authorType)
+
     if (noteWeek >= 1 && noteWeek <= 10) {
-      /*axios.post('http://127.0.0.1:8000/addnote', { 'courseName': courseName, 
-                                                    'instructor': instructor, 
-                                                    'term': term, 
+      axios.post('http://127.0.0.1:8000/addnote', {'courseName': courseName, 'instructor': instructor, 'term': term, 
                                                     'url': noteLink, 
-                                                    'author': ,
-                                                    'vrole': authorType, 
+                                                    'author': userName,
+                                                    'role': authorType, 
                                                     'title': noteTitle,
                                                     'date' : today,
                                                     'week' : noteWeek,
-                                                    'commentList': []})
+                                                    'commentList': null,
+                                                    'like': null,
+                                                    'dislike': null})
       .then((res) => {
         console.log(res);
-      });*/
-      handleCloseReq();
+      });
+      //handleCloseReq();
     }
-    handleCloseAdd();
+    //handleCloseAdd();
   }
 
   const [requestMsg, setRequestMsg] = useState("");
