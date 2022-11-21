@@ -91,6 +91,7 @@ function CoursePage(props) {
   //      https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises
   async function getCourseData()  {
     console.log('getCourseData'); 
+    setLoading(true);
     try {
       const url = "http://127.0.0.1:8000/searchcourses/" + coursename;
       const response = await axios.get(url)
@@ -108,6 +109,7 @@ function CoursePage(props) {
     catch (error) {
       console.error("Could not get courses:", error);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -363,7 +365,7 @@ function CoursePage(props) {
         </div>
       </div>
       <div className='coursepage-body'>
-        {!courseData.length ? <NoClass /> : null}
+        {(!courseData.length && !loading ) ? <NoClass /> : null}
         <> {/* ref: https://react-bootstrap.github.io/components/modal/ */}
           <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
