@@ -476,6 +476,22 @@ async def increase_likes(id):
             return JSONResponse(status_code=status.HTTP_200_OK, content=likes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
+@app.put("/decreaselikes/{id}", response_description="Decrease likes on a note")
+async def decrase_likes(id):
+    """
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    """
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        likes = note['likes']
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'likes':-1}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=likes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
 @app.put("/increasedislikes/{id}", response_description="Increase dislikes on a note")
 async def increase_dislikes(id):
     """
@@ -490,7 +506,23 @@ async def increase_dislikes(id):
         updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'dislikes':1}})
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
-    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)\
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
+@app.put("/decreasedislikes/{id}", response_description="Decrease dislikes on a note")
+async def decrease_dislikes(id):
+    """
+    Decreases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    """
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        dislikes = note['dislikes']
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'dislikes':-1}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=dislikes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
         
 @app.get("/searchnote/{courseName}/{instructor}/{term}", response_description="Search for notes that match courseName, professor, and quarter")
 async def search_note_by_fields(courseName, instructor, term):
@@ -531,5 +563,7 @@ async def search_note_requests_by_fields(courseName, instructor, term):
 
     matchingNoteRequests = await db['noteRequests'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNoteRequests
+ 
+ 
  
 ### END NOTES API ###
