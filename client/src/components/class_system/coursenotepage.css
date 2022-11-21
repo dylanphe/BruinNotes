@@ -185,6 +185,16 @@
     margin-right: 5px
 }
 
+.author-button {
+    background-color: #2D68C4;
+    color: white;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    margin-left: 5px;
+    margin-right: 5px
+}
+
 #like {
     color:#2D68C4;
     font-size: larger;
@@ -252,4 +262,9 @@
     padding-bottom: 10px;
     padding-left: 20px;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+}
+
+#modal-select {
+    width: 70%;
+    border-radius: 10px;
 }

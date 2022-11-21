@@ -18,9 +18,12 @@ function App() {
           <Route path = "/" element={<Loginpage onLogin={updateUid} />} />
           <Route path = "Signup" element={<Signuppage />} />
           <Route path = "ForgetPassword" element={<ForgetPasswordPage />} />
-          <Route path = "SearchPage" element={<Searchpage uid={uid}/>} />
-          <Route path = "/c/:coursename" element={<CoursePage uid={uid}/>} />
-          <Route path = "c/:coursename/:instructor/:term" element={<CourseNotePage uid={uid}/>} />
+          {/* <Route path = "SearchPage" element={<Searchpage uid={uid}/>} />
+           <Route path = "/c/:coursename" element={<CoursePage uid={uid}/>} />
+           <Route path = "c/:coursename/:instructor/:term" element={<CourseNotePage uid={uid}/>} /> */}
+          <Route path = "/:uid/" element={<Searchpage />} />
+          <Route path = "/:uid/:coursename" element={<CoursePage />} />
+          <Route path = "/:uid/:coursename/:instructor/:term" element={<CourseNotePage />} />
         </Routes>
     </BrowserRouter>
   );

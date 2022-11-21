@@ -73,7 +73,8 @@ function Loginpage(props) {
                     alert("Wrong UID and Password. Please re-enter the information.");
                     return;
                 }
-                navigate("/Searchpage");
+                const uidparams = String(uid);
+                navigate('/'+uidparams+'/');
             })
         }
     }
