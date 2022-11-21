@@ -1,6 +1,3 @@
-// TODO: report page button 
-// TODO: IMPORTANT: where to show note requests?
-
 import React, { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import {BiCommentAdd, BiLink} from 'react-icons/bi';
@@ -10,12 +7,26 @@ import Modal from 'react-bootstrap/Modal';
 import './coursenotepage.css';
 import HomeBtn from './homebtn';
 import axios from 'axios';
-//create request function
+
+//TODO: SORTING(BY WEEK -> BY AUTHOR)/COLORCODED(AUTHOR TYPE)
+//TODO: LIKE/DISLIKE/COMMENT
 
 
 function CourseNotePage(props) {
+  useEffect(() => {
+    axios.get('http://127.0.0.1:8000/viewuser/'+uidParams)
+    .then( (res) => {
+      setUser(res.data.at(0));
+    })
+    searchNote();
+    searchNoteReq();
+  }, []);
 
-  //Add Notes and Display notes
+  useEffect(() => {
+    
+  });
+
+  //Notes
   const params = useParams();
   const courseName = params.coursename, instructor = params.instructor, term = params.term, uidParams = params.uid;
   const authorTypes = ['Student', 'TA', 'Professor'];
@@ -26,6 +37,14 @@ function CourseNotePage(props) {
   const [authorType, setAuthorType] = useState('');
   const [noteList, setNoteList] = useState([]);
 
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [hideNote, setHideNote] = useState(false);
+  const openReqPanel = () => {
+    setPanelOpen(!panelOpen);
+    setHideNote(!hideNote);
+  }
+
+  //Function to generate notelink onto webpage
   function Note(note) {
     const [showComments, setShowComments] = useState(false);
     const [showLikes, setShowLikes] = useState(false);
@@ -66,24 +85,18 @@ function CourseNotePage(props) {
     );
   }
 
+  //Function to map note found onto webpage
+  const Notes = () => {
+    return noteList.map((note) => Note(note));
+  }
+
+  //Function to handleSelection of authortype
   async function handleSelect() {
     const sb = document.querySelector('#modal-select');
     setAuthorType(sb.value);
   }
 
-  const Notes = () => {
-    return noteList.map((note) => Note(note));
-  }
-
-  useEffect(() => {
-    axios.get('http://127.0.0.1:8000/viewuser/'+uidParams)
-    .then( (res) => {
-      setUser(res.data.at(0));
-    })
-    searchNote();
-    searchNoteReq();
-  }, []);
-
+  //Function to find note from db
   async function searchNote() {
     let items = [];
     axios.get('http://127.0.0.1:8000/searchnote/'+courseName+'/'+instructor+'/'+term)
@@ -103,7 +116,7 @@ function CourseNotePage(props) {
     })
   }
 
-
+  //Function to add note to db
   const handleSubmitAdd = () => {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -133,15 +146,17 @@ function CourseNotePage(props) {
     handleCloseAdd();
   }
 
-  //Add requests and display requestes
+  //Requests
   const [requestMsg, setRequestMsg] = useState("");
   const [reqWeek, setReqWeek] = useState();
   const [reqList, setReqList] = useState([]);
   const [reqDelete, setReqDelete] = useState();
-  const [showReq, setShowReq] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [showAdd, setShowAdd] = useState(false);
 
+  const [showDelete, setShowDelete] = useState(false);
+  const handleOpenDelete = () => {setShowDelete(true);}
+  const handleCloseDelete = () => {setShowDelete(false);}
+
+  //Function to generate requests
   function RequestWithDelete(req) {
     let reqMsg = req.requestMsg;
     let reqUID = req.uid;
@@ -163,26 +178,12 @@ function CourseNotePage(props) {
     );
   }
 
-  const handleOpenDelete = () => {setShowDelete(true);}
-  const handleCloseDelete = () => {setShowDelete(false);}
-  const handleOpenReq = () => {setShowReq(true);}
-  const handleCloseReq = () => {setShowReq(false);}
-  const handleOpenAdd = () => {setShowAdd(true);}
-  const handleCloseAdd = () => {setShowAdd(false);}
-
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [hideNote, setHideNote] = useState(false);
-
-  const openReqPanel = () => {
-    setPanelOpen(!panelOpen);
-    setHideNote(!hideNote);
-  }
-
-
+  //Function to map request found to display onto webpage
   const Requests = () => {
     return reqList.map((req) => RequestWithDelete(req));
   }
 
+  //Function to ask user if they are sure to delete the request
   function handleDelete(reqID) {
     //console.log(reqID.reqID);
     let noteRequestID = String(reqID.reqID);
@@ -192,6 +193,7 @@ function CourseNotePage(props) {
     
   }
 
+  //Function to delete request when user click yes
   async function handleDeleteRequest(reqID) {
     axios.put("/deletenoterequest/"+reqID)
     .then(res => {
@@ -201,6 +203,7 @@ function CourseNotePage(props) {
     })
   }
 
+  //Function to search for Request from db to output on the webpage
   async function searchNoteReq() {
     let items = [];
     axios.get('http://127.0.0.1:8000/searchnoterequest/'+courseName+'/'+instructor+'/'+term)
@@ -220,6 +223,7 @@ function CourseNotePage(props) {
     })
   }
 
+  //Function to add Request into data
   const handleSubmitReq = () => {
     // e.preventDefault();
     if (reqWeek >= 1 && reqWeek <= 10) {
@@ -232,7 +236,13 @@ function CourseNotePage(props) {
     }
   };
 
+  const [showReq, setShowReq] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
   // console.log(requestMsg);
+  const handleOpenReq = () => {setShowReq(true);}
+  const handleCloseReq = () => {setShowReq(false);}
+  const handleOpenAdd = () => {setShowAdd(true);}
+  const handleCloseAdd = () => {setShowAdd(false);}
 
   return (
     <div className='quarterpage-main-body'>
