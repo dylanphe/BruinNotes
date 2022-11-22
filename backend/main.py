@@ -216,7 +216,7 @@ async def check_email(email: str):
     #return (await verify_email_async(email))
 
 # View a specific database item
-@app.get("/viewuser/{uid}", response_description="View user with given username")
+@app.get("/viewuser/{uid}", response_description="View user with given UID")
 async def view_user(uid: str):
     """
     View a specific user in the database.
