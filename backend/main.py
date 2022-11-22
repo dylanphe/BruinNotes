@@ -212,7 +212,7 @@ async def check_email(email: str):
     user = await db["users"].find_one({"email": email})
     if user is not None:
         return False
-    
+    return True
     #return (await verify_email_async(email))
 
 # View a specific database item
