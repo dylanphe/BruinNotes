@@ -1,6 +1,9 @@
 BruinNotes - CS130project
 =========================
-##### GitHub repo for UCLA CS130 LAB1A Group Project. 
+##### GitHub repo for UCLA CS130 LAB1A Group Project.
+
+NOTE: Python 3.8 or lower is required to run this program. 
+
 ## Developers
 1. Yunfan Zhong, 
 2. Dylan Phe, 
