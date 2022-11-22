@@ -320,7 +320,7 @@ async def search_course_names(courseName: str):
         The requested courses with matching names.
     """
     query = {"courseName": {"$regex": courseName, "$options": "i"}}
-    courses = await db["courseNames"].find(query).to_list(1000)
+    courses = await db["courseNames"].find(query).sort("courseName", 1).to_list(1000)
     return courses
 
 @app.post("/addcourse", response_description="Add new course")
@@ -363,9 +363,7 @@ async def search_courses(courseName: str):
     Returns:
         The requested courses.
     """
-    # query = {"courseName": {"$regex": courseName, "$options": "i"}}
     query = {"courseName": {"$regex": "^"+courseName+"$", "$options": "im"}}
-    # courses = await db["courseNames"].find(query).to_list(1000)
     courses = await db["courses"].find(query).to_list(1000)
     return courses
 ### END COURSES API ###
