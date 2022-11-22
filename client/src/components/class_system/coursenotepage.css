@@ -329,3 +329,11 @@
 #Professor {
     color: #8b0000;
 }
+
+#no-note {
+    color: #2D68C4;
+    font-family: "Gloria Hallelujah";
+    font-weight: bolder;
+    font-size: large;
+    text-align: center;
+}

@@ -309,12 +309,14 @@ function Searchpage(props) {
             <div className="float-container">
                 <div className="dropdown float-child">
                     <input className='searchbar' type="text" onChange={event => searchlist(event)} placeholder="Search"/>
-                    {showRes && (<div className="dropdown-content">
-                        {
-                            searchItems.map((c) =>
-                                <Link className ="search-item" to={"".concat(c)}>{c}</Link>
-                            )
-                        }
+                    {showRes && (<div className='search-box'>
+                        {showRes && 
+                            (<div className="dropdown-content">
+                                { searchItems.map((c) =>
+                                    <Link className ="search-item" to={"".concat(c)}>{c}</Link>
+                                )
+                                }
+                            </div>)}
                     </div>)}
                 </div>
             </div>

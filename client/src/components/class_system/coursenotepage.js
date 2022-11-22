@@ -2,6 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import {BiCommentAdd, BiLink} from 'react-icons/bi';
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillDelete} from 'react-icons/ai'; 
+import {ImArrowUpLeft2} from 'react-icons/im'; 
 import Button from 'react-bootstrap/esm/Button';
 import Modal from 'react-bootstrap/Modal';
 import './coursenotepage.css';
@@ -18,12 +19,26 @@ function CourseNotePage(props) {
     .then( (res) => {
       setUser(res.data.at(0));
     })
+
     searchNote();
     searchNoteReq();
   }, []);
 
   useEffect(() => {
-    
+    if (Object.keys(noteList).length === 0)
+    {
+      setEmptyNote(true);
+    }
+    else {
+      setEmptyNote(false);
+    }
+    if (Object.keys(reqList).length === 0)
+    {
+      setEmptyReq(true);
+    }
+    else {
+      setEmptyReq(false);
+    }
   });
 
   //Notes
@@ -36,6 +51,7 @@ function CourseNotePage(props) {
   const [user, setUser] = useState([]);
   const [authorType, setAuthorType] = useState('');
   const [noteList, setNoteList] = useState([]);
+  const [emptyNote, setEmptyNote] = useState(false);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [hideNote, setHideNote] = useState(false);
@@ -79,15 +95,24 @@ function CourseNotePage(props) {
               </div>
             )}
           </div>          
-        </div>  
+        </div>
         <hr/>
       </div>
     );
   }
 
+  function NoNote() { 
+    return (
+      <div id='no-note'>
+        No notes for this course yet ... <br />
+        Add a note today <ImArrowUpLeft2 />
+      </div>
+    );
+  }
+
   //Function to map note found onto webpage
-  const Notes = () => {
-    return noteList.map((note) => Note(note));
+  function Notes() {
+      return noteList.map((note) => Note(note));
   }
 
   //Function to handleSelection of authortype
@@ -151,6 +176,8 @@ function CourseNotePage(props) {
   const [reqWeek, setReqWeek] = useState();
   const [reqList, setReqList] = useState([]);
   const [reqDelete, setReqDelete] = useState();
+  const [noteReqList, setNoteReqList] = useState([]);
+  const [emptyReq, setEmptyReq] = useState(false);
 
   const [showDelete, setShowDelete] = useState(false);
   const handleOpenDelete = () => {setShowDelete(true);}
@@ -267,11 +294,19 @@ function CourseNotePage(props) {
           {!hideNote && (
           <div id="quarterpage-note-list">
             <Notes />
+            {emptyNote && (<div id='no-note'>
+              No notes for this course yet ... <br />
+              Share a note today <ImArrowUpLeft2 />
+            </div> )}
           </div> 
           )}
           {hideNote && (
           <div id="quarterpage-request-list">
             <Requests />
+            {emptyReq && (<div id='no-note'>
+              No requests for this course yet ... <br />
+              Request for notes today <ImArrowUpLeft2 />
+            </div> )}
           </div>
           )}
         </div>

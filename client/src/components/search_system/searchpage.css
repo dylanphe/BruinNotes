@@ -187,3 +187,8 @@
   background-color: #ddd;
   color: black;
 }
+
+.search-box {
+  height:300px;
+  overflow-y: auto;
+}
