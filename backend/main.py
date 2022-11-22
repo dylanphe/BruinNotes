@@ -3,13 +3,12 @@ import motor.motor_asyncio
 import random
 
 from bson import ObjectId
-from fastapi import FastAPI, Body, HTTPException, status
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import Optional, List
-from verify_email import verify_email_async
 import bcrypt
 
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
@@ -213,7 +212,6 @@ async def check_email(email: str):
     if user is not None:
         return False
     return True
-    #return (await verify_email_async(email))
 
 # View a specific database item
 @app.get("/viewuser/{uid}", response_description="View user with given UID")
