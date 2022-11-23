@@ -84,3 +84,9 @@ This will run the backend on [http://localhost:8000](http://localhost:8000) by d
 
 Once both the front end and backend are running, the application will be fully useable.
 
+### Running Tests
+#### Backend tests
+
+1. Navigate to `/tests/api`
+2. If necessary, give permissions using `chmod +x run_tests.sh`
+3. Run `./run_tests.sh`
