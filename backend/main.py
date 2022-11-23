@@ -407,10 +407,13 @@ async def show_comment(noteInfo:dict):
         Json object with updated note with 200 status
     """
     noteId= noteInfo["_id"]
-    updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"showComment": True}})
-    JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"showComment": True}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=noteInfo)
     
-
 @app.put("/hidecomment", response_description="Indicate that comment should be hidden")
 async def hide_comment(noteInfo:dict):
     """Indicate that comment should be shown
@@ -422,8 +425,12 @@ async def hide_comment(noteInfo:dict):
         Json object with updated note with 200 status
     """
     noteId= noteInfo["_id"]
-    updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"showComment": False}})
-    JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
+    note = await db['notes'].find_one({"_id": id})
+    if note:
+        updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"showComment": False}})
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=noteInfo)
 
 ### END COMMENTS PAGE API ###
 
