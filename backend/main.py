@@ -1,4 +1,3 @@
-import os
 import motor.motor_asyncio
 import random
 
@@ -449,7 +448,6 @@ async def add_note_request(noteRequestInfo: dict):
     created_noteRequest = await db['noteRequests'].find_one({"_id": inserted_noteRequest.inserted_id})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_noteRequest)
 
-# TODO: (possibly) add in way to delete note requests
 @app.put("/deletenoterequest/{id}", response_description="Delete note request from database")
 async def delete_note_request(id):
     """
