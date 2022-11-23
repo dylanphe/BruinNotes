@@ -75,6 +75,7 @@ function CoursePage(props) {
   const [instructorInvalidMsg, setInstructorInvalidMsg] = useState("");
   const [quarterInvalidMsg, setQuarterInvalidMsg] = useState("");
   const [yearInvalidMsg, setYearInvalidMsg] = useState("");
+  const [userRating, setUserRating] = useState(0);
 
   // TODO: maybe refactoring into functions handleClose(para) and handleShow(para)? 
   const handleClose = () => {
@@ -313,6 +314,15 @@ function CoursePage(props) {
   //const color6= '#2D68C4';
   //const colorCodes = {color1, color2, color3, color4, color5, color6};
 
+  function handleChangeRating(r) {
+    setUserRating(r);
+    console.log('hii', r);
+  }
+
+  function handleSubmitRating() {
+    console.log(userRating);
+  }
+
   function professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
     let instructor = courseDataElement.instructor;
@@ -326,6 +336,20 @@ function CoursePage(props) {
         <div id='coursepage-instructor' style={{backgroundColor: instructorColor}} key={instructor}>
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
+          <div className='rate'> 
+            <span className='score'>{"5.0  "} </span>
+            <input type="radio" id="star5" name="rate" value="5" onClick={() => handleChangeRating(5)}/>
+            <label htmlFor="star5" title="text">5 stars</label>
+            <input type="radio" id="star4" name="rate" value="4" onClick={() => handleChangeRating(4)}/>
+            <label htmlFor="star4" title="text">4 stars</label>
+            <input type="radio" id="star3" name="rate" value="3" onClick={() => handleChangeRating(3)}/>
+            <label htmlFor="star3" title="text">3 stars</label>
+            <input type="radio" id="star2" name="rate" value="2" onClick={() => handleChangeRating(2)}/>
+            <label htmlFor="star2" title="text">2 stars</label>
+            <input type="radio" id="star1" name="rate" value="1" onClick={() => handleChangeRating(1)}/>
+            <label htmlFor="star1" title="text">1 star</label>
+            <button type="button" onClick={handleSubmitRating}>Rate!</button>
+          </div>
         </div>
         <div id="coursepage-term-list" >
           <ul className='term-under-instructor'>
