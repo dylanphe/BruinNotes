@@ -74,7 +74,7 @@ function CourseNotePage(props) {
             searchNote();
           })
       }
-      else if (note.likeUsers[uidParams] === false && note.dislikeUsers[uidParams] === false) {
+      if (note.likeUsers[uidParams] === undefined && note.dislikeUsers[uidParams] === 0) {
         axios.put("/increaselikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
@@ -82,7 +82,31 @@ function CourseNotePage(props) {
             searchNote();
           })
       }
-      else if (note.likeUsers[uidParams] === true && note.dislikeUsers[uidParams] === false) {
+      else if (note.likeUsers[uidParams] === 0 && note.dislikeUsers[uidParams] === 0) {
+        axios.put("/increaselikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.likeUsers[uidParams] === 0 && note.dislikeUsers[uidParams] === undefined) {
+        axios.put("/increaselikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.likeUsers[uidParams] === 1 && note.dislikeUsers[uidParams] === undefined) {
+        axios.put("/decreaselikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.likeUsers[uidParams] === 1 && note.dislikeUsers[uidParams] === 0) {
         axios.put("/decreaselikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
@@ -92,8 +116,8 @@ function CourseNotePage(props) {
       }
     }
 
-    async function handleDisLike() {
-      if (note.likeUsers[uidParams] === undefined && note.dislikeUsers[uidParams] === undefined) {
+    async function handleDislike() {
+      if (note.dislikeUsers[uidParams] === undefined && note.likeUsers[uidParams] === undefined) {
         axios.put("/increasedislikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
@@ -101,7 +125,7 @@ function CourseNotePage(props) {
             searchNote();
           })
       }
-      else if (note.likeUsers[uidParams] === false && note.dislikeUsers[uidParams] === false) {
+      else if (note.dislikeUsers[uidParams] === undefined && note.likeUsers[uidParams] === 0) {
         axios.put("/increasedislikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
@@ -109,7 +133,31 @@ function CourseNotePage(props) {
             searchNote();
           })
       }
-      else if (note.likeUsers[uidParams] === true && note.dislikeUsers[uidParams] === false) {
+      else if (note.dislikeUsers[uidParams] === 0 && note.likeUsers[uidParams] === 0) {
+        axios.put("/increasedislikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.dislikeUsers[uidParams] === 0 && note.likeUsers[uidParams] === undefined) {
+        axios.put("/increasedislikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.dislikeUsers[uidParams] === 1 && note.likeUsers[uidParams] === undefined) {
+        axios.put("/decreasedislikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.dislikeUsers[uidParams] === 1 && note.likeUsers[uidParams] === 0) {
         axios.put("/decreasedislikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
@@ -124,8 +172,8 @@ function CourseNotePage(props) {
         <div className="note-nav-button">
           <a href={note.url} target="_blank" id={note.role} className="note-lnk">{title}</a>
           <div className='misc-button-list'>
-            <button className='misc-button' onClick={handleLike} id="like">{note.likeUsers[uidParams] === undefined || 0 ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
-            <button className='misc-button' id="dislike">{note.dislikeUsers[uidParams] === undefined || 0  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
+            <button className='misc-button' onClick={handleLike} id="like">{note.likeUsers[uidParams] === (undefined || 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
+            <button className='misc-button' onClick={handleDislike} id="dislike">{note.dislikeUsers[uidParams] === (undefined || 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
             <button className='misc-button' id='comment'> <BiCommentAdd/> </button> 
           </div>
         </div>
