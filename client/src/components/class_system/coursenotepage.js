@@ -62,26 +62,44 @@ function CourseNotePage(props) {
 
   //Function to generate notelink onto webpage
   function Note(note) {
-    const [showComments, setShowComments] = useState(false);
-    const [showLikes, setShowLikes] = useState(false);
-    const [showDislikes, setShowDislikes] = useState(false);
-    const toggleDislikes = () => setShowDislikes(!showDislikes);
-    const toggleLikes = () => setShowLikes(!showLikes);
-    const toggleComments = () => setShowComments(!showComments);
     let title = note.author + ": " + note.title + " | Week " + note.week + " (" + note.role + ")";
     let comments = note.commentList;
     
+    async function handleLike() {
+      if (note.likeUsers[uidParams] === undefined && note.dislikeUsers[uidParams] === undefined) {
+        axios.put("/decreaselikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+          })
+      }
+      else if (note.likeUsers[uidParams] === false && note.dislikeUsers[uidParams] === false) {
+        axios.put("/increaselikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+          })
+      }
+      else if (note.likeUsers[uidParams] === true && note.dislikeUsers[uidParams] === false) {
+        axios.put("/decreaselikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+          })
+      }
+    }
+
     return (
       <div key={note._id}>
         <div className="note-nav-button">
           <a href={note.url} target="_blank" id={note.role} className="note-lnk">{title}</a>
           <div className='misc-button-list'>
-            <button className='misc-button' id="like" onClick={toggleLikes}>{showLikes === false ? <AiOutlineLike/> : <AiFillLike />} {note.likes}</button>  
-            <button className='misc-button' id="dislike" onClick={toggleDislikes}>{showDislikes === false ? <AiOutlineDislike/> : <AiFillDislike />} {note.dislikes}</button> 
-            <button className='misc-button' id='comment' onClick={toggleComments}> <BiCommentAdd/> </button> 
+            <button className='misc-button' onClick={handleLike} id="like">{note.likeUsers[uidParams] === undefined || 0 ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
+            <button className='misc-button' id="dislike">{note.dislikeUsers[uidParams] === undefined || 0  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
+            <button className='misc-button' id='comment'> <BiCommentAdd/> </button> 
           </div>
         </div>
-        <div style={{display: showComments ? 'block' : 'none'}}>
+        <div style={{display: hideNote ? 'block' : 'none'}}>
           <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
           <div className='comments'>
             {comments.map((comment, idx) => 
@@ -97,15 +115,6 @@ function CourseNotePage(props) {
           </div>          
         </div>
         <hr/>
-      </div>
-    );
-  }
-
-  function NoNote() { 
-    return (
-      <div id='no-note'>
-        No notes for this course yet ... <br />
-        Add a note today <ImArrowUpLeft2 />
       </div>
     );
   }
@@ -152,7 +161,9 @@ function CourseNotePage(props) {
     var userName = user.fullname
 
     if (noteWeek >= 1 && noteWeek <= 10) {
-      axios.post('http://127.0.0.1:8000/addnote', {'courseName': courseName, 'instructor': instructor, 'term': term, 
+      axios.post('http://127.0.0.1:8000/addnote', {'courseName': courseName, 
+                                                    'instructor': instructor, 
+                                                    'term': term, 
                                                     'url': noteLink, 
                                                     'author': userName,
                                                     'role': authorType, 
@@ -160,8 +171,13 @@ function CourseNotePage(props) {
                                                     'date' : today,
                                                     'week' : noteWeek,
                                                     'commentList': null,
-                                                    'like': null,
-                                                    'dislike': null})
+                                                    'likes': null,
+                                                    'dislikes': null,
+                                                    'numLikes': null,
+                                                    'numDislikes' : null,
+                                                    'likeUsers': null,
+                                                    'dislikeUsers': null,
+                                                    'commentVisibileUsers': null})
       .then((res) => {
         console.log(res);
         searchNote();
@@ -176,7 +192,6 @@ function CourseNotePage(props) {
   const [reqWeek, setReqWeek] = useState();
   const [reqList, setReqList] = useState([]);
   const [reqDelete, setReqDelete] = useState();
-  const [noteReqList, setNoteReqList] = useState([]);
   const [emptyReq, setEmptyReq] = useState(false);
 
   const [showDelete, setShowDelete] = useState(false);
