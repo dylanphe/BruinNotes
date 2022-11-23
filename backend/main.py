@@ -413,7 +413,7 @@ async def toggle_comment_visibility(note_id, user_id):
             visibleUsers[user_id] = not visibleUsers[user_id]
         else:
             visibleUsers[user_id] = True
-        updated_note = await db["notes"].update_one({"_id": id}, {"$set": {"commentVisibleUsers": visibleUsers}},upsert=False)
+        updated_note = await db["notes"].update_one({"_id": note_id}, {"$set": {"commentVisibleUsers": visibleUsers}},upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content="visibility status updated sucessfully")
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="note not found")
@@ -512,7 +512,8 @@ async def increase_likes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numLikes = note['numLikes']
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':1}, '$set': {'likeUsers.'+user_id:1}}, upsert=False)
+        userKey='likeUsers.'+str(user_id)
+        updated_note = await db['notes'].update_one({'_id': user_id}, {'$inc': {'numLikes':1}, '$set': {userKey:1}})
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -528,9 +529,8 @@ async def decrease_likes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numLikes = note['numLikes']
-        likeUsers = note['likeUsers']
-        likeUsers[user_id] = 0
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':-1}, '$set': {'likeUsers.'+user_id:0}}, upsert=False)
+        userKey='likeUsers.'+str(user_id)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numLikes':-1}, '$set': {userKey:1}})
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes-1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -546,7 +546,7 @@ async def increase_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':1}, '$set': {'dislikeUsers.'+user_id:1}}, upsert=False)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numDislikes':1}, '$set': {'dislikeUsers.'+str(user_id):1}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -562,7 +562,7 @@ async def decrease_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':-1}, '$set': {'dislikeUsers.'+user_id:0}}, upsert=False)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numDislikes':-1}, '$set': {'dislikeUsers.'+str(user_id):0}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes-1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
