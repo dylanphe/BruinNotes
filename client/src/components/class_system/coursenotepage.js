@@ -172,8 +172,8 @@ function CourseNotePage(props) {
         <div className="note-nav-button">
           <a href={note.url} target="_blank" id={note.role} className="note-lnk">{title}</a>
           <div className='misc-button-list'>
-            <button className='misc-button' onClick={handleLike} id="like">{note.likeUsers[uidParams] === (undefined || 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
-            <button className='misc-button' onClick={handleDislike} id="dislike">{note.dislikeUsers[uidParams] === (undefined || 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
+            <button className='misc-button' onClick={handleLike} id="like">{(note.likeUsers[uidParams] === (undefined) || note.likeUsers[uidParams] === 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
+            <button className='misc-button' onClick={handleDislike} id="dislike">{(note.dislikeUsers[uidParams] === (undefined) || note.dislikeUsers[uidParams] === 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
             <button className='misc-button' id='comment'> <BiCommentAdd/> </button> 
           </div>
         </div>
