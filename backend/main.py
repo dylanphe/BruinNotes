@@ -513,9 +513,12 @@ async def increase_likes(note_id, user_id):
     if note:
         numLikes = note['numLikes']
         userKey='likeUsers.'+str(user_id)
+        if note['likeUsers'][str(user_id)] == 1 or note['likeUsers'][str(user_id)] is None:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
         updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numLikes':1}, '$set': {userKey:1}})
         if updated_note:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes+1)
+            updated_result = await db['notes'].find_one({"_id": note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result['numLikes'])
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
 @app.put("/decreaselikes/{note_id}/{user_id}", response_description="Decrease likes on a note")
@@ -530,9 +533,12 @@ async def decrease_likes(note_id, user_id):
     if note:
         numLikes = note['numLikes']
         userKey='likeUsers.'+str(user_id)
+        if note['likeUsers'][str(user_id)] == 0 or note['likeUsers'][str(user_id)] is None:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
         updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numLikes':-1}, '$set': {userKey:0}})
         if updated_note:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes-1)
+            updated_result = await db['notes'].find_one({"_id": note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result['numLikes'])
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
 @app.put("/increasedislikes/{note_id}/{user_id}", response_description="Increase dislikes on a note")
@@ -546,6 +552,8 @@ async def increase_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
+        if note['dislikeUsers'][str(user_id)] == 1 or note['dislikeUsers'][str(user_id)] is None:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
         updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numDislikes':1}, '$set': {'dislikeUsers.'+str(user_id):1}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes+1)
@@ -562,6 +570,8 @@ async def decrease_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
+        if note['dislikeUsers'][str(user_id)] == 0 or note['dislikeUsers'][str(user_id)] is None:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
         updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numDislikes':-1}, '$set': {'dislikeUsers.'+str(user_id):0}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes-1)
