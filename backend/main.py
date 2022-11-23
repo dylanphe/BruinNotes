@@ -415,7 +415,7 @@ async def toggle_comment_visibility(note_id, user_id):
             visibleUsers[user_id] = True
         updated_note = await db["notes"].update_one({"_id": id}, {"$set": {"commentVisibleUsers": visibleUsers}},upsert=False)
         if updated_note:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
+            return JSONResponse(status_code=status.HTTP_200_OK, content="visibility status updated sucessfully")
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="note not found")
 
 @app.get("/getcommentvisibilitystatus/{note_id}/{user_id}",  response_description="Indicate that comment should be shown to the user for that note")
