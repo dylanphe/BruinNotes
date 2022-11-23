@@ -396,8 +396,8 @@ async def add_comment(noteInfo: dict, commentInfo: dict):
     updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"commentList":currentCommentList}})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
 
-@app.put("/showcomment/{id}", response_description="Indicate that comment should be shown")
-async def show_comment(id):
+@app.put("/togglecomment/{id}", response_description="Indicate that comment should be shown")
+async def toggle_comment(id):
     """Indicate that comment should be shown
 
     Args:
@@ -408,24 +408,8 @@ async def show_comment(id):
     """
     note = await db['notes'].find_one({"_id": id})
     if note:
-        updated_note = await db["notes"].update_one({"_id": id}, {"$set": {"showComment": True}},upsert=False)
-        if updated_note:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
-    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="note not found")
-    
-@app.put("/hidecomment/{id}", response_description="Indicate that comment should be hidden")
-async def hide_comment(id):
-    """Indicate that comment should be shown
-
-    Args:
-        noteInfo (dict): _description_
-
-    Returns:
-        Json object with updated note with 200 status
-    """
-    note = await db['notes'].find_one({"_id": id})
-    if note:
-        updated_note = await db["notes"].update_one({"_id": id}, {"$set": {"showComment": False}},upsert=False)
+        visible = note['showComment']
+        updated_note = await db["notes"].update_one({"_id": id}, {"$set": {"showComment": not visible}},upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=updated_note)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="note not found")
