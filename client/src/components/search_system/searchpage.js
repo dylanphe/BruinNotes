@@ -300,7 +300,7 @@ function Searchpage(props) {
 
     return (
         <div className='search-body'>
-            <LogoutBtn />
+            <LogoutBtn onLogout={props.onLogout} />
             <div className='coursepage-nav-button'>
                 <button type='button' className='coursepage-btn' onClick={handleShow}>+ Add class if not found</button>
             </div>

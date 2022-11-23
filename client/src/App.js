@@ -23,7 +23,7 @@ function App() {
           {/* <Route path = "SearchPage" element={<Searchpage uid={uid}/>} />
            <Route path = "/c/:coursename" element={<CoursePage uid={uid}/>} />
            <Route path = "c/:coursename/:instructor/:term" element={<CourseNotePage uid={uid}/>} /> */}
-          <Route path = "/:uid/" element={uid !== null ? <Searchpage uid={uid}/> : <Navigate to="/" />} />
+          <Route path = "/:uid/" element={uid !== null ? <Searchpage uid={uid} onLogout={updateUid} /> : <Navigate to="/" />} />
           <Route path = "/:uid/:coursename" element={uid !== null ? <CoursePage uid={uid}/> : <Navigate to="/" />} />
           <Route path = "/:uid/:coursename/:instructor/:term" element={uid !== null ? <CourseNotePage uid={uid}/> : <Navigate to="/" />} />
         </Routes>
