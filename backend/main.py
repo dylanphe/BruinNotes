@@ -512,9 +512,7 @@ async def increase_likes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numLikes = note['numLikes']
-        likeUsers = note['likeUsers']
-        likeUsers[user_id] = 1
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':1}, '$set': {'likeUsers':likeUsers}}, upsert=False)
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':1}, '$set': {'likeUsers.'+user_id:1}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -532,7 +530,7 @@ async def decrease_likes(note_id, user_id):
         numLikes = note['numLikes']
         likeUsers = note['likeUsers']
         likeUsers[user_id] = 0
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':-1}, '$set': {'likeUsers':likeUsers}}, upsert=False)
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':-1}, '$set': {'likeUsers.'+user_id:0}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes-1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -548,9 +546,7 @@ async def increase_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
-        dislikeUsers = note['dislikeUsers']
-        dislikeUsers[user_id] = 1
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':1}, '$set': {'likeUsers':dislikeUsers}}, upsert=False)
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':1}, '$set': {'dislikeUsers.'+user_id:1}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -566,9 +562,7 @@ async def decrease_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
-        dislikeUsers = note['dislikeUsers']
-        dislikeUsers[user_id] = 0
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':-1}, '$set': {'likeUsers':dislikeUsers}}, upsert=False)
+        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':-1}, '$set': {'dislikeUsers.'+user_id:0}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes-1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
