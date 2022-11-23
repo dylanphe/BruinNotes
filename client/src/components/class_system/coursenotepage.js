@@ -67,10 +67,11 @@ function CourseNotePage(props) {
     
     async function handleLike() {
       if (note.likeUsers[uidParams] === undefined && note.dislikeUsers[uidParams] === undefined) {
-        axios.put("/decreaselikes/"+note._id+"/"+uidParams)
+        axios.put("/increaselikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
             console.log(res);
+            searchNote();
           })
       }
       else if (note.likeUsers[uidParams] === false && note.dislikeUsers[uidParams] === false) {
@@ -78,6 +79,7 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
+            searchNote();
           })
       }
       else if (note.likeUsers[uidParams] === true && note.dislikeUsers[uidParams] === false) {
@@ -85,6 +87,34 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
+            searchNote();
+          })
+      }
+    }
+
+    async function handleDisLike() {
+      if (note.likeUsers[uidParams] === undefined && note.dislikeUsers[uidParams] === undefined) {
+        axios.put("/increasedislikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.likeUsers[uidParams] === false && note.dislikeUsers[uidParams] === false) {
+        axios.put("/increasedislikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
+          })
+      }
+      else if (note.likeUsers[uidParams] === true && note.dislikeUsers[uidParams] === false) {
+        axios.put("/decreasedislikes/"+note._id+"/"+uidParams)
+        .then(res =>
+          {
+            console.log(res);
+            searchNote();
           })
       }
     }
