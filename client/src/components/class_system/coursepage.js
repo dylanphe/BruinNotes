@@ -66,6 +66,8 @@ function CoursePage(props) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
   const [newClassForm, setNewClassForm] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  // let submitted = false;
   // const [inputInstructor, setInputInstructor] = useState("");
   // const [inputQuarter, setInputQuarter] = useState("");
   // const [inputYear, setInputYear] = useState("");
@@ -242,6 +244,7 @@ function CoursePage(props) {
       };
 
       console.log("newClassSubmit:", newClassSubmit);
+      setSubmitted(true);
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
       // axios.post("http://localhost:8000/addcourse", newClassSubmit)
       .then(response => {
@@ -249,6 +252,7 @@ function CoursePage(props) {
         setModalInputTextShown(true);
         setModalInputSelectShown(false);
         handleClose();
+        setSubmitted(false);
         setShowMsg(true);
       })
       .then(() => {getCourseData(); setNewClassForm({});})
@@ -433,22 +437,22 @@ function CoursePage(props) {
               <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button variant="primary" onClick={/*handleClose*/ handleSubmit}>
-                Save Changes
+              <Button variant={submitted ? "success" : "primary"} onClick={/*handleClose*/ handleSubmit}>
+                Submit
               </Button>
             </Modal.Footer>
           </Modal>
           {/* <AddClassMsg /> */}
-          <Modal show={showMsg} onHide={handleCloseMsg}>
+          {/* <Modal show={showMsg} onHide={handleCloseMsg}>
             <Modal.Body 
               // style={{display: 'flex'}}
             >
               {msg}{'     '}
-              <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
+              <Button variant="success" onClick={handleCloseMsg} style={{float: 'right'}}>
                   OK
               </Button>
             </Modal.Body>
-          </Modal>
+          </Modal> */}
         </>
         <div className='coursepage-class-list'>
           <Professors />
