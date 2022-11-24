@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useTransition} from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {BiCommentAdd, BiLink} from 'react-icons/bi';
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillDelete} from 'react-icons/ai'; 
 import {ImArrowUpLeft2} from 'react-icons/im'; 
@@ -214,10 +214,15 @@ function CourseNotePage(props) {
       }
     }
 
+    const prependUrl = (url) => {
+      if (url.slice(0,4) === 'http') return url;
+      else return ('//'+url);
+    }
+
     return (
       <div key={note._id}>
         <div className="note-nav-button">
-          <a href={note.url} target="_blank" id={note.role} className="note-lnk">{title}</a>
+          <a href={prependUrl(note.url)} target="_blank" id={note.role} className="note-lnk">{title}</a>
           <div className='misc-button-list'>
             <button className='misc-button' onClick={handleLike} id="like">{(note.likeUsers[uidParams] === (undefined) || note.likeUsers[uidParams] === 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
             <button className='misc-button' onClick={handleDislike} id="dislike">{(note.dislikeUsers[uidParams] === (undefined) || note.dislikeUsers[uidParams] === 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
