@@ -52,6 +52,8 @@ function CourseNotePage(props) {
   const [authorType, setAuthorType] = useState('');
   const [noteList, setNoteList] = useState([]);
   const [emptyNote, setEmptyNote] = useState(false);
+  const [loading, setLoading] = useState(true);
+  console.log(loading);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [hideNote, setHideNote] = useState(false);
@@ -210,6 +212,7 @@ function CourseNotePage(props) {
 
   //Function to find note from db
   async function searchNote() {
+    setLoading(true);
     let items = [];
     axios.get('http://127.0.0.1:8000/searchnote/'+courseName+'/'+instructor+'/'+term)
     .then(res => {
@@ -225,6 +228,7 @@ function CourseNotePage(props) {
         else {
           setNoteList([]);
         }
+        setLoading(false);
     })
   }
 
@@ -386,11 +390,15 @@ function CourseNotePage(props) {
           </div>
           {!hideNote && (
           <div id="quarterpage-note-list">
-            <Notes />
-            {emptyNote && (<div id='no-note'>
+            {/* <Notes />
+            {emptyNote && (<div id='no-note'> 
               No notes for this course yet ... <br />
               Share a note today <ImArrowUpLeft2 />
-            </div> )}
+            </div> )} */}
+            {(!loading && emptyNote) ? (<div id='no-note'> 
+              No notes for this course yet ... <br />
+              Share a note today <ImArrowUpLeft2 />
+            </div> ): <Notes />}
           </div> 
           )}
           {hideNote && (
