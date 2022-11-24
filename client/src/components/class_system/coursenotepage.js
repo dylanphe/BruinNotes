@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useTransition} from 'react';
 import { useParams } from 'react-router-dom';
 import {BiCommentAdd, BiLink} from 'react-icons/bi';
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillDelete} from 'react-icons/ai'; 
@@ -171,6 +171,23 @@ function CourseNotePage(props) {
       }
     }
 
+    async function handleToggleComments() {
+      try {
+        const res = await axios.put('/togglecommentvisibility/'+note._id+'/'+uidParams);
+        console.log(res);
+      }
+      catch (err) {
+        console.log("Error in handleToggleComments:", err);
+      }
+      searchNote();
+    }
+
+    const isCommentVisible = () => {
+      console.log('visibility of', note._id, (note['commentVisibleUsers'][uidParams] === true))
+      return (note['commentVisibleUsers'][uidParams] === true);
+      
+    }
+
     return (
       <div key={note._id}>
         <div className="note-nav-button">
@@ -178,10 +195,11 @@ function CourseNotePage(props) {
           <div className='misc-button-list'>
             <button className='misc-button' onClick={handleLike} id="like">{(note.likeUsers[uidParams] === (undefined) || note.likeUsers[uidParams] === 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
             <button className='misc-button' onClick={handleDislike} id="dislike">{(note.dislikeUsers[uidParams] === (undefined) || note.dislikeUsers[uidParams] === 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
-            <button className='misc-button' id='comment'> <BiCommentAdd/> </button> 
+            <button className='misc-button' id='comment' onClick={handleToggleComments}> <BiCommentAdd/> </button> 
           </div>
         </div>
-        <div style={{display: hideNote ? 'block' : 'none'}}>
+        {/* <div style={{display: hideNote ? 'block' : 'none'}}> */}
+        <div style={{display: (note['commentVisibleUsers'][uidParams] === true) ? 'block' : 'none'}}>
           <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
           <div className='comments'>
             {comments.map((comment, idx) => 
@@ -331,6 +349,7 @@ function CourseNotePage(props) {
 
   //Function to search for Request from db to output on the webpage
   async function searchNoteReq() {
+    setLoading(true);
     let items = [];
     axios.get('http://127.0.0.1:8000/searchnoterequest/'+courseName+'/'+instructor+'/'+term)
     .then(res => {
@@ -346,6 +365,7 @@ function CourseNotePage(props) {
       else {
         setReqList([]);
       }
+      setLoading(false);
     })
   }
 
