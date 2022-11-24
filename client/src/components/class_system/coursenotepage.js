@@ -53,7 +53,7 @@ function CourseNotePage(props) {
   const [noteList, setNoteList] = useState([]);
   const [emptyNote, setEmptyNote] = useState(false);
   const [loading, setLoading] = useState(true);
-  console.log(loading);
+  console.log("loading", loading);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [hideNote, setHideNote] = useState(false);
@@ -61,6 +61,8 @@ function CourseNotePage(props) {
     setPanelOpen(!panelOpen);
     setHideNote(!hideNote);
   }
+
+  const [userComments, setUserComments] = useState({});
 
   //Function to generate notelink onto webpage
   function Note(note) {
@@ -403,11 +405,15 @@ function CourseNotePage(props) {
           )}
           {hideNote && (
           <div id="quarterpage-request-list">
-            <Requests />
+            {/* <Requests />
             {emptyReq && (<div id='no-note'>
               No requests for this course yet ... <br />
               Request for notes today <ImArrowUpLeft2 />
-            </div> )}
+            </div> )} */}
+            {!loading && emptyReq ? (<div id='no-note'>
+              No requests for this course yet ... <br />
+              Request for notes today <ImArrowUpLeft2 />
+            </div> ) : <Requests />}
           </div>
           )}
         </div>
