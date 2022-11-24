@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import {BiCommentAdd, BiLink} from 'react-icons/bi';
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillDelete} from 'react-icons/ai'; 
 import {ImArrowUpLeft2} from 'react-icons/im'; 
+import { GrSend } from "react-icons/gr";
 import Button from 'react-bootstrap/esm/Button';
 import Modal from 'react-bootstrap/Modal';
 import './coursenotepage.css';
@@ -18,6 +19,7 @@ function CourseNotePage(props) {
     axios.get('http://127.0.0.1:8000/viewuser/'+uidParams)
     .then( (res) => {
       setUser(res.data.at(0));
+      console.log(user);
     })
 
     searchNote();
@@ -65,7 +67,7 @@ function CourseNotePage(props) {
   const [userComments, setUserComments] = useState({});
 
   //Function to generate notelink onto webpage
-  function Note(note) {
+  function Note(note, idx) {
     let title = note.author + ": " + note.title + " | Week " + note.week + " (" + note.role + ")";
     let comments = note.commentList;
     
@@ -171,10 +173,14 @@ function CourseNotePage(props) {
       }
     }
 
-    async function handleToggleComments() {
+    async function handleToggleComments(note, idx) {
       try {
         const res = await axios.put('/togglecommentvisibility/'+note._id+'/'+uidParams);
         console.log(res);
+        note['commentVisibleUsers'][uidParams] = !note['commentVisibleUsers'][uidParams];
+        noteList[idx] = note;
+        setNoteList(noteList);
+        console.log(noteList);
       }
       catch (err) {
         console.log("Error in handleToggleComments:", err);
@@ -182,10 +188,30 @@ function CourseNotePage(props) {
       searchNote();
     }
 
-    const isCommentVisible = () => {
-      console.log('visibility of', note._id, (note['commentVisibleUsers'][uidParams] === true))
-      return (note['commentVisibleUsers'][uidParams] === true);
+    // const isCommentVisible = () => {
+    //   console.log('visibility of', note._id, (note['commentVisibleUsers'][uidParams] === true))
+    //   return (note['commentVisibleUsers'][uidParams] === true);
       
+    // }
+
+    function handleCommentChange(e) {
+      userComments[note._id] = e.target.value;
+      setUserComments(userComments);
+      console.log(userComments);
+    }
+
+    async function handleSubmitComment() {
+      try {
+        const res = await axios.post('http://127.0.0.1:8000/addcomment', {
+          'noteInfo': {'_id': note._id}, 
+          'commentInfo': {'username': user.fullname, 'comment': userComments[note._id]}
+        });
+        console.log(res);
+        searchNote();
+      }
+      catch (err) {
+        console.log(err);
+      }
     }
 
     return (
@@ -195,12 +221,18 @@ function CourseNotePage(props) {
           <div className='misc-button-list'>
             <button className='misc-button' onClick={handleLike} id="like">{(note.likeUsers[uidParams] === (undefined) || note.likeUsers[uidParams] === 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
             <button className='misc-button' onClick={handleDislike} id="dislike">{(note.dislikeUsers[uidParams] === (undefined) || note.dislikeUsers[uidParams] === 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
-            <button className='misc-button' id='comment' onClick={handleToggleComments}> <BiCommentAdd/> </button> 
+            <button className='misc-button' id='comment' onClick={() => handleToggleComments(note, idx)}> <BiCommentAdd/> </button> 
           </div>
         </div>
         {/* <div style={{display: hideNote ? 'block' : 'none'}}> */}
         <div style={{display: (note['commentVisibleUsers'][uidParams] === true) ? 'block' : 'none'}}>
-          <span> <input type="text" id='cmt-input-box' placeholder='Enter a comment...'></input> </span>
+          <span><input 
+                    type="text" id='cmt-input-box' placeholder='Enter a comment...' 
+                    onChange={handleCommentChange}
+                    // value={userComments[note._id] !== undefined ? userComments[note._id] : ''}
+                    >
+                </input> </span>  
+          <span className='misc-button-list send-btn'><button className='misc-button' onClick={handleSubmitComment}><GrSend /></button></span>
           <div className='comments'>
             {comments.map((comment, idx) => 
               <div id='cmt-box' key={idx}>
@@ -221,7 +253,7 @@ function CourseNotePage(props) {
 
   //Function to map note found onto webpage
   function Notes() {
-      return noteList.map((note) => Note(note));
+      return noteList.map((note, idx) => Note(note, idx));
   }
 
   //Function to handleSelection of authortype
@@ -249,6 +281,7 @@ function CourseNotePage(props) {
           setNoteList([]);
         }
         setLoading(false);
+        setUserComments({});
     })
   }
 
