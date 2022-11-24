@@ -67,7 +67,11 @@ function CourseNotePage(props) {
   const [userComments, setUserComments] = useState({});
 
   //Function to generate notelink onto webpage
-  function Note(note, idx) {
+  function Note(props) {
+    const [note, setNote] = useState(props.thisnote);
+    const [user, setUser] = useState(props.user);
+    const [comment, setComment] = useState('');
+    const uidParams = props.uidParams;
     let title = note.author + ": " + note.title + " | Week " + note.week + " (" + note.role + ")";
     let comments = note.commentList;
     
@@ -77,15 +81,25 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
           })
+        .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+        .then(res => {
+          const updatedNote = res.data;
+          setNote(updatedNote);
+        })
       }
       if (note.likeUsers[uidParams] === undefined && note.dislikeUsers[uidParams] === 0) {
         axios.put("/increaselikes/"+note._id+"/"+uidParams)
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.likeUsers[uidParams] === 0 && note.dislikeUsers[uidParams] === 0) {
@@ -93,7 +107,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.likeUsers[uidParams] === 0 && note.dislikeUsers[uidParams] === undefined) {
@@ -101,7 +120,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.likeUsers[uidParams] === 1 && note.dislikeUsers[uidParams] === undefined) {
@@ -109,7 +133,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.likeUsers[uidParams] === 1 && note.dislikeUsers[uidParams] === 0) {
@@ -117,7 +146,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
     }
@@ -128,7 +162,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.dislikeUsers[uidParams] === undefined && note.likeUsers[uidParams] === 0) {
@@ -136,7 +175,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.dislikeUsers[uidParams] === 0 && note.likeUsers[uidParams] === 0) {
@@ -144,7 +188,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.dislikeUsers[uidParams] === 0 && note.likeUsers[uidParams] === undefined) {
@@ -152,7 +201,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.dislikeUsers[uidParams] === 1 && note.likeUsers[uidParams] === undefined) {
@@ -160,7 +214,12 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
       else if (note.dislikeUsers[uidParams] === 1 && note.likeUsers[uidParams] === 0) {
@@ -168,46 +227,53 @@ function CourseNotePage(props) {
         .then(res =>
           {
             console.log(res);
-            searchNote();
+            // searchNote();
+          })
+          .then(() => axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id))
+          .then(res => {
+            const updatedNote = res.data;
+            setNote(updatedNote);
           })
       }
     }
 
-    async function handleToggleComments(note, idx) {
+    async function handleToggleComments() {
+      console.log("comment", comment);
       try {
         const res = await axios.put('/togglecommentvisibility/'+note._id+'/'+uidParams);
         console.log(res);
-        note['commentVisibleUsers'][uidParams] = !note['commentVisibleUsers'][uidParams];
-        noteList[idx] = note;
-        setNoteList(noteList);
-        console.log(noteList);
+        const res2 = await axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id);
+        setNote(res2.data);
       }
       catch (err) {
         console.log("Error in handleToggleComments:", err);
       }
-      searchNote();
+      // searchNote();
     }
 
-    // const isCommentVisible = () => {
-    //   console.log('visibility of', note._id, (note['commentVisibleUsers'][uidParams] === true))
-    //   return (note['commentVisibleUsers'][uidParams] === true);
-      
-    // }
-
     function handleCommentChange(e) {
-      userComments[note._id] = e.target.value;
-      setUserComments(userComments);
-      console.log(userComments);
+      // userComments[note._id] = e.target.value;
+      // setUserComments(userComments);
+      // console.log(userComments);
+      setComment(e.target.value);
+      console.log("comment", comment);
     }
 
     async function handleSubmitComment() {
+      console.log("comment", comment);
+      if (comment === '') return;
       try {
         const res = await axios.post('http://127.0.0.1:8000/addcomment', {
           'noteInfo': {'_id': note._id}, 
-          'commentInfo': {'username': user.fullname, 'comment': userComments[note._id]}
+          'commentInfo': {'username': user.fullname, 'comment': comment}
         });
         console.log(res);
-        searchNote();
+        // searchNote();
+        const res2 = await axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id);
+        const updatedNote = res2.data;
+        console.log(updatedNote);
+        setNote(updatedNote);
+        setComment('');
       }
       catch (err) {
         console.log(err);
@@ -226,7 +292,7 @@ function CourseNotePage(props) {
           <div className='misc-button-list'>
             <button className='misc-button' onClick={handleLike} id="like">{(note.likeUsers[uidParams] === (undefined) || note.likeUsers[uidParams] === 0) ? <AiOutlineLike/> : <AiFillLike />} {note.numLikes}</button>  
             <button className='misc-button' onClick={handleDislike} id="dislike">{(note.dislikeUsers[uidParams] === (undefined) || note.dislikeUsers[uidParams] === 0)  ? <AiOutlineDislike/> : <AiFillDislike />} {note.numDislikes}</button> 
-            <button className='misc-button' id='comment' onClick={() => handleToggleComments(note, idx)}> <BiCommentAdd/> </button> 
+            <button className='misc-button' id='comment' onClick={handleToggleComments}> <BiCommentAdd/> </button> 
           </div>
         </div>
         {/* <div style={{display: hideNote ? 'block' : 'none'}}> */}
@@ -234,7 +300,7 @@ function CourseNotePage(props) {
           <span><input 
                     type="text" id='cmt-input-box' placeholder='Enter a comment...' 
                     onChange={handleCommentChange}
-                    // value={userComments[note._id] !== undefined ? userComments[note._id] : ''}
+                    value={comment}
                     >
                 </input> </span>  
           <span className='misc-button-list send-btn'><button className='misc-button' onClick={handleSubmitComment}><GrSend /></button></span>
@@ -460,10 +526,12 @@ function CourseNotePage(props) {
               No notes for this course yet ... <br />
               Share a note today <ImArrowUpLeft2 />
             </div> )} */}
-            {(!loading && emptyNote) ? (<div id='no-note'> 
-              No notes for this course yet ... <br />
-              Share a note today <ImArrowUpLeft2 />
-            </div> ): <Notes />}
+            {(!loading && emptyNote) ? 
+              (<div id='no-note'> 
+                No notes for this course yet ... <br />
+                Share a note today <ImArrowUpLeft2 />
+              </div> ) : 
+              noteList.map((note) => <Note key={note._id} thisnote={note} uidParams={uidParams} user={user}/>)}
           </div> 
           )}
           {hideNote && (
