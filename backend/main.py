@@ -609,6 +609,22 @@ async def search_note_by_fields(courseName, instructor, term):
     matchingNotes = await db['notes'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNotes
 
+@app.get("/searchnotebyid/{note_id}", response_description="Search for a note by its _id")
+async def search_note_by_id(note_id):
+    """
+    Search note by its _id
+
+    Args: 
+        the note's _id
+
+    Returns: 
+        The requested note
+    """
+    note = await db['notes'].find_one({"_id": note_id})
+    if note:
+        return JSONResponse(status_code=status.HTTP_200_OK, content=note)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=note_id)  
+
 @app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
 async def search_note_requests_by_fields(courseName, instructor, term):
     """
