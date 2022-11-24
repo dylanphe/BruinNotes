@@ -237,32 +237,37 @@ function CourseNotePage(props) {
     today = mm + '/' + dd + '/' + yyyy;
 
     var userName = user.fullname
-
-    if (noteWeek >= 1 && noteWeek <= 10) {
-      axios.post('http://127.0.0.1:8000/addnote', {'courseName': courseName, 
-                                                    'instructor': instructor, 
-                                                    'term': term, 
-                                                    'url': noteLink, 
-                                                    'author': userName,
-                                                    'role': authorType, 
-                                                    'title': noteTitle,
-                                                    'date' : today,
-                                                    'week' : noteWeek,
-                                                    'commentList': null,
-                                                    'likes': null,
-                                                    'dislikes': null,
-                                                    'numLikes': null,
-                                                    'numDislikes' : null,
-                                                    'likeUsers': null,
-                                                    'dislikeUsers': null,
-                                                    'commentVisibileUsers': null})
-      .then((res) => {
-        console.log(res);
-        searchNote();
-      });
-      handleCloseReq();
+    if (!noteLink || !noteTitle || !noteWeek || !authorType)
+    {
+      alert("Please Enter All Fields");
+      return;
+    } else {
+      if (noteWeek >= 1 && noteWeek <= 10) {
+        axios.post('http://127.0.0.1:8000/addnote', {'courseName': courseName, 
+                                                      'instructor': instructor, 
+                                                      'term': term, 
+                                                      'url': noteLink, 
+                                                      'author': userName,
+                                                      'role': authorType, 
+                                                      'title': noteTitle,
+                                                      'date' : today,
+                                                      'week' : noteWeek,
+                                                      'commentList': null,
+                                                      'likes': null,
+                                                      'dislikes': null,
+                                                      'numLikes': null,
+                                                      'numDislikes' : null,
+                                                      'likeUsers': null,
+                                                      'dislikeUsers': null,
+                                                      'commentVisibileUsers': null})
+        .then((res) => {
+          console.log(res);
+          searchNote();
+        });
+        handleCloseReq();
+      }
+      handleCloseAdd();
     }
-    handleCloseAdd();
   }
 
   //Requests
