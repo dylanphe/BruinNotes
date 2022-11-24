@@ -381,6 +381,7 @@ async def add_comment(noteInfo: dict, commentInfo: dict):
     Returns:
         JSON object with created comment and 201 status.
     """
+    print(noteInfo, commentInfo)
     name = commentInfo['username']
     content = commentInfo['comment']
     
@@ -394,7 +395,9 @@ async def add_comment(noteInfo: dict, commentInfo: dict):
     currentCommentList.append(new_comment)
     
     updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"commentList":currentCommentList}})
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    # print(updated_note)
+    # return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content='comment updated')
 
 @app.put("/togglecommentvisibility/{note_id}/{user_id}", response_description="Update comment visibility for the user for the note")
 async def toggle_comment_visibility(note_id, user_id):

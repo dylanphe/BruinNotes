@@ -210,6 +210,13 @@
     margin-right: 5px
 }
 
+.send-btn {
+    margin-left: 8px;
+    height: 70px;
+    padding: 7px 0px;
+    border-radius: 10px;
+}
+
 #like {
     color:#2D68C4;
     font-size: larger;
@@ -261,7 +268,7 @@
 }
 
 #cmt-input-box {
-    width: 100%;
+    width: 94%;
     border-radius: 15px;
     padding-top: 10px;
     padding-left: 20px;
