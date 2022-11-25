@@ -62,9 +62,8 @@ function CourseNotePage(props) {
   const openReqPanel = () => {
     setPanelOpen(!panelOpen);
     setHideNote(!hideNote);
+    searchNote();
   }
-
-  const [userComments, setUserComments] = useState({});
 
   //Function to generate notelink onto webpage
   function Note(props) {
@@ -352,7 +351,6 @@ function CourseNotePage(props) {
           setNoteList([]);
         }
         setLoading(false);
-        setUserComments({});
     })
   }
 
