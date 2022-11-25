@@ -63,7 +63,7 @@ function Loginpage(props) {
                     alert("Wrong UID and Password. Please re-enter the information.");
                     return;
                 }
-                // props.onLogin(uid);
+                props.onLogin(uid);
                 const uidparams = String(uid);
                 navigate('/'+uidparams+'/');
             })

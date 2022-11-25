@@ -102,12 +102,12 @@ function CoursePage(props) {
       // const response = await sampleCourseDataEmt;
       // console.log(response);
       const data = await response.data;
-      console.log("response:", response);
-      console.log("data:", data);
+      // console.log("response:", response);
+      // console.log("data:", data);
       const courses = dataToCourses(data, compareTerms);
-      console.log("courses:", courses);
+      // console.log("courses:", courses);
       setCourseData(courses);
-      console.log("courseData.length:", courseData.length);      
+      // console.log("courseData.length:", courseData.length);      
     } 
     catch (error) {
       console.error("Could not get courses:", error);
@@ -133,10 +133,10 @@ function CoursePage(props) {
   // setCourseBucket(sampleCourseBucket);
 
   // debug
-  console.log("courseData", courseData);
+  // console.log("courseData", courseData);
   if (courseData.length >= 2) {
-    console.log("courseData.length:", courseData.length);
-    console.log(courseData[1].instructor);
+    // console.log("courseData.length:", courseData.length);
+    // console.log(courseData[1].instructor);
   }
   console.log("professors:", getProfessors(courseData));
 
@@ -197,20 +197,20 @@ function CoursePage(props) {
 
     const inputValidateResult = validateAddCourseInput(newClassIntermediate);
     const isInputValidate = (inputValidateResult.isInstructorValid && inputValidateResult.isQuarterValid && inputValidateResult.isYearValid);
-    console.log(isInputValidate);
+    // console.log(isInputValidate);
     if (!isInputValidate) {
-      console.log("inputValidateResult:", inputValidateResult);
+      // console.log("inputValidateResult:", inputValidateResult);
       if (!inputValidateResult.isInstructorValid) {
-        console.log(1);
+        // console.log(1);
         setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
       }
       if (!inputValidateResult.isQuarterValid) {
-        console.log(2);
+        // console.log(2);
         setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
         // console.log(quarterInvalidMsg);
       }
       if (!inputValidateResult.isYearValid) {
-        console.log(3);
+        // console.log(3);
         setYearInvalidMsg(inputValidateResult.yearValidateMessage);
         // console.log(yearInvalidMsg);
       }   
@@ -223,11 +223,11 @@ function CoursePage(props) {
       let colorCode = 1;
       const course_idx = courseData.findIndex((course) => course.instructor === newClassIntermediate['instructor']);
       if (course_idx === -1) { // Generate a new colorCode for a new professor 
-        console.log("courseData.length:", courseData.length);
+        // console.log("courseData.length:", courseData.length);
         if (courseData.length) {
           // colorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
           colorCode = courseData.length % num_colors + 1;
-          console.log("newColorCode", colorCode);
+          // console.log("newColorCode", colorCode);
         }
       }
       else {  // Use the existing color code
@@ -247,7 +247,7 @@ function CoursePage(props) {
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
       // axios.post("http://localhost:8000/addcourse", newClassSubmit)
       .then(response => {
-        console.log("post response:", response);
+        // console.log("post response:", response);
         setModalInputTextShown(true);
         setModalInputSelectShown(false);
         handleClose();
