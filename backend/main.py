@@ -381,6 +381,7 @@ async def add_comment(noteInfo: dict, commentInfo: dict):
     Returns:
         JSON object with created comment and 201 status.
     """
+    print(noteInfo, commentInfo)
     name = commentInfo['username']
     content = commentInfo['comment']
     
@@ -394,7 +395,9 @@ async def add_comment(noteInfo: dict, commentInfo: dict):
     currentCommentList.append(new_comment)
     
     updated_note = await db["notes"].update_one({"_id": noteId}, {"$set": {"commentList":currentCommentList}})
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    # print(updated_note)
+    # return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content='comment updated')
 
 @app.put("/togglecommentvisibility/{note_id}/{user_id}", response_description="Update comment visibility for the user for the note")
 async def toggle_comment_visibility(note_id, user_id):
@@ -413,7 +416,7 @@ async def toggle_comment_visibility(note_id, user_id):
             visibleUsers[user_id] = not visibleUsers[user_id]
         else:
             visibleUsers[user_id] = True
-        updated_note = await db["notes"].update_one({"_id": id}, {"$set": {"commentVisibleUsers": visibleUsers}},upsert=False)
+        updated_note = await db["notes"].update_one({"_id": note_id}, {"$set": {"commentVisibleUsers": visibleUsers}},upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content="visibility status updated sucessfully")
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content="note not found")
@@ -453,8 +456,7 @@ async def add_note(noteInfo: dict):
     date = noteInfo['date']
     week = noteInfo['week']
 
-    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author,role=role,title=title,date=date,
-                     week=week,commentList=[],likes=0, dislikes=0, numLikes=0, numDislikes=0, likeUsers={}, dislikeUsers={}, commentVisibileUsers={})
+    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author, role=role, title=title, date=date, week=week, commentList=[], likes=0, dislikes=0, numLikes=0, numDislikes=0, likeUsers={}, dislikeUsers={}, commentVisibleUsers={},)
     new_note = jsonable_encoder(note)
     inserted_note = await db["notes"].insert_one(new_note)
     created_note = await db["notes"].find_one({"_id": inserted_note.inserted_id})
@@ -513,11 +515,16 @@ async def increase_likes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numLikes = note['numLikes']
-        likeUsers = note['likeUsers']
-        likeUsers[user_id] = 1
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':1}, '$set': {'likeUsers':likeUsers}}, upsert=False)
+        userKey='likeUsers.'+str(user_id)
+        likeList = note['likeUsers']
+        if str(user_id) in likeList:
+            if note['likeUsers'][str(user_id)] == 1:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numLikes':1}, '$set': {userKey:1}})
         if updated_note:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes+1)
+            updated_result = await db['notes'].find_one({"_id": note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result['numLikes'])
+        
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
 @app.put("/decreaselikes/{note_id}/{user_id}", response_description="Decrease likes on a note")
@@ -531,11 +538,15 @@ async def decrease_likes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numLikes = note['numLikes']
-        likeUsers = note['likeUsers']
-        likeUsers[user_id] = 0
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numLikes':-1}, '$set': {'likeUsers':likeUsers}}, upsert=False)
+        userKey='likeUsers.'+str(user_id)
+        likeList = note['likeUsers']
+        if str(user_id) in likeList:
+            if note['likeUsers'][str(user_id)] == 0:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numLikes':-1}, '$set': {userKey:0}})
         if updated_note:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes-1)
+            updated_result = await db['notes'].find_one({"_id": note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result['numLikes'])
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
 
 @app.put("/increasedislikes/{note_id}/{user_id}", response_description="Increase dislikes on a note")
@@ -549,9 +560,11 @@ async def increase_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
-        dislikeUsers = note['dislikeUsers']
-        dislikeUsers[user_id] = 1
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':1}, '$set': {'likeUsers':dislikeUsers}}, upsert=False)
+        dislikeList = note['dislikeUsers']
+        if str(user_id) in dislikeList:
+            if note['dislikeUsers'][str(user_id)] == 1:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numDislikes':1}, '$set': {'dislikeUsers.'+str(user_id):1}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes+1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -567,9 +580,11 @@ async def decrease_dislikes(note_id, user_id):
     note = await db['notes'].find_one({"_id": note_id})
     if note:
         numDislikes = note['numDislikes']
-        dislikeUsers = note['dislikeUsers']
-        dislikeUsers[user_id] = 0
-        updated_note = await db['notes'].update_one({'_id': id}, {'$inc': {'numDislikes':-1}, '$set': {'likeUsers':dislikeUsers}}, upsert=False)
+        dislikeList = note['dislikeUsers']
+        if str(user_id) in dislikeList:
+            if note['dislikeUsers'][str(user_id)] == 0:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
+        updated_note = await db['notes'].update_one({'_id': note_id}, {'$inc': {'numDislikes':-1}, '$set': {'dislikeUsers.'+str(user_id):0}}, upsert=False)
         if updated_note:
             return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes-1)
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
@@ -593,6 +608,22 @@ async def search_note_by_fields(courseName, instructor, term):
         
     matchingNotes = await db['notes'].find(query).sort([("week", 1),("role", 1)]).to_list(1000)
     return matchingNotes
+
+@app.get("/searchnotebyid/{note_id}", response_description="Search for a note by its _id")
+async def search_note_by_id(note_id):
+    """
+    Search note by its _id
+
+    Args: 
+        the note's _id
+
+    Returns: 
+        The requested note
+    """
+    note = await db['notes'].find_one({"_id": note_id})
+    if note:
+        return JSONResponse(status_code=status.HTTP_200_OK, content=note)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=note_id)  
 
 @app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
 async def search_note_requests_by_fields(courseName, instructor, term):

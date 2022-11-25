@@ -66,6 +66,8 @@ function CoursePage(props) {
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
   const [newClassForm, setNewClassForm] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  // let submitted = false;
   // const [inputInstructor, setInputInstructor] = useState("");
   // const [inputQuarter, setInputQuarter] = useState("");
   // const [inputYear, setInputYear] = useState("");
@@ -76,7 +78,6 @@ function CoursePage(props) {
   const [quarterInvalidMsg, setQuarterInvalidMsg] = useState("");
   const [yearInvalidMsg, setYearInvalidMsg] = useState("");
 
-  // TODO: maybe refactoring into functions handleClose(para) and handleShow(para)? 
   const handleClose = () => {
     setShow(false); 
     setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg("");
@@ -241,7 +242,8 @@ function CoursePage(props) {
         "colorCode": colorCode
       };
 
-      // console.log("newClassSubmit:", newClassSubmit);
+      console.log("newClassSubmit:", newClassSubmit);
+      setSubmitted(true);
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
       // axios.post("http://localhost:8000/addcourse", newClassSubmit)
       .then(response => {
@@ -249,69 +251,14 @@ function CoursePage(props) {
         setModalInputTextShown(true);
         setModalInputSelectShown(false);
         handleClose();
+        setSubmitted(false);
         setShowMsg(true);
       })
       .then(() => {getCourseData(); setNewClassForm({});})
 
       
     }
-
-    /*
-    const newClassInfo = {
-      instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
-      term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
-      // colorCode: 2, // temporarily set to color2. TODO: assign to different colors 
-    };
-    console.log(newClassInfo);
-    // await fetch('/Coursepage/add', {
-    //   method: "PUT", 
-    //   headers: {"Content-Type": "application/json"}, 
-    //   body: JSON.stringify({msg: "hello"})
-    // })    
-    setModalInputTextShown(true);
-    setModalInputSelectShown(false);
-    handleClose();
-    setShowMsg(true);
-    // ////////// For demo propose, subject to change //////////
-    // Add input to the `courseData` to simulate inserting to the db 
-    // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
-    const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
-    if (course_idx === -1) { // Add a new professor to courseData
-      let newColorCode = 1;
-      console.log("courseData.length:", courseData.length);
-      if (courseData.length) {
-        newColorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
-        console.log("newColorCode", newColorCode);
-      }
-      let newProf = {
-        instructor: newClassForm['fullname'], 
-        terms: [(newClassForm['quarter'] + ' ' + newClassForm['year'])], 
-        colorCode: newColorCode
-        ,
-      };
-      courseData.unshift(newProf);  
-      setCourseData(courseData);
-    } else {  // Add term to an existing professor 
-      let l = courseData[course_idx].terms.length; 
-      courseData[course_idx].terms.push(newClassForm['quarter'] + ' ' + newClassForm['year']);
-      let l2 = courseData[course_idx].terms.length; 
-      console.log("l:", l, "l2:", l2);
-      courseData[course_idx].terms.sort(compareTerms).reverse();
-      setCourseData(courseData);
-    }
-    // /////////////////////////////////////////////////////////
-    */
-
-    
   }
-
-  //const color1= '#6B8E23';
-  //const color2= '#EC7063';
-  //const color3= '#A569BD';
-  //const color4= '#34495E';
-  //const color5= '#F5B041';
-  //const color6= '#2D68C4';
-  //const colorCodes = {color1, color2, color3, color4, color5, color6};
 
   function professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
@@ -433,22 +380,22 @@ function CoursePage(props) {
               <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button variant="primary" onClick={/*handleClose*/ handleSubmit}>
-                Save Changes
+              <Button variant={submitted ? "success" : "primary"} onClick={/*handleClose*/ handleSubmit}>
+                Submit
               </Button>
             </Modal.Footer>
           </Modal>
           {/* <AddClassMsg /> */}
-          <Modal show={showMsg} onHide={handleCloseMsg}>
+          {/* <Modal show={showMsg} onHide={handleCloseMsg}>
             <Modal.Body 
               // style={{display: 'flex'}}
             >
               {msg}{'     '}
-              <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
+              <Button variant="success" onClick={handleCloseMsg} style={{float: 'right'}}>
                   OK
               </Button>
             </Modal.Body>
-          </Modal>
+          </Modal> */}
         </>
         <div className='coursepage-class-list'>
           <Professors />
