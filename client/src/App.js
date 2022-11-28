@@ -13,8 +13,8 @@ function App() {
 
   const updateUid = (uid) => {setUid(uid); localStorage.setItem("uid", uid);}
   const logout = () => {localStorage.removeItem("uid");}
-  console.log("App uid:", uid);
-  console.log("storage:", localStorage.getItem("uid"));
+  // console.log("App uid:", uid);
+  // console.log("storage:", localStorage.getItem("uid"));
 
   return (
     <BrowserRouter>

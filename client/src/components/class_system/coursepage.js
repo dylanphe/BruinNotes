@@ -2,7 +2,7 @@
 //        More tests on the comparator function
 //        https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
 import React, {useState, useEffect} from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -58,9 +58,9 @@ function CoursePage(props) {
   // let location = useLocation();
   let coursename = params.coursename;
   let uid = params.uid;
-  console.log(params.coursename);    // debug
-  console.log(params.uid);
-  console.log(props.uid);
+  // console.log(params.coursename);    // debug
+  // console.log(params.uid);
+  // console.log(props.uid);
   const navigate = useNavigate();
 
   const [courseData, setCourseData] = useState([]);
@@ -94,7 +94,7 @@ function CoursePage(props) {
   //      https://axios-http.com/docs/example
   //      https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises
   async function getCourseData()  {
-    console.log('getCourseData'); 
+    // console.log('getCourseData'); 
     setLoading(true);
     try {
       const url = "http://127.0.0.1:8000/searchcourses/" + coursename;
@@ -103,12 +103,12 @@ function CoursePage(props) {
       // const response = await sampleCourseDataEmt;
       // console.log(response);
       const data = await response.data;
-      console.log("response:", response);
-      console.log("data:", data);
+      // console.log("response:", response);
+      // console.log("data:", data);
       const courses = dataToCourses(data, compareTerms);
-      console.log("courses:", courses);
+      // console.log("courses:", courses);
       setCourseData(courses);
-      console.log("courseData.length:", courseData.length);      
+      // console.log("courseData.length:", courseData.length);      
     } 
     catch (error) {
       console.error("Could not get courses:", error);
@@ -119,13 +119,13 @@ function CoursePage(props) {
   useEffect(() => {
     const storedUid = localStorage.getItem("uid");
     if (storedUid != null && storedUid !== params.uid) {
-      console.log(storedUid, "=/=", params.uid);
+      // console.log(storedUid, "=/=", params.uid);
       // Hey don't use other ppl's uid :<
       navigate('/'+storedUid+'/'+params.coursename);
     }
 
     getCourseData();
-    console.log('useEffect'); //debug
+    // console.log('useEffect'); //debug
   }, []);
 
   useEffect(() => {
@@ -141,12 +141,12 @@ function CoursePage(props) {
   // setCourseBucket(sampleCourseBucket);
 
   // debug
-  console.log("courseData", courseData);
-  if (courseData.length >= 2) {
-    console.log("courseData.length:", courseData.length);
-    console.log(courseData[1].instructor);
-  }
-  console.log("professors:", getProfessors(courseData));
+  // console.log("courseData", courseData);
+  // if (courseData.length >= 2) {
+  //   console.log("courseData.length:", courseData.length);
+  //   console.log(courseData[1].instructor);
+  // }
+  // console.log("professors:", getProfessors(courseData));
 
   function colorNumToColorCode(colorNum) {
     return 'var(--color' + colorNum + ')';
@@ -158,7 +158,7 @@ function CoursePage(props) {
     let value = e.target.value;
     newClassForm[name] = value;
     setNewClassForm(newClassForm);
-    console.log("newClassForm in handleChange:", newClassForm);
+    // console.log("newClassForm in handleChange:", newClassForm);
   }
 
   function compareTerms(term1, term2) { 
@@ -193,7 +193,7 @@ function CoursePage(props) {
     // e.preventDefault();
     setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg("");
 
-    console.log("newClassForm:", newClassForm);
+    // console.log("newClassForm:", newClassForm);
     const isProfExist = (newClassForm['professor_select'] != null);
     // TODO: might need to assert that fullname == null whenever professor_select exists
     
@@ -205,24 +205,24 @@ function CoursePage(props) {
 
     const inputValidateResult = validateAddCourseInput(newClassIntermediate);
     const isInputValidate = (inputValidateResult.isInstructorValid && inputValidateResult.isQuarterValid && inputValidateResult.isYearValid);
-    console.log(isInputValidate);
+    // console.log(isInputValidate);
     if (!isInputValidate) {
-      console.log("inputValidateResult:", inputValidateResult);
+      // console.log("inputValidateResult:", inputValidateResult);
       if (!inputValidateResult.isInstructorValid) {
-        console.log(1);
+        // console.log(1);
         setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
       }
       if (!inputValidateResult.isQuarterValid) {
-        console.log(2);
+        // console.log(2);
         setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
         // console.log(quarterInvalidMsg);
       }
       if (!inputValidateResult.isYearValid) {
-        console.log(3);
+        // console.log(3);
         setYearInvalidMsg(inputValidateResult.yearValidateMessage);
         // console.log(yearInvalidMsg);
       }   
-      console.log("invalid", instructorInvalidMsg, quarterInvalidMsg, yearInvalidMsg);   
+      // console.log("invalid", instructorInvalidMsg, quarterInvalidMsg, yearInvalidMsg);   
     }
     else {  // Input is valid
       setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg(""); 
@@ -231,11 +231,11 @@ function CoursePage(props) {
       let colorCode = 1;
       const course_idx = courseData.findIndex((course) => course.instructor === newClassIntermediate['instructor']);
       if (course_idx === -1) { // Generate a new colorCode for a new professor 
-        console.log("courseData.length:", courseData.length);
+        // console.log("courseData.length:", courseData.length);
         if (courseData.length) {
           // colorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
           colorCode = courseData.length % num_colors + 1;
-          console.log("newColorCode", colorCode);
+          // console.log("newColorCode", colorCode);
         }
       }
       else {  // Use the existing color code
@@ -250,7 +250,7 @@ function CoursePage(props) {
         "colorCode": colorCode
       };
 
-      console.log("newClassSubmit:", newClassSubmit);
+      // console.log("newClassSubmit:", newClassSubmit);
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
       // axios.post("http://localhost:8000/addcourse", newClassSubmit)
       .then(response => {
@@ -263,63 +263,8 @@ function CoursePage(props) {
       .then(() => {getCourseData(); setNewClassForm({});})
       axios.post("http://127.0.0.1:8000/addprofessor/"+newClassIntermediate['instructor'])
     }
-
-    /*
-    const newClassInfo = {
-      instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
-      term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
-      // colorCode: 2, // temporarily set to color2. TODO: assign to different colors 
-    };
-    console.log(newClassInfo);
-    // await fetch('/Coursepage/add', {
-    //   method: "PUT", 
-    //   headers: {"Content-Type": "application/json"}, 
-    //   body: JSON.stringify({msg: "hello"})
-    // })    
-    setModalInputTextShown(true);
-    setModalInputSelectShown(false);
-    handleClose();
-    setShowMsg(true);
-    // ////////// For demo propose, subject to change //////////
-    // Add input to the `courseData` to simulate inserting to the db 
-    // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
-    const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
-    if (course_idx === -1) { // Add a new professor to courseData
-      let newColorCode = 1;
-      console.log("courseData.length:", courseData.length);
-      if (courseData.length) {
-        newColorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
-        console.log("newColorCode", newColorCode);
-      }
-      let newProf = {
-        instructor: newClassForm['fullname'], 
-        terms: [(newClassForm['quarter'] + ' ' + newClassForm['year'])], 
-        colorCode: newColorCode
-        ,
-      };
-      courseData.unshift(newProf);  
-      setCourseData(courseData);
-    } else {  // Add term to an existing professor 
-      let l = courseData[course_idx].terms.length; 
-      courseData[course_idx].terms.push(newClassForm['quarter'] + ' ' + newClassForm['year']);
-      let l2 = courseData[course_idx].terms.length; 
-      console.log("l:", l, "l2:", l2);
-      courseData[course_idx].terms.sort(compareTerms).reverse();
-      setCourseData(courseData);
-    }
-    // /////////////////////////////////////////////////////////
-    */
-
-    
   }
 
-  //const color1= '#6B8E23';
-  //const color2= '#EC7063';
-  //const color3= '#A569BD';
-  //const color4= '#34495E';
-  //const color5= '#F5B041';
-  //const color6= '#2D68C4';
-  //const colorCodes = {color1, color2, color3, color4, color5, color6};
   const [showRating, setShowRating] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [profRating, setProf] = useState('None');

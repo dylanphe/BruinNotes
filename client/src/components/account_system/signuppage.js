@@ -15,7 +15,7 @@ function SignupPage() {
     //KeyPressed Enter == SignUp Button clicked
     useEffect(() => {
         const keyDownHandler = event => {
-            console.log('User pressed: ', event.key);
+            // console.log('User pressed: ', event.key);
     
             if (event.key === 'Enter') {
                 handleSubmit();

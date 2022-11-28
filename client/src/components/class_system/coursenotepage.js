@@ -19,7 +19,7 @@ function CourseNotePage(props) {
   useEffect(() => {
     const storedUid = localStorage.getItem("uid");
     if (storedUid != null && storedUid !== params.uid) {
-      console.log(storedUid, "=/=", params.uid);
+      // console.log(storedUid, "=/=", params.uid);
       // Hey don't use other ppl's uid :<
       navigate('/'+storedUid+'/'+params.coursename+'/'+params.instructor+'/'+params.term);
     }
@@ -66,7 +66,7 @@ function CourseNotePage(props) {
   const [noteList, setNoteList] = useState([]);
   const [emptyNote, setEmptyNote] = useState(false);
   const [loading, setLoading] = useState(true);
-  console.log("loading", loading);
+  // console.log("loading", loading);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [hideNote, setHideNote] = useState(false);
@@ -248,7 +248,7 @@ function CourseNotePage(props) {
     }
 
     async function handleToggleComments() {
-      console.log("comment", comment);
+      // console.log("comment", comment);
       try {
         const res = await axios.put('/togglecommentvisibility/'+note._id+'/'+uidParams);
         console.log(res);
@@ -266,22 +266,22 @@ function CourseNotePage(props) {
       // setUserComments(userComments);
       // console.log(userComments);
       setComment(e.target.value);
-      console.log("comment", comment);
+      // console.log("comment", comment);
     }
 
     async function handleSubmitComment() {
-      console.log("comment", comment);
+      // console.log("comment", comment);
       if (comment === '') return;
       try {
         const res = await axios.post('http://127.0.0.1:8000/addcomment', {
           'noteInfo': {'_id': note._id}, 
           'commentInfo': {'username': user.fullname, 'comment': comment}
         });
-        console.log(res);
+        // console.log(res);
         // searchNote();
         const res2 = await axios.get('http://127.0.0.1:8000/searchnotebyid/'+note._id);
         const updatedNote = res2.data;
-        console.log(updatedNote);
+        // console.log(updatedNote);
         setNote(updatedNote);
         setComment('');
       }
