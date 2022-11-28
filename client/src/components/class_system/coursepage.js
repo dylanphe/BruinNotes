@@ -118,7 +118,7 @@ function CoursePage(props) {
 
   useEffect(() => {
     const storedUid = localStorage.getItem("uid");
-    if (storedUid !== params.uid) {
+    if (storedUid != null && storedUid !== params.uid) {
       console.log(storedUid, "=/=", params.uid);
       // Hey don't use other ppl's uid :<
       navigate('/'+storedUid+'/'+params.coursename);
