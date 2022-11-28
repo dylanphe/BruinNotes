@@ -335,15 +335,21 @@ function CoursePage(props) {
   }
 
   async function handleGetRating(prof) {
-    if (prof != null) {
-      axios.get("/getrating/"+prof)
-      .then(res => {
-        let result = res.data.avgRating;
-        console.log(result);
-        return result;
-      });
-    }
+    const getRating = async () => {
+      if (prof != null) {
+        axios.get("/getrating/"+prof)
+        .then(res => {
+          let result = res.data;
+          console.log(result);
+          return result;
+        });
+      }
+    };
+
+    const globalRating = await getRating();
+    console.log(globalRating);
   }
+
 
   const onPointerEnter = () => console.log('Enter');
   const onPointerLeave = () => console.log('Leave');
@@ -360,15 +366,19 @@ function CoursePage(props) {
     setUserRating(0);
   }
 
-  function professor(courseDataElement) {
+  function Professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
     let instructor = courseDataElement.instructor;
     // let instructorColor = courseDataElement.colorCode;
     // let instructorColor = 'var(--color' + courseDataElement.colorCode + ')';
     let instructorColor = colorNumToColorCode(courseDataElement.colorCode);
     // console.log("colorCode:", courseDataElement.colorCode);
-    let rating = handleGetRating(instructor);
-    console.log(rating)
+    const [profRating, setProfRating] = useState('');
+    axios.get("/getrating/"+instructor)
+      .then(res => {
+        let result = res.data;
+        setProfRating(result);
+    });
 
     return (
       <div key={instructor} className='prof-main'>
@@ -376,7 +386,7 @@ function CoursePage(props) {
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
           <div className='rate'> 
-            <span className='score'>{}</span>
+            <span className='score'>{profRating}</span>
             <button type="button" id="rating" className='misc-button' onClick={e => handleShowRating(instructor)}><BsFillStarFill/></button>
           </div>
         </div>
@@ -394,7 +404,7 @@ function CoursePage(props) {
 
   function Professors() {
     if (!courseData.length) {return null;}
-    return (courseData.map((courseDataElement) => professor(courseDataElement)));
+    return (courseData.map((courseDataElement) => Professor(courseDataElement)));
   }
 
   const [isModalInputTextShown, setModalInputTextShown] = useState(true);
