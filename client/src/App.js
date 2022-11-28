@@ -8,11 +8,13 @@ import CoursePage from './components/class_system/coursepage';
 import CourseNotePage from './components/class_system/coursenotepage';
 
 function App() {
-  const [uid, setUid] = useState(null);
+  const [uid, setUid] = useState(localStorage.getItem("uid"));
   // const [uid, setUid] = useState('000000000');
 
-  const updateUid = (uid) => {setUid(uid);}
+  const updateUid = (uid) => {setUid(uid); localStorage.setItem("uid", uid);}
+  const logout = () => {localStorage.removeItem("uid");}
   console.log("App uid:", uid);
+  console.log("storage:", localStorage.getItem("uid"));
 
   return (
     <BrowserRouter>
@@ -23,7 +25,7 @@ function App() {
           {/* <Route path = "SearchPage" element={<Searchpage uid={uid}/>} />
            <Route path = "/c/:coursename" element={<CoursePage uid={uid}/>} />
            <Route path = "c/:coursename/:instructor/:term" element={<CourseNotePage uid={uid}/>} /> */}
-          <Route path = "/:uid/" element={uid !== null ? <Searchpage uid={uid} onLogout={updateUid} /> : <Navigate to="/" />} />
+          <Route path = "/:uid/" element={uid !== null ? <Searchpage uid={uid} onLogout={logout} /> : <Navigate to="/" />} />
           <Route path = "/:uid/:coursename" element={uid !== null ? <CoursePage uid={uid}/> : <Navigate to="/" />} />
           <Route path = "/:uid/:coursename/:instructor/:term" element={uid !== null ? <CourseNotePage uid={uid}/> : <Navigate to="/" />} />
         </Routes>

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Link,  useParams} from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Link,  useNavigate,  useParams} from 'react-router-dom';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -12,9 +12,11 @@ import LogoutBtn from './logoutbtn';
 // The function that toggles between themes
 function Searchpage(props) {
     const [show, setShow] = useState(false);
-
     const [showMsg, setShowMsg] = useState(false);
     let msg = "hiiiiii"; // TODO: change default message
+    
+    const params = useParams();
+    const navigate = useNavigate();
 
     console.log(props.uid);
     const handleShow = () => setShow(true);
@@ -242,6 +244,15 @@ function Searchpage(props) {
         "ESL",
         "ENGCOMP"
     ];
+
+    useEffect(() => {
+        const storedUid = localStorage.getItem("uid");
+        if (storedUid !== params.uid) {
+          console.log(storedUid, "=/=", params.uid);
+          // Hey don't use other ppl's uid :<
+          navigate('/'+storedUid+'/');
+        }
+    }, []);
 
 
     function validateCourse() {

@@ -24,6 +24,13 @@ function Loginpage(props) {
         };
     });
 
+    useEffect(() => {
+        const storedUid = localStorage.getItem("uid");
+        if (storedUid !== null) {
+            navigate('/'+storedUid+'/');
+        }
+    }, []);
+
 
     const [uid, setUID] = React.useState();
     const [password, setPassword] = React.useState();
@@ -72,6 +79,7 @@ function Loginpage(props) {
 
     //UI Data for passwordshown button and page routing
     const navigate = useNavigate();
+
     const [passwordShown, setPasswordShown] = useState(false);
     // Password toggle handler
     const togglePassword = () => {

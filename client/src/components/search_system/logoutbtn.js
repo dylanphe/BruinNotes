@@ -5,7 +5,7 @@ import './logoutbtn.css';
 function LogoutBtn(props) {
   const navigate = useNavigate();
   return (
-    <button id='logout-btn' className='search-btn' onClick={() => {props.onLogout(null); navigate("/")}}>
+    <button id='logout-btn' className='search-btn' onClick={() => {props.onLogout(); navigate("/")}}>
       {/* <Link to="/"> */}
         Logout
       {/* </Link> */}

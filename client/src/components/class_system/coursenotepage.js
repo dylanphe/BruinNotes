@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useTransition} from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {BiCommentAdd, BiLink} from 'react-icons/bi';
 import {AiFillLike, AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillDelete} from 'react-icons/ai'; 
 import {ImArrowUpLeft2} from 'react-icons/im'; 
@@ -15,6 +15,16 @@ import axios from 'axios';
 
 
 function CourseNotePage(props) {
+  
+  useEffect(() => {
+    const storedUid = localStorage.getItem("uid");
+    if (storedUid !== params.uid) {
+      console.log(storedUid, "=/=", params.uid);
+      // Hey don't use other ppl's uid :<
+      navigate('/'+storedUid+'/'+params.coursename+'/'+params.instructor+'/'+params.term);
+    }
+  }, []);
+  
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/viewuser/'+uidParams)
     .then( (res) => {
@@ -45,6 +55,7 @@ function CourseNotePage(props) {
 
   //Notes
   const params = useParams();
+  const navigate = useNavigate();
   const courseName = params.coursename, instructor = params.instructor, term = params.term, uidParams = params.uid;
   const authorTypes = ['Student', 'TA', 'Professor'];
   const [noteLink, setNoteLink] = useState('');

@@ -60,6 +60,7 @@ function CoursePage(props) {
   console.log(params.coursename);    // debug
   console.log(params.uid);
   console.log(props.uid);
+  const navigate = useNavigate();
 
   const [courseData, setCourseData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,6 +117,13 @@ function CoursePage(props) {
   };
 
   useEffect(() => {
+    const storedUid = localStorage.getItem("uid");
+    if (storedUid !== params.uid) {
+      console.log(storedUid, "=/=", params.uid);
+      // Hey don't use other ppl's uid :<
+      navigate('/'+storedUid+'/'+params.coursename);
+    }
+
     getCourseData();
     console.log('useEffect'); //debug
   }, []);
