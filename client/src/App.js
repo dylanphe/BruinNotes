@@ -8,8 +8,8 @@ import CoursePage from './components/class_system/coursepage';
 import CourseNotePage from './components/class_system/coursenotepage';
 
 function App() {
-  const [uid, setUid] = useState(null);
-  // const [uid, setUid] = useState('000000000');
+  //const [uid, setUid] = useState(null);
+  const [uid, setUid] = useState('505834475');
 
   const updateUid = (uid) => {setUid(uid);}
   console.log("App uid:", uid);

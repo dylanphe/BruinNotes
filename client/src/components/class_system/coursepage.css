@@ -31,7 +31,6 @@
 }
 
 .coursepage-title-box {
-    width: 100vw;
     height: 100px;
     padding-top: 20px;
 }
@@ -43,8 +42,10 @@
     display:flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 10px;
     border-top-left-radius: 50px;
     border-top-right-radius: 50px;
+    overflow-x: hidden;
 }
 
 .coursepage-title {
@@ -56,9 +57,7 @@
 
 .coursepage-class-list {
     /* position: relative; */
-    width: 95%;
-    min-width: 250px;
-    margin-top: 2.5%;    
+    padding-top: 2.5%;    
 }
 
 
@@ -98,7 +97,7 @@ ul.term-under-instructor{
 ul.term-under-instructor li {
     display: inline;
     /* padding: .5%; */
-    margin-right: 5%;
+    padding-right: 5%;
     
 }
 
@@ -184,8 +183,10 @@ a:hover {
 
 
 #no-class {
-    margin: 18% auto;
+    margin-top: 17%;
     color: #2D68C4;
+    background-color: #FFFAF1;
+    height: 100vh;
     font-family: "Gloria Hallelujah";
     font-weight: bolder;
     font-size: x-large;
@@ -195,4 +196,29 @@ a:hover {
 .invalidMsg {
     color: #EC7063;
     padding: 40px;
+}
+
+.rate {
+    float: right;
+    font-size: medium;
+    padding: 0 10px;
+    text-align:center;
+}
+
+.rate-modal {
+    font-size: medium;
+    text-align:center;
+}
+
+
+#rating {
+    color: yellow;
+}
+
+#rating:hover {
+    color: #c59b08;
+}
+
+.prof-main {
+    width: 93vw;
 }
