@@ -2,17 +2,19 @@
 //        More tests on the comparator function
 //        https://stackoverflow.com/questions/43164554/how-to-implement-authenticated-routes-in-react-router-4/43171515#43171515
 import React, {useState, useEffect} from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import {ImArrowUpLeft2} from 'react-icons/im'; 
+import {BsFillStarFill} from 'react-icons/bs'; 
 import HomeBtn from './homebtn';
 import dataToCourses from './datatocourse.js';
 import validateAddCourseInput from './validateInput.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './coursepage.css';
+import { Rating } from 'react-simple-star-rating'
 
 /*
 Expected data structure from get:
@@ -48,7 +50,6 @@ Expected data structure from get:
     "notes": [...],
 }];
 */
-const sampleCourseDataEmt = [];
 
 // route: /:uid/:coursename
 function CoursePage(props) {
@@ -63,22 +64,22 @@ function CoursePage(props) {
   const navigate = useNavigate();
 
   const [courseData, setCourseData] = useState([]);
+  const [professorData, setProfessorData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [show, setShow] = useState(false);
   const [newClassForm, setNewClassForm] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  // let submitted = false;
   // const [inputInstructor, setInputInstructor] = useState("");
   // const [inputQuarter, setInputQuarter] = useState("");
   // const [inputYear, setInputYear] = useState("");
   // const [msg, setMsg] = useState("hiiii");  // TODO: change default message
-  let msg = "hiiiiii"; // TODO: change default message
+  let msg = "Professor Added"; // TODO: change default message
   const [showMsg, setShowMsg] = useState(false);
   const [instructorInvalidMsg, setInstructorInvalidMsg] = useState("");
   const [quarterInvalidMsg, setQuarterInvalidMsg] = useState("");
   const [yearInvalidMsg, setYearInvalidMsg] = useState("");
 
+  // TODO: maybe refactoring into functions handleClose(para) and handleShow(para)? 
   const handleClose = () => {
     setShow(false); 
     setInstructorInvalidMsg(""); setQuarterInvalidMsg(""); setYearInvalidMsg("");
@@ -86,7 +87,6 @@ function CoursePage(props) {
   };
   const handleShow = () => setShow(true);
   const handleCloseMsg = () => setShowMsg(false);
-  const handleShowMsg = () => setShowMsg(true);
 
   const num_colors = 10;
 
@@ -103,12 +103,12 @@ function CoursePage(props) {
       // const response = await sampleCourseDataEmt;
       // console.log(response);
       const data = await response.data;
-      // console.log("response:", response);
-      // console.log("data:", data);
+      console.log("response:", response);
+      console.log("data:", data);
       const courses = dataToCourses(data, compareTerms);
-      // console.log("courses:", courses);
+      console.log("courses:", courses);
       setCourseData(courses);
-      // console.log("courseData.length:", courseData.length);      
+      console.log("courseData.length:", courseData.length);      
     } 
     catch (error) {
       console.error("Could not get courses:", error);
@@ -141,10 +141,10 @@ function CoursePage(props) {
   // setCourseBucket(sampleCourseBucket);
 
   // debug
-  // console.log("courseData", courseData);
+  console.log("courseData", courseData);
   if (courseData.length >= 2) {
-    // console.log("courseData.length:", courseData.length);
-    // console.log(courseData[1].instructor);
+    console.log("courseData.length:", courseData.length);
+    console.log(courseData[1].instructor);
   }
   console.log("professors:", getProfessors(courseData));
 
@@ -205,20 +205,20 @@ function CoursePage(props) {
 
     const inputValidateResult = validateAddCourseInput(newClassIntermediate);
     const isInputValidate = (inputValidateResult.isInstructorValid && inputValidateResult.isQuarterValid && inputValidateResult.isYearValid);
-    // console.log(isInputValidate);
+    console.log(isInputValidate);
     if (!isInputValidate) {
-      // console.log("inputValidateResult:", inputValidateResult);
+      console.log("inputValidateResult:", inputValidateResult);
       if (!inputValidateResult.isInstructorValid) {
-        // console.log(1);
+        console.log(1);
         setInstructorInvalidMsg(inputValidateResult.instructorValidateMessage);
       }
       if (!inputValidateResult.isQuarterValid) {
-        // console.log(2);
+        console.log(2);
         setQuarterInvalidMsg(inputValidateResult.quarterValidateMessage);
         // console.log(quarterInvalidMsg);
       }
       if (!inputValidateResult.isYearValid) {
-        // console.log(3);
+        console.log(3);
         setYearInvalidMsg(inputValidateResult.yearValidateMessage);
         // console.log(yearInvalidMsg);
       }   
@@ -231,11 +231,11 @@ function CoursePage(props) {
       let colorCode = 1;
       const course_idx = courseData.findIndex((course) => course.instructor === newClassIntermediate['instructor']);
       if (course_idx === -1) { // Generate a new colorCode for a new professor 
-        // console.log("courseData.length:", courseData.length);
+        console.log("courseData.length:", courseData.length);
         if (courseData.length) {
           // colorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
           colorCode = courseData.length % num_colors + 1;
-          // console.log("newColorCode", colorCode);
+          console.log("newColorCode", colorCode);
         }
       }
       else {  // Use the existing color code
@@ -251,42 +251,157 @@ function CoursePage(props) {
       };
 
       console.log("newClassSubmit:", newClassSubmit);
-      setSubmitted(true);
       axios.post("http://127.0.0.1:8000/addcourse", newClassSubmit)
       // axios.post("http://localhost:8000/addcourse", newClassSubmit)
       .then(response => {
-        // console.log("post response:", response);
+        console.log("post response:", response);
         setModalInputTextShown(true);
         setModalInputSelectShown(false);
         handleClose();
-        setSubmitted(false);
         setShowMsg(true);
       })
       .then(() => {getCourseData(); setNewClassForm({});})
+      axios.post("http://127.0.0.1:8000/addprofessor/"+newClassIntermediate['instructor'])
+    }
 
-      
+    /*
+    const newClassInfo = {
+      instructor: isProfExist? newClassForm['professor_select'] : newClassForm['fullname'], 
+      term: (newClassForm['quarter'] + ' ' + newClassForm['year']),
+      // colorCode: 2, // temporarily set to color2. TODO: assign to different colors 
+    };
+    console.log(newClassInfo);
+    // await fetch('/Coursepage/add', {
+    //   method: "PUT", 
+    //   headers: {"Content-Type": "application/json"}, 
+    //   body: JSON.stringify({msg: "hello"})
+    // })    
+    setModalInputTextShown(true);
+    setModalInputSelectShown(false);
+    handleClose();
+    setShowMsg(true);
+    // ////////// For demo propose, subject to change //////////
+    // Add input to the `courseData` to simulate inserting to the db 
+    // ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
+    const course_idx = courseData.findIndex((course) => course.instructor === newClassInfo['instructor']);
+    if (course_idx === -1) { // Add a new professor to courseData
+      let newColorCode = 1;
+      console.log("courseData.length:", courseData.length);
+      if (courseData.length) {
+        newColorCode = (courseData[0].colorCode + (num_colors-2)) % (num_colors) + 1;
+        console.log("newColorCode", newColorCode);
+      }
+      let newProf = {
+        instructor: newClassForm['fullname'], 
+        terms: [(newClassForm['quarter'] + ' ' + newClassForm['year'])], 
+        colorCode: newColorCode
+        ,
+      };
+      courseData.unshift(newProf);  
+      setCourseData(courseData);
+    } else {  // Add term to an existing professor 
+      let l = courseData[course_idx].terms.length; 
+      courseData[course_idx].terms.push(newClassForm['quarter'] + ' ' + newClassForm['year']);
+      let l2 = courseData[course_idx].terms.length; 
+      console.log("l:", l, "l2:", l2);
+      courseData[course_idx].terms.sort(compareTerms).reverse();
+      setCourseData(courseData);
+    }
+    // /////////////////////////////////////////////////////////
+    */
+
+    
+  }
+
+  //const color1= '#6B8E23';
+  //const color2= '#EC7063';
+  //const color3= '#A569BD';
+  //const color4= '#34495E';
+  //const color5= '#F5B041';
+  //const color6= '#2D68C4';
+  //const colorCodes = {color1, color2, color3, color4, color5, color6};
+  const [showRating, setShowRating] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [profRating, setProf] = useState('None');
+
+
+  function handleChangeRating(r) {
+    setUserRating(r);
+    console.log('hii', r);
+  }
+
+  async function handleSubmitRating(prof, rating) {
+    if (rating != 0) {
+      axios.put("/addrating/"+prof+"/"+rating)
+      .then(res => {
+          console.log(res.data);
+          handleCloseRating();
+        }
+      );
+
     }
   }
 
-  function professor(courseDataElement) {
+  async function handleGetRating(prof) {
+    const getRating = async () => {
+      if (prof != null) {
+        axios.get("/getrating/"+prof)
+        .then(res => {
+          let result = res.data;
+          console.log(result);
+          return result;
+        });
+      }
+    };
+
+    const globalRating = await getRating();
+    console.log(globalRating);
+  }
+
+
+  const onPointerEnter = () => console.log('Enter');
+  const onPointerLeave = () => console.log('Leave');
+  const onPointerMove = (value, index) => console.log(value, index);
+
+  function handleShowRating(instructor) {
+    setProf(instructor);
+    setShowRating(true);
+  }
+
+  function handleCloseRating() {
+    console.log(userRating);
+    setShowRating(false);
+    setUserRating(0);
+  }
+
+  function Professor(courseDataElement) {
     // courseDataElement = {"instructor": "DJ, JAYS","term": ["Spring 2022", "Fall 2022"]};
     let instructor = courseDataElement.instructor;
     // let instructorColor = courseDataElement.colorCode;
     // let instructorColor = 'var(--color' + courseDataElement.colorCode + ')';
     let instructorColor = colorNumToColorCode(courseDataElement.colorCode);
     // console.log("colorCode:", courseDataElement.colorCode);
+    const [profRating, setProfRating] = useState('');
+    axios.get("/getrating/"+instructor)
+      .then(res => {
+        let result = res.data;
+        setProfRating(result);
+    });
 
     return (
-      <div key={instructor}>
+      <div key={instructor} className='prof-main'>
         <div id='coursepage-instructor' style={{backgroundColor: instructorColor}} key={instructor}>
           <span id='coursepage-prof-title'><b>PROFESSOR</b></span>:
           <span> {courseDataElement.instructor}</span>
+          <div className='rate'> 
+            <span className='score'>{profRating}</span>
+            <button type="button" id="rating" className='misc-button' onClick={e => handleShowRating(instructor)}><BsFillStarFill/></button>
+          </div>
         </div>
         <div id="coursepage-term-list" >
           <ul className='term-under-instructor'>
             {courseDataElement.terms.map((term) => 
               <li key={term} className='lnk'>
-                {/* <Link to={"".concat("/c/", coursename, "/", instructor, "/", term)} className='lnk'>{term}</Link> */}
                 <Link className="lnk" to={"".concat("/", uid, "/", coursename, "/", instructor, "/", term)}>{term}</Link>
               </li>)}
           </ul>
@@ -297,7 +412,7 @@ function CoursePage(props) {
 
   function Professors() {
     if (!courseData.length) {return null;}
-    return (courseData.map((courseDataElement) => professor(courseDataElement)));
+    return (courseData.map((courseDataElement) => Professor(courseDataElement)));
   }
 
   const [isModalInputTextShown, setModalInputTextShown] = useState(true);
@@ -388,22 +503,46 @@ function CoursePage(props) {
               <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button variant={submitted ? "success" : "primary"} onClick={/*handleClose*/ handleSubmit}>
-                Submit
+              <Button variant="primary" onClick={/*handleClose*/ handleSubmit}>
+                Save Changes
               </Button>
             </Modal.Footer>
           </Modal>
           {/* <AddClassMsg /> */}
-          {/* <Modal show={showMsg} onHide={handleCloseMsg}>
+          <Modal show={showMsg} onHide={handleCloseMsg}>
             <Modal.Body 
               // style={{display: 'flex'}}
             >
               {msg}{'     '}
-              <Button variant="success" onClick={handleCloseMsg} style={{float: 'right'}}>
+              <Button variant="success" onClick={/*handleClose*/ handleCloseMsg} style={{float: 'right'}}>
                   OK
               </Button>
             </Modal.Body>
-          </Modal> */}
+          </Modal>
+          <Modal show={showRating} onHide={handleCloseRating}>
+              <Modal.Header closeButton>
+                <Modal.Title>Rating: {profRating}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className ='rate-modal'>
+                  <Rating
+                    onClick={handleChangeRating}
+                    onPointerEnter={onPointerEnter}
+                    onPointerLeave={onPointerLeave}
+                    onPointerMove={onPointerMove}
+                    /* Available Props */
+                  />
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseRating}>
+                  Close
+                </Button>
+                <Button variant="primary" onClick={e => handleSubmitRating(profRating, userRating)}>
+                  Rate
+                </Button>
+              </Modal.Footer>
+            </Modal>
         </>
         <div className='coursepage-class-list'>
           <Professors />

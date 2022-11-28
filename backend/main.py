@@ -665,7 +665,7 @@ async def add_professor(name):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_prof)
     
 
-@app.put("/addrating/{prof_name}/{newRating}")
+@app.put("/addrating/{profName}/{newRating}")
 async def add_rating(profName, newRating):
     """adds new rating to the professor
 
@@ -677,19 +677,19 @@ async def add_rating(profName, newRating):
     Returns:
         Updated rating of the professor
     """
-    prof = db["professors"].find_one({"name": profName})
+    prof = await db["professors"].find_one({"name": profName})
     if (prof is None):
         msg = "Professor with this name not found in the database"
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
 
-    numRating = prof['numRating']
-    avgRating = prof['avgRating']
-    newRating = (numRating*avgRating + newRating)/(numRating+1)
-    updated_prof_rating = await db['notes'].update_one({'name':profName},{'$inc':{"numRating":1},'$set': {"avgRating":newRating}}, upsert=False)
+    numRating = float(prof['numRating'])
+    avgRating = float(prof['avgRating'])
+    newRating = round((numRating*avgRating + float(newRating))/(numRating+1),1)
+    updated_prof_rating = await db['professors'].update_one({'name':profName},{'$inc':{"numRating":1},'$set': {"avgRating":newRating}}, upsert=False)
     if (updated_prof_rating):
         return JSONResponse(status_code=status.HTTP_200_OK, content="{:.1f}".format(newRating))
     
-@app.put("/updaterating/{prof_name}/{prevRating}/{newRating}")
+@app.put("/updaterating/{profName}/{prevRating}/{newRating}")
 async def update_rating(profName, prevRating, newRating):
     """updates preexisting rating to a new rating for a professor
 
@@ -714,13 +714,13 @@ async def update_rating(profName, prevRating, newRating):
     if (updated_prof_rating):
         return JSONResponse(status_code=status.HTTP_200_OK, content="{:.1f}".format(newRating))
 
-@app.get("/getrating/{prof_name}")
+@app.get("/getrating/{profName}")
 async def get_prof_rating(profName):
-    prof = db["professors"].find_one({"name": profName})
+    prof = await db["professors"].find_one({"name": profName})
     if (prof is None):
         msg = "Professor with this name not found in the database"
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
 
-    rating = prof['avgRating']
-    return JSONResponse(status_code=status.HTTP_200_OK, content="{:.1f}".format(rating))
+    avgRating = prof["avgRating"]
+    return JSONResponse(status_code=status.HTTP_200_OK, content=str(avgRating))
 ### END PROF API ###
