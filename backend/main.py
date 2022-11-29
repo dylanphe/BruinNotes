@@ -491,6 +491,9 @@ async def delete_note_request(id):
     """
     Remove note request from the database.
 
+    Args:
+        id (PyObjectId): The ID of the note request to delete.
+
     Returns:
         HTTP 200 OK upon success
         HTTP 404 NOT FOUND if id isn't valid
@@ -508,6 +511,10 @@ async def delete_note_request(id):
 async def increase_likes(note_id, user_id):
     """
     Increases the like count on a note.
+
+    Args:
+        note_id (PyObjectId): The ID of the note to increase likes on.
+        user_id (str): The ID of the user liking the note.
 
     Returns:
         Updated like count on the note.
@@ -530,7 +537,11 @@ async def increase_likes(note_id, user_id):
 @app.put("/decreaselikes/{note_id}/{user_id}", response_description="Decrease likes on a note")
 async def decrease_likes(note_id, user_id):
     """
-    Increases the like count on a note.
+    Decreases the like count on a note.
+
+    Args:
+        note_id (PyObjectId): The ID of the note to decrease likes on.
+        user_id (str): The ID of the user unliking the note.
 
     Returns:
         Updated like count on the note.
@@ -554,6 +565,10 @@ async def increase_dislikes(note_id, user_id):
     """
     Increases the dislike count on a note.
 
+    Args:
+        note_id (PyObjectId): The ID of the note to increase dislikes on.
+        user_id (str): The ID of the user disliking the note.
+
     Returns:
         Updated dislike count on the note.
     """
@@ -574,6 +589,10 @@ async def decrease_dislikes(note_id, user_id):
     """
     Decreases the dislike count on a note.
 
+    Args:
+        note_id (PyObjectId): The ID of the note to decrease dislikes on.
+        user_id (str): The ID of the user undisliking the note.
+
     Returns:
         Updated dislike count on the note.
     """
@@ -592,10 +611,15 @@ async def decrease_dislikes(note_id, user_id):
 @app.get("/searchnote/{courseName}/{instructor}/{term}", response_description="Search for notes that match courseName, professor, and quarter")
 async def search_note_by_fields(courseName, instructor, term):
     """
-    Search note by string fields
+    Search for a note by course, instructor, and term.
+
+    Args:
+        courseName (str): The course name for the note.
+        instructor (str): The instructor for the note.
+        term (str): The term for the note.
     
     Returns:
-        A list of all notes that match these fields
+        A list of all notes that match these fields.
     """
     
     query =  {'$and': 
@@ -612,13 +636,13 @@ async def search_note_by_fields(courseName, instructor, term):
 @app.get("/searchnotebyid/{note_id}", response_description="Search for a note by its _id")
 async def search_note_by_id(note_id):
     """
-    Search note by its _id
+    Search note by its id.
 
     Args: 
-        the note's _id
+        note_id (PyObjectId): The note's _id.
 
     Returns: 
-        The requested note
+        The requested note.
     """
     note = await db['notes'].find_one({"_id": note_id})
     if note:
@@ -628,10 +652,15 @@ async def search_note_by_id(note_id):
 @app.get("/searchnoterequest/{courseName}/{instructor}/{term}", response_description="Search for note requests that match courseName, professor, and quarter")
 async def search_note_requests_by_fields(courseName, instructor, term):
     """
-    Search note requests by string fields
+    Search note requests by course name, instructor, and term.
+
+    Args:
+        courseName (str): The course name for the note request.
+        instructor (str): The instructor for the note request.
+        term (str): The term for the note request.
     
     Returns:
-        A list of all note requests that match these fields
+        A list of all note requests that match these fields.
     """
 
     query =  {'$and': 
@@ -652,7 +681,10 @@ async def add_professor(name):
     """Checks if a professor exists, and adds it to the database if not.
 
     Args:
-        name: The name of the professor
+        name (str): The name of the professor.
+
+    Returns:
+        A JSON object containing the created professor.
     """
     if (await db["professors"].find_one({"name": name}) is not None):
         msg = "Professor with this name already exists in the database"
@@ -667,15 +699,15 @@ async def add_professor(name):
 
 @app.put("/addrating/{profName}/{newRating}")
 async def add_rating(profName, newRating):
-    """adds new rating to the professor
+    """Adds a new rating to a professor.
 
     Args:
-        profName (str): name of the professor
-        newRating (float): new incoming rating of the professor, which is 
-                        a number between 0.5 and 5
+        profName (str): The name of the professor.
+        newRating (float): The new incoming rating of the professor, which is 
+                        a number between 0.5 and 5.
 
     Returns:
-        Updated rating of the professor
+        Updated rating of the professor.
     """
     prof = await db["professors"].find_one({"name": profName})
     if (prof is None):
@@ -691,16 +723,16 @@ async def add_rating(profName, newRating):
     
 @app.put("/updaterating/{profName}/{prevRating}/{newRating}")
 async def update_rating(profName, prevRating, newRating):
-    """updates preexisting rating to a new rating for a professor
+    """Updates preexisting rating to a new rating for a professor.
 
     Args:
-        profName (str): name of the professor
-        newRating (float): new incoming rating of the professor, which is 
+        profName (str): The name of the professor.
+        newRating (float): The new incoming rating of the professor, which is 
                         a number between 0.5 and 5. This replaces a
-                        pre-existing rating for the professor
+                        pre-existing rating for the professor.
 
     Returns:
-        Updated rating of the professor
+        Updated rating of the professor.
     """
     prof = db["professors"].find_one({"name": profName})
     if (prof is None):
@@ -716,6 +748,14 @@ async def update_rating(profName, prevRating, newRating):
 
 @app.get("/getrating/{profName}")
 async def get_prof_rating(profName):
+    """Gets a professor's rating.
+
+    Args:
+        profName (str): The name of the professor.
+
+    Returns:
+        The average rating of the professor.
+    """
     prof = await db["professors"].find_one({"name": profName})
     if (prof is None):
         msg = "Professor with this name not found in the database"
