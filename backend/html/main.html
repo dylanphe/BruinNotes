@@ -26,17 +26,17 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import os
-import motor.motor_asyncio
+<pre><code class="python">import motor.motor_asyncio
 import random
 
 from bson import ObjectId
-from fastapi import FastAPI, Body, HTTPException, status
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import Optional, List
+import bcrypt
 
 client = motor.motor_asyncio.AsyncIOMotorClient(&#34;mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&amp;w=majority&#34;)
 db = client.cluster0
@@ -78,7 +78,7 @@ class UserModel(BaseModel):
     fullname: str
     uid: str
     email: str
-    password: str
+    key: str
 
     class Config:
         allow_population_by_field_name = True
@@ -94,6 +94,86 @@ class UpdateUserModel(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class ProfessorModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    name: str
+    avgRating: float
+    numRating: int
+    
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class CommentModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    username: str
+    comment: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class NoteModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+    instructor: str
+    term: str
+    url: str
+    author: str
+    role: str
+    title: str
+    date: str
+    week: int
+    commentList: List[CommentModel]
+    numLikes: int
+    numDislikes: int
+    likeUsers: dict
+    dislikeUsers: dict
+    commentVisibleUsers: dict
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class NoteRequestModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+    instructor: str
+    term: str
+    requestMsg: str
+    week: int
+    uid: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class CourseModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+    instructor: str
+    term: str
+    colorCode: int
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class CourseNameModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+### START ACCOUNT SYSTEM API ###
 # Add a new database item
 @app.post(&#34;/adduser&#34;, response_description=&#34;Add new user&#34;)
 async def add_user(userInfo: dict):
@@ -110,7 +190,10 @@ async def add_user(userInfo: dict):
     uid = userInfo[&#39;uid&#39;]
     email = userInfo[&#39;email&#39;]
     password = userInfo[&#39;password&#39;]
-    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
+
+    salt = bcrypt.gensalt()
+    key = bcrypt.hashpw(password.encode(&#39;utf-8&#39;), salt)
+    user = UserModel(fullname=fullname, uid=uid, email=email, key=key)
     new_user = jsonable_encoder(user)
     inserted_user = await db[&#34;users&#34;].insert_one(new_user)
     created_user = await db[&#34;users&#34;].find_one({&#34;_id&#34;: inserted_user.inserted_id})
@@ -144,16 +227,16 @@ async def check_uid(uid: str):
         return False
     return True
 
-@app.get(&#34;/checkemail/{email}&#34;, response_description=&#34;Check that a user with a given email does not already exist&#34;)
+@app.get(&#34;/checkemail/{email}&#34;, response_description=&#34;Check that an email exists and a user with a given email does not already exist&#34;)
 async def check_email(email: str):
     &#34;&#34;&#34;
-    Check that a user with a given email does not already exist.
+    Check that a user with a given email does not already exist and the email exists.
 
     Args:
         email (str): A string containing the email to be checked.
 
     Returns:
-        True if the email is unique, False if it already exists.
+        True if the email is unique and exists, False if either condition fails.
     &#34;&#34;&#34;
     user = await db[&#34;users&#34;].find_one({&#34;email&#34;: email})
     if user is not None:
@@ -161,7 +244,7 @@ async def check_email(email: str):
     return True
 
 # View a specific database item
-@app.get(&#34;/viewuser/{uid}&#34;, response_description=&#34;View user with given username&#34;)
+@app.get(&#34;/viewuser/{uid}&#34;, response_description=&#34;View user with given UID&#34;)
 async def view_user(uid: str):
     &#34;&#34;&#34;
     View a specific user in the database.
@@ -193,8 +276,9 @@ async def check_password(userInfo: dict):
     uid = userInfo[&#39;uid&#39;]
     password = userInfo[&#39;password&#39;]
     user = await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})
-    
-    if password == user[&#34;password&#34;]:
+
+    key = user[&#39;key&#39;]
+    if bcrypt.checkpw(password.encode(&#39;utf-8&#39;), key.encode(&#39;utf-8&#39;)):
         return True
     return False
 
@@ -223,7 +307,451 @@ async def update_user(uid: str):
                 return updated_user
         
     if (existing_user := await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})) is not None:
-        return existing_user</code></pre>
+        return existing_user
+
+### END ACCOUNT SYSTEM API ###
+
+
+### START COURSES API ###
+@app.post(&#34;/addcoursename&#34;, response_description=&#34;Add a new course name&#34;)
+async def add_course(courseInfo: dict):
+    &#34;&#34;&#34;
+    Adds a new course name to the database.
+    
+    Args:
+        courseInfo (dict): A dict containing the course&#39;s name.
+
+    Returns:
+        JSON object with created course name and 201 status.
+    &#34;&#34;&#34;
+    courseName = courseInfo[&#39;courseName&#39;]
+
+    courseExists = await db[&#34;courseNames&#34;].find_one({&#34;courseName&#34;: courseName})
+    if courseExists is not None:
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=&#34;A course with this name already exists.&#34;)
+
+    course = CourseNameModel(courseName=courseName)
+    new_course = jsonable_encoder(course)
+    inserted_course = await db[&#34;courseNames&#34;].insert_one(new_course)
+    created_course = await db[&#34;courseNames&#34;].find_one({&#34;_id&#34;: inserted_course.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)
+
+@app.get(&#34;/searchcoursenames/{courseName}&#34;, response_description=&#34;View matching course names&#34;)
+async def search_course_names(courseName: str):
+    &#34;&#34;&#34;
+    View all matching course names in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses with matching names.
+    &#34;&#34;&#34;
+    query = {&#34;courseName&#34;: {&#34;$regex&#34;: courseName, &#34;$options&#34;: &#34;i&#34;}}
+    courses = await db[&#34;courseNames&#34;].find(query).sort(&#34;courseName&#34;, 1).to_list(1000)
+    return courses
+
+@app.post(&#34;/addcourse&#34;, response_description=&#34;Add new course&#34;)
+async def add_course(courseInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new course and adds it to the database.
+    
+    Args:
+        courseInfo (dict): A dict containing the course&#39;s information.
+
+    Returns:
+        JSON object with created course and 201 status.
+    &#34;&#34;&#34;
+    courseName = courseInfo[&#39;courseName&#39;]
+    instructor = courseInfo[&#39;instructor&#39;]
+    quarter = courseInfo[&#39;quarter&#39;]
+    year = courseInfo[&#39;year&#39;]
+    colorCode = courseInfo[&#39;colorCode&#39;]
+
+    term = str(quarter) + &#34; &#34; + str(year)
+
+    courseExists = await db[&#34;courses&#34;].find_one({&#34;courseName&#34;: courseName, &#34;instructor&#34;: instructor, &#34;term&#34;: term, &#34;colorCode&#34;: colorCode})
+    if courseExists is not None:
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=&#34;A course with this information already exists.&#34;)
+
+    course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode, notes=[], noteRequests=[])
+    new_course = jsonable_encoder(course)
+    inserted_course = await db[&#34;courses&#34;].insert_one(new_course)
+    created_course = await db[&#34;courses&#34;].find_one({&#34;_id&#34;: inserted_course.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)
+
+@app.get(&#34;/searchcourses/{courseName}&#34;, response_description=&#34;View courses with matching names&#34;)
+async def search_courses(courseName: str):
+    &#34;&#34;&#34;
+    View all courses matching the courseName in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses.
+    &#34;&#34;&#34;
+    query = {&#34;courseName&#34;: {&#34;$regex&#34;: &#34;^&#34;+courseName+&#34;$&#34;, &#34;$options&#34;: &#34;im&#34;}}
+    courses = await db[&#34;courses&#34;].find(query).to_list(1000)
+    return courses
+### END COURSES API ###
+
+
+### START COMMENTS API ###
+@app.post(&#34;/addcomment&#34;, response_description=&#34;Add new comment&#34;)
+async def add_comment(noteInfo: dict, commentInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new comment and adds it to a note in the database.
+    
+    Args:
+        commentInfo (dict): A dict containing the comment&#39;s information.
+
+    Returns:
+        JSON object with created comment and 201 status.
+    &#34;&#34;&#34;
+    print(noteInfo, commentInfo)
+    name = commentInfo[&#39;username&#39;]
+    content = commentInfo[&#39;comment&#39;]
+    
+    comment = CommentModel(username=name, comment=content)
+    new_comment = jsonable_encoder(comment)
+    
+    noteId = noteInfo[&#34;_id&#34;]
+    note = await db[&#34;notes&#34;].find_one({&#34;_id&#34;: noteId})
+    
+    currentCommentList = note[&#39;commentList&#39;]
+    currentCommentList.append(new_comment)
+    
+    updated_note = await db[&#34;notes&#34;].update_one({&#34;_id&#34;: noteId}, {&#34;$set&#34;: {&#34;commentList&#34;:currentCommentList}})
+    # print(updated_note)
+    # return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=&#39;comment updated&#39;)
+
+@app.put(&#34;/togglecommentvisibility/{note_id}/{user_id}&#34;, response_description=&#34;Update comment visibility for the user for the note&#34;)
+async def toggle_comment_visibility(note_id, user_id):
+    &#34;&#34;&#34;Indicate that comment should be shown
+
+    Args:
+        noteInfo (dict): _description_
+
+    Returns:
+        Json object with updated note with 200 status
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        visibleUsers = note[&#39;commentVisibleUsers&#39;]
+        if user_id in visibleUsers:
+            visibleUsers[user_id] = not visibleUsers[user_id]
+        else:
+            visibleUsers[user_id] = True
+        updated_note = await db[&#34;notes&#34;].update_one({&#34;_id&#34;: note_id}, {&#34;$set&#34;: {&#34;commentVisibleUsers&#34;: visibleUsers}},upsert=False)
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=&#34;visibility status updated sucessfully&#34;)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=&#34;note not found&#34;)
+
+@app.get(&#34;/getcommentvisibilitystatus/{note_id}/{user_id}&#34;,  response_description=&#34;Indicate that comment should be shown to the user for that note&#34;)
+async def get_comment_visiblity(note_id, user_id):
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        visibleUsers = note[&#39;commentVisibleUsers&#39;]
+        if user_id in visibleUsers:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=visibleUsers[user_id])
+        else:
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=&#34;user not found in note[commentVisibleUsers]&#34;)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=&#34;note not found&#34;)
+### END COMMENTS PAGE API ###
+
+
+### START NOTES API ###
+@app.post(&#34;/addnote&#34;, response_description=&#34;Add new note&#34;)
+async def add_note(noteInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new note and adds it to a course in the database.
+    
+    Args:
+        noteInfo (dict): A dict containing the note&#39;s information.
+
+    Returns:
+        JSON object with created note and 201 status.
+    &#34;&#34;&#34;
+    courseName = noteInfo[&#39;courseName&#39;]
+    instructor = noteInfo[&#39;instructor&#39;]
+    term = noteInfo[&#39;term&#39;]
+    url = noteInfo[&#39;url&#39;]
+    author = noteInfo[&#39;author&#39;]
+    role = noteInfo[&#39;role&#39;]
+    title = noteInfo[&#39;title&#39;]
+    date = noteInfo[&#39;date&#39;]
+    week = noteInfo[&#39;week&#39;]
+
+    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author, role=role, title=title, date=date, week=week, commentList=[], likes=0, dislikes=0, numLikes=0, numDislikes=0, likeUsers={}, dislikeUsers={}, commentVisibleUsers={},)
+    new_note = jsonable_encoder(note)
+    inserted_note = await db[&#34;notes&#34;].insert_one(new_note)
+    created_note = await db[&#34;notes&#34;].find_one({&#34;_id&#34;: inserted_note.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_note)
+
+@app.post(&#34;/addnoterequest&#34;, response_description=&#34;Add new note request&#34;)
+async def add_note_request(noteRequestInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new note request and adds it to a course in the database.
+    
+    Args:
+        noteInfo (dict): A dict containing the note&#39;s information.
+
+    Returns:
+        JSON object with created note request and 201 status.
+    &#34;&#34;&#34;
+    courseName = noteRequestInfo[&#39;courseName&#39;]
+    instructor = noteRequestInfo[&#39;instructor&#39;]
+    term = noteRequestInfo[&#39;term&#39;]
+    requestMsg = noteRequestInfo[&#39;requestMsg&#39;]
+    week = noteRequestInfo[&#39;week&#39;]
+    uid = noteRequestInfo[&#39;uid&#39;]
+    
+    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week, uid=uid)
+    new_noteRequest = jsonable_encoder(noteRequest)
+    inserted_noteRequest = await db[&#39;noteRequests&#39;].insert_one(new_noteRequest)
+    created_noteRequest = await db[&#39;noteRequests&#39;].find_one({&#34;_id&#34;: inserted_noteRequest.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_noteRequest)
+
+@app.put(&#34;/deletenoterequest/{id}&#34;, response_description=&#34;Delete note request from database&#34;)
+async def delete_note_request(id):
+    &#34;&#34;&#34;
+    Remove note request from the database.
+
+    Returns:
+        HTTP 200 OK upon success
+        HTTP 404 NOT FOUND if id isn&#39;t valid
+    &#34;&#34;&#34;
+    note = await db[&#39;noteRequests&#39;].find_one({&#34;_id&#34;: id})
+    if note:
+        await db[&#39;noteRequests&#39;].delete_one({&#39;_id&#39;: id})
+        msg = &#34;Successfully removed note request&#34;
+        return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
+    else: 
+        msg = &#34;note request with ID not found&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+@app.put(&#34;/increaselikes/{note_id}/{user_id}&#34;, response_description=&#34;Increase likes on a note&#34;)
+async def increase_likes(note_id, user_id):
+    &#34;&#34;&#34;
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numLikes = note[&#39;numLikes&#39;]
+        userKey=&#39;likeUsers.&#39;+str(user_id)
+        likeList = note[&#39;likeUsers&#39;]
+        if str(user_id) in likeList:
+            if note[&#39;likeUsers&#39;][str(user_id)] == 1:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numLikes&#39;:1}, &#39;$set&#39;: {userKey:1}})
+        if updated_note:
+            updated_result = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result[&#39;numLikes&#39;])
+        
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
+@app.put(&#34;/decreaselikes/{note_id}/{user_id}&#34;, response_description=&#34;Decrease likes on a note&#34;)
+async def decrease_likes(note_id, user_id):
+    &#34;&#34;&#34;
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numLikes = note[&#39;numLikes&#39;]
+        userKey=&#39;likeUsers.&#39;+str(user_id)
+        likeList = note[&#39;likeUsers&#39;]
+        if str(user_id) in likeList:
+            if note[&#39;likeUsers&#39;][str(user_id)] == 0:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numLikes&#39;:-1}, &#39;$set&#39;: {userKey:0}})
+        if updated_note:
+            updated_result = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result[&#39;numLikes&#39;])
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
+@app.put(&#34;/increasedislikes/{note_id}/{user_id}&#34;, response_description=&#34;Increase dislikes on a note&#34;)
+async def increase_dislikes(note_id, user_id):
+    &#34;&#34;&#34;
+    Increases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numDislikes = note[&#39;numDislikes&#39;]
+        dislikeList = note[&#39;dislikeUsers&#39;]
+        if str(user_id) in dislikeList:
+            if note[&#39;dislikeUsers&#39;][str(user_id)] == 1:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numDislikes&#39;:1}, &#39;$set&#39;: {&#39;dislikeUsers.&#39;+str(user_id):1}}, upsert=False)
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+
+@app.put(&#34;/decreasedislikes/{note_id}/{user_id}&#34;, response_description=&#34;Decrease dislikes on a note&#34;)
+async def decrease_dislikes(note_id, user_id):
+    &#34;&#34;&#34;
+    Decreases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numDislikes = note[&#39;numDislikes&#39;]
+        dislikeList = note[&#39;dislikeUsers&#39;]
+        if str(user_id) in dislikeList:
+            if note[&#39;dislikeUsers&#39;][str(user_id)] == 0:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numDislikes&#39;:-1}, &#39;$set&#39;: {&#39;dislikeUsers.&#39;+str(user_id):0}}, upsert=False)
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes-1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)
+        
+@app.get(&#34;/searchnote/{courseName}/{instructor}/{term}&#34;, response_description=&#34;Search for notes that match courseName, professor, and quarter&#34;)
+async def search_note_by_fields(courseName, instructor, term):
+    &#34;&#34;&#34;
+    Search note by string fields
+    
+    Returns:
+        A list of all notes that match these fields
+    &#34;&#34;&#34;
+    
+    query =  {&#39;$and&#39;: 
+            [
+                {&#34;courseName&#34;: {&#34;$regex&#34;: courseName, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;instructor&#34;: {&#34;$regex&#34;: instructor, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;term&#34;: {&#34;$regex&#34;: term, &#34;$options&#34;: &#34;i&#34;}}
+            ]
+            }
+        
+    matchingNotes = await db[&#39;notes&#39;].find(query).sort([(&#34;week&#34;, 1),(&#34;role&#34;, 1)]).to_list(1000)
+    return matchingNotes
+
+@app.get(&#34;/searchnotebyid/{note_id}&#34;, response_description=&#34;Search for a note by its _id&#34;)
+async def search_note_by_id(note_id):
+    &#34;&#34;&#34;
+    Search note by its _id
+
+    Args: 
+        the note&#39;s _id
+
+    Returns: 
+        The requested note
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        return JSONResponse(status_code=status.HTTP_200_OK, content=note)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=note_id)  
+
+@app.get(&#34;/searchnoterequest/{courseName}/{instructor}/{term}&#34;, response_description=&#34;Search for note requests that match courseName, professor, and quarter&#34;)
+async def search_note_requests_by_fields(courseName, instructor, term):
+    &#34;&#34;&#34;
+    Search note requests by string fields
+    
+    Returns:
+        A list of all note requests that match these fields
+    &#34;&#34;&#34;
+
+    query =  {&#39;$and&#39;: 
+            [
+                {&#34;courseName&#34;: {&#34;$regex&#34;: courseName, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;instructor&#34;: {&#34;$regex&#34;: instructor, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;term&#34;: {&#34;$regex&#34;: term, &#34;$options&#34;: &#34;i&#34;}}
+            ]
+            }
+
+    matchingNoteRequests = await db[&#39;noteRequests&#39;].find(query).sort([(&#34;week&#34;, 1),(&#34;role&#34;, 1)]).to_list(1000)
+    return matchingNoteRequests
+### END NOTES API ###
+
+### START PROF API ###
+@app.post(&#34;/addprofessor/{name}&#34;)
+async def add_professor(name):
+    &#34;&#34;&#34;Checks if a professor exists, and adds it to the database if not.
+
+    Args:
+        name: The name of the professor
+    &#34;&#34;&#34;
+    if (await db[&#34;professors&#34;].find_one({&#34;name&#34;: name}) is not None):
+        msg = &#34;Professor with this name already exists in the database&#34;
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=msg)
+        
+    prof = ProfessorModel(name=name, avgRating=0, numRating=0)
+    new_prof = jsonable_encoder(prof)
+    inserted_prof = await db[&#34;professors&#34;].insert_one(new_prof)
+    created_prof = await db[&#34;professors&#34;].find_one({&#34;_id&#34;: inserted_prof.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_prof)
+    
+
+@app.put(&#34;/addrating/{profName}/{newRating}&#34;)
+async def add_rating(profName, newRating):
+    &#34;&#34;&#34;adds new rating to the professor
+
+    Args:
+        profName (str): name of the professor
+        newRating (float): new incoming rating of the professor, which is 
+                        a number between 0.5 and 5
+
+    Returns:
+        Updated rating of the professor
+    &#34;&#34;&#34;
+    prof = await db[&#34;professors&#34;].find_one({&#34;name&#34;: profName})
+    if (prof is None):
+        msg = &#34;Professor with this name not found in the database&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    numRating = float(prof[&#39;numRating&#39;])
+    avgRating = float(prof[&#39;avgRating&#39;])
+    newRating = round((numRating*avgRating + float(newRating))/(numRating+1),1)
+    updated_prof_rating = await db[&#39;professors&#39;].update_one({&#39;name&#39;:profName},{&#39;$inc&#39;:{&#34;numRating&#34;:1},&#39;$set&#39;: {&#34;avgRating&#34;:newRating}}, upsert=False)
+    if (updated_prof_rating):
+        return JSONResponse(status_code=status.HTTP_200_OK, content=&#34;{:.1f}&#34;.format(newRating))
+    
+@app.put(&#34;/updaterating/{profName}/{prevRating}/{newRating}&#34;)
+async def update_rating(profName, prevRating, newRating):
+    &#34;&#34;&#34;updates preexisting rating to a new rating for a professor
+
+    Args:
+        profName (str): name of the professor
+        newRating (float): new incoming rating of the professor, which is 
+                        a number between 0.5 and 5. This replaces a
+                        pre-existing rating for the professor
+
+    Returns:
+        Updated rating of the professor
+    &#34;&#34;&#34;
+    prof = db[&#34;professors&#34;].find_one({&#34;name&#34;: profName})
+    if (prof is None):
+        msg = &#34;Professor with this name not found in the database&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    numRating = prof[&#39;numRating&#39;]
+    avgRating = prof[&#39;avgRating&#39;]
+    newRating = (numRating*avgRating - prevRating + newRating)/(numRating)
+    updated_prof_rating = await db[&#39;notes&#39;].update_one({&#39;name&#39;:profName},{&#39;$set&#39;: {&#34;avgRating&#34;:newRating}}, upsert=False)
+    if (updated_prof_rating):
+        return JSONResponse(status_code=status.HTTP_200_OK, content=&#34;{:.1f}&#34;.format(newRating))
+
+@app.get(&#34;/getrating/{profName}&#34;)
+async def get_prof_rating(profName):
+    prof = await db[&#34;professors&#34;].find_one({&#34;name&#34;: profName})
+    if (prof is None):
+        msg = &#34;Professor with this name not found in the database&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    avgRating = prof[&#34;avgRating&#34;]
+    return JSONResponse(status_code=status.HTTP_200_OK, content=str(avgRating))
+### END PROF API ###</code></pre>
 </details>
 </section>
 <section>
@@ -233,6 +761,259 @@ async def update_user(uid: str):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="main.add_comment"><code class="name flex">
+<span>async def <span class="ident">add_comment</span></span>(<span>noteInfo: dict, commentInfo: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a new comment and adds it to a note in the database.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>commentInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dict containing the comment's information.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>JSON object with created comment and 201 status.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.post(&#34;/addcomment&#34;, response_description=&#34;Add new comment&#34;)
+async def add_comment(noteInfo: dict, commentInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new comment and adds it to a note in the database.
+    
+    Args:
+        commentInfo (dict): A dict containing the comment&#39;s information.
+
+    Returns:
+        JSON object with created comment and 201 status.
+    &#34;&#34;&#34;
+    print(noteInfo, commentInfo)
+    name = commentInfo[&#39;username&#39;]
+    content = commentInfo[&#39;comment&#39;]
+    
+    comment = CommentModel(username=name, comment=content)
+    new_comment = jsonable_encoder(comment)
+    
+    noteId = noteInfo[&#34;_id&#34;]
+    note = await db[&#34;notes&#34;].find_one({&#34;_id&#34;: noteId})
+    
+    currentCommentList = note[&#39;commentList&#39;]
+    currentCommentList.append(new_comment)
+    
+    updated_note = await db[&#34;notes&#34;].update_one({&#34;_id&#34;: noteId}, {&#34;$set&#34;: {&#34;commentList&#34;:currentCommentList}})
+    # print(updated_note)
+    # return JSONResponse(status_code=status.HTTP_201_CREATED, content=updated_note)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=&#39;comment updated&#39;)</code></pre>
+</details>
+</dd>
+<dt id="main.add_course"><code class="name flex">
+<span>async def <span class="ident">add_course</span></span>(<span>courseInfo: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a new course and adds it to the database.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>courseInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dict containing the course's information.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>JSON object with created course and 201 status.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.post(&#34;/addcourse&#34;, response_description=&#34;Add new course&#34;)
+async def add_course(courseInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new course and adds it to the database.
+    
+    Args:
+        courseInfo (dict): A dict containing the course&#39;s information.
+
+    Returns:
+        JSON object with created course and 201 status.
+    &#34;&#34;&#34;
+    courseName = courseInfo[&#39;courseName&#39;]
+    instructor = courseInfo[&#39;instructor&#39;]
+    quarter = courseInfo[&#39;quarter&#39;]
+    year = courseInfo[&#39;year&#39;]
+    colorCode = courseInfo[&#39;colorCode&#39;]
+
+    term = str(quarter) + &#34; &#34; + str(year)
+
+    courseExists = await db[&#34;courses&#34;].find_one({&#34;courseName&#34;: courseName, &#34;instructor&#34;: instructor, &#34;term&#34;: term, &#34;colorCode&#34;: colorCode})
+    if courseExists is not None:
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=&#34;A course with this information already exists.&#34;)
+
+    course = CourseModel(courseName=courseName, instructor=instructor, term=term, colorCode=colorCode, notes=[], noteRequests=[])
+    new_course = jsonable_encoder(course)
+    inserted_course = await db[&#34;courses&#34;].insert_one(new_course)
+    created_course = await db[&#34;courses&#34;].find_one({&#34;_id&#34;: inserted_course.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_course)</code></pre>
+</details>
+</dd>
+<dt id="main.add_note"><code class="name flex">
+<span>async def <span class="ident">add_note</span></span>(<span>noteInfo: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a new note and adds it to a course in the database.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>noteInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dict containing the note's information.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>JSON object with created note and 201 status.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.post(&#34;/addnote&#34;, response_description=&#34;Add new note&#34;)
+async def add_note(noteInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new note and adds it to a course in the database.
+    
+    Args:
+        noteInfo (dict): A dict containing the note&#39;s information.
+
+    Returns:
+        JSON object with created note and 201 status.
+    &#34;&#34;&#34;
+    courseName = noteInfo[&#39;courseName&#39;]
+    instructor = noteInfo[&#39;instructor&#39;]
+    term = noteInfo[&#39;term&#39;]
+    url = noteInfo[&#39;url&#39;]
+    author = noteInfo[&#39;author&#39;]
+    role = noteInfo[&#39;role&#39;]
+    title = noteInfo[&#39;title&#39;]
+    date = noteInfo[&#39;date&#39;]
+    week = noteInfo[&#39;week&#39;]
+
+    note = NoteModel(courseName=courseName, instructor=instructor, term=term, url=url, author=author, role=role, title=title, date=date, week=week, commentList=[], likes=0, dislikes=0, numLikes=0, numDislikes=0, likeUsers={}, dislikeUsers={}, commentVisibleUsers={},)
+    new_note = jsonable_encoder(note)
+    inserted_note = await db[&#34;notes&#34;].insert_one(new_note)
+    created_note = await db[&#34;notes&#34;].find_one({&#34;_id&#34;: inserted_note.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_note)</code></pre>
+</details>
+</dd>
+<dt id="main.add_note_request"><code class="name flex">
+<span>async def <span class="ident">add_note_request</span></span>(<span>noteRequestInfo: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a new note request and adds it to a course in the database.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>noteInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dict containing the note's information.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>JSON object with created note request and 201 status.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.post(&#34;/addnoterequest&#34;, response_description=&#34;Add new note request&#34;)
+async def add_note_request(noteRequestInfo: dict):
+    &#34;&#34;&#34;
+    Creates a new note request and adds it to a course in the database.
+    
+    Args:
+        noteInfo (dict): A dict containing the note&#39;s information.
+
+    Returns:
+        JSON object with created note request and 201 status.
+    &#34;&#34;&#34;
+    courseName = noteRequestInfo[&#39;courseName&#39;]
+    instructor = noteRequestInfo[&#39;instructor&#39;]
+    term = noteRequestInfo[&#39;term&#39;]
+    requestMsg = noteRequestInfo[&#39;requestMsg&#39;]
+    week = noteRequestInfo[&#39;week&#39;]
+    uid = noteRequestInfo[&#39;uid&#39;]
+    
+    noteRequest = NoteRequestModel(courseName=courseName, instructor=instructor, term=term, requestMsg=requestMsg, week=week, uid=uid)
+    new_noteRequest = jsonable_encoder(noteRequest)
+    inserted_noteRequest = await db[&#39;noteRequests&#39;].insert_one(new_noteRequest)
+    created_noteRequest = await db[&#39;noteRequests&#39;].find_one({&#34;_id&#34;: inserted_noteRequest.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_noteRequest)</code></pre>
+</details>
+</dd>
+<dt id="main.add_professor"><code class="name flex">
+<span>async def <span class="ident">add_professor</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if a professor exists, and adds it to the database if not.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the professor</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.post(&#34;/addprofessor/{name}&#34;)
+async def add_professor(name):
+    &#34;&#34;&#34;Checks if a professor exists, and adds it to the database if not.
+
+    Args:
+        name: The name of the professor
+    &#34;&#34;&#34;
+    if (await db[&#34;professors&#34;].find_one({&#34;name&#34;: name}) is not None):
+        msg = &#34;Professor with this name already exists in the database&#34;
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=msg)
+        
+    prof = ProfessorModel(name=name, avgRating=0, numRating=0)
+    new_prof = jsonable_encoder(prof)
+    inserted_prof = await db[&#34;professors&#34;].insert_one(new_prof)
+    created_prof = await db[&#34;professors&#34;].find_one({&#34;_id&#34;: inserted_prof.inserted_id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_prof)</code></pre>
+</details>
+</dd>
+<dt id="main.add_rating"><code class="name flex">
+<span>async def <span class="ident">add_rating</span></span>(<span>profName, newRating)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>adds new rating to the professor</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>profName</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of the professor</dd>
+<dt><strong><code>newRating</code></strong> :&ensp;<code>float</code></dt>
+<dd>new incoming rating of the professor, which is
+a number between 0.5 and 5</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Updated rating of the professor</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/addrating/{profName}/{newRating}&#34;)
+async def add_rating(profName, newRating):
+    &#34;&#34;&#34;adds new rating to the professor
+
+    Args:
+        profName (str): name of the professor
+        newRating (float): new incoming rating of the professor, which is 
+                        a number between 0.5 and 5
+
+    Returns:
+        Updated rating of the professor
+    &#34;&#34;&#34;
+    prof = await db[&#34;professors&#34;].find_one({&#34;name&#34;: profName})
+    if (prof is None):
+        msg = &#34;Professor with this name not found in the database&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    numRating = float(prof[&#39;numRating&#39;])
+    avgRating = float(prof[&#39;avgRating&#39;])
+    newRating = round((numRating*avgRating + float(newRating))/(numRating+1),1)
+    updated_prof_rating = await db[&#39;professors&#39;].update_one({&#39;name&#39;:profName},{&#39;$inc&#39;:{&#34;numRating&#34;:1},&#39;$set&#39;: {&#34;avgRating&#34;:newRating}}, upsert=False)
+    if (updated_prof_rating):
+        return JSONResponse(status_code=status.HTTP_200_OK, content=&#34;{:.1f}&#34;.format(newRating))</code></pre>
+</details>
+</dd>
 <dt id="main.add_user"><code class="name flex">
 <span>async def <span class="ident">add_user</span></span>(<span>userInfo: dict)</span>
 </code></dt>
@@ -264,7 +1045,10 @@ async def add_user(userInfo: dict):
     uid = userInfo[&#39;uid&#39;]
     email = userInfo[&#39;email&#39;]
     password = userInfo[&#39;password&#39;]
-    user = UserModel(fullname=fullname, uid=uid, email=email, password=password)
+
+    salt = bcrypt.gensalt()
+    key = bcrypt.hashpw(password.encode(&#39;utf-8&#39;), salt)
+    user = UserModel(fullname=fullname, uid=uid, email=email, key=key)
     new_user = jsonable_encoder(user)
     inserted_user = await db[&#34;users&#34;].insert_one(new_user)
     created_user = await db[&#34;users&#34;].find_one({&#34;_id&#34;: inserted_user.inserted_id})
@@ -275,28 +1059,28 @@ async def add_user(userInfo: dict):
 <span>async def <span class="ident">check_email</span></span>(<span>email: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Check that a user with a given email does not already exist.</p>
+<div class="desc"><p>Check that a user with a given email does not already exist and the email exists.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>email</code></strong> :&ensp;<code>str</code></dt>
 <dd>A string containing the email to be checked.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>True if the email is unique, False if it already exists.</p></div>
+<p>True if the email is unique and exists, False if either condition fails.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/checkemail/{email}&#34;, response_description=&#34;Check that a user with a given email does not already exist&#34;)
+<pre><code class="python">@app.get(&#34;/checkemail/{email}&#34;, response_description=&#34;Check that an email exists and a user with a given email does not already exist&#34;)
 async def check_email(email: str):
     &#34;&#34;&#34;
-    Check that a user with a given email does not already exist.
+    Check that a user with a given email does not already exist and the email exists.
 
     Args:
         email (str): A string containing the email to be checked.
 
     Returns:
-        True if the email is unique, False if it already exists.
+        True if the email is unique and exists, False if either condition fails.
     &#34;&#34;&#34;
     user = await db[&#34;users&#34;].find_one({&#34;email&#34;: email})
     if user is not None:
@@ -334,8 +1118,9 @@ async def check_password(userInfo: dict):
     uid = userInfo[&#39;uid&#39;]
     password = userInfo[&#39;password&#39;]
     user = await db[&#34;users&#34;].find_one({&#34;uid&#34;: uid})
-    
-    if password == user[&#34;password&#34;]:
+
+    key = user[&#39;key&#39;]
+    if bcrypt.checkpw(password.encode(&#39;utf-8&#39;), key.encode(&#39;utf-8&#39;)):
         return True
     return False</code></pre>
 </details>
@@ -371,6 +1156,454 @@ async def check_uid(uid: str):
     if user is not None:
         return False
     return True</code></pre>
+</details>
+</dd>
+<dt id="main.decrease_dislikes"><code class="name flex">
+<span>async def <span class="ident">decrease_dislikes</span></span>(<span>note_id, user_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decreases the dislike count on a note.</p>
+<h2 id="returns">Returns</h2>
+<p>Updated dislike count on the note.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/decreasedislikes/{note_id}/{user_id}&#34;, response_description=&#34;Decrease dislikes on a note&#34;)
+async def decrease_dislikes(note_id, user_id):
+    &#34;&#34;&#34;
+    Decreases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numDislikes = note[&#39;numDislikes&#39;]
+        dislikeList = note[&#39;dislikeUsers&#39;]
+        if str(user_id) in dislikeList:
+            if note[&#39;dislikeUsers&#39;][str(user_id)] == 0:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numDislikes&#39;:-1}, &#39;$set&#39;: {&#39;dislikeUsers.&#39;+str(user_id):0}}, upsert=False)
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes-1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)</code></pre>
+</details>
+</dd>
+<dt id="main.decrease_likes"><code class="name flex">
+<span>async def <span class="ident">decrease_likes</span></span>(<span>note_id, user_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Increases the like count on a note.</p>
+<h2 id="returns">Returns</h2>
+<p>Updated like count on the note.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/decreaselikes/{note_id}/{user_id}&#34;, response_description=&#34;Decrease likes on a note&#34;)
+async def decrease_likes(note_id, user_id):
+    &#34;&#34;&#34;
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numLikes = note[&#39;numLikes&#39;]
+        userKey=&#39;likeUsers.&#39;+str(user_id)
+        likeList = note[&#39;likeUsers&#39;]
+        if str(user_id) in likeList:
+            if note[&#39;likeUsers&#39;][str(user_id)] == 0:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numLikes&#39;:-1}, &#39;$set&#39;: {userKey:0}})
+        if updated_note:
+            updated_result = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result[&#39;numLikes&#39;])
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)</code></pre>
+</details>
+</dd>
+<dt id="main.delete_note_request"><code class="name flex">
+<span>async def <span class="ident">delete_note_request</span></span>(<span>id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove note request from the database.</p>
+<h2 id="returns">Returns</h2>
+<p>HTTP 200 OK upon success
+HTTP 404 NOT FOUND if id isn't valid</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/deletenoterequest/{id}&#34;, response_description=&#34;Delete note request from database&#34;)
+async def delete_note_request(id):
+    &#34;&#34;&#34;
+    Remove note request from the database.
+
+    Returns:
+        HTTP 200 OK upon success
+        HTTP 404 NOT FOUND if id isn&#39;t valid
+    &#34;&#34;&#34;
+    note = await db[&#39;noteRequests&#39;].find_one({&#34;_id&#34;: id})
+    if note:
+        await db[&#39;noteRequests&#39;].delete_one({&#39;_id&#39;: id})
+        msg = &#34;Successfully removed note request&#34;
+        return JSONResponse(status_code=status.HTTP_200_OK, content=msg)
+    else: 
+        msg = &#34;note request with ID not found&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)</code></pre>
+</details>
+</dd>
+<dt id="main.get_comment_visiblity"><code class="name flex">
+<span>async def <span class="ident">get_comment_visiblity</span></span>(<span>note_id, user_id)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/getcommentvisibilitystatus/{note_id}/{user_id}&#34;,  response_description=&#34;Indicate that comment should be shown to the user for that note&#34;)
+async def get_comment_visiblity(note_id, user_id):
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        visibleUsers = note[&#39;commentVisibleUsers&#39;]
+        if user_id in visibleUsers:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=visibleUsers[user_id])
+        else:
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=&#34;user not found in note[commentVisibleUsers]&#34;)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=&#34;note not found&#34;)</code></pre>
+</details>
+</dd>
+<dt id="main.get_prof_rating"><code class="name flex">
+<span>async def <span class="ident">get_prof_rating</span></span>(<span>profName)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/getrating/{profName}&#34;)
+async def get_prof_rating(profName):
+    prof = await db[&#34;professors&#34;].find_one({&#34;name&#34;: profName})
+    if (prof is None):
+        msg = &#34;Professor with this name not found in the database&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    avgRating = prof[&#34;avgRating&#34;]
+    return JSONResponse(status_code=status.HTTP_200_OK, content=str(avgRating))</code></pre>
+</details>
+</dd>
+<dt id="main.increase_dislikes"><code class="name flex">
+<span>async def <span class="ident">increase_dislikes</span></span>(<span>note_id, user_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Increases the dislike count on a note.</p>
+<h2 id="returns">Returns</h2>
+<p>Updated dislike count on the note.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/increasedislikes/{note_id}/{user_id}&#34;, response_description=&#34;Increase dislikes on a note&#34;)
+async def increase_dislikes(note_id, user_id):
+    &#34;&#34;&#34;
+    Increases the dislike count on a note.
+
+    Returns:
+        Updated dislike count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numDislikes = note[&#39;numDislikes&#39;]
+        dislikeList = note[&#39;dislikeUsers&#39;]
+        if str(user_id) in dislikeList:
+            if note[&#39;dislikeUsers&#39;][str(user_id)] == 1:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numDislikes&#39;:1}, &#39;$set&#39;: {&#39;dislikeUsers.&#39;+str(user_id):1}}, upsert=False)
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=numDislikes+1)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)</code></pre>
+</details>
+</dd>
+<dt id="main.increase_likes"><code class="name flex">
+<span>async def <span class="ident">increase_likes</span></span>(<span>note_id, user_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Increases the like count on a note.</p>
+<h2 id="returns">Returns</h2>
+<p>Updated like count on the note.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/increaselikes/{note_id}/{user_id}&#34;, response_description=&#34;Increase likes on a note&#34;)
+async def increase_likes(note_id, user_id):
+    &#34;&#34;&#34;
+    Increases the like count on a note.
+
+    Returns:
+        Updated like count on the note.
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        numLikes = note[&#39;numLikes&#39;]
+        userKey=&#39;likeUsers.&#39;+str(user_id)
+        likeList = note[&#39;likeUsers&#39;]
+        if str(user_id) in likeList:
+            if note[&#39;likeUsers&#39;][str(user_id)] == 1:
+                return JSONResponse(status_code=status.HTTP_200_OK, content=numLikes)
+        updated_note = await db[&#39;notes&#39;].update_one({&#39;_id&#39;: note_id}, {&#39;$inc&#39;: {&#39;numLikes&#39;:1}, &#39;$set&#39;: {userKey:1}})
+        if updated_note:
+            updated_result = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_result[&#39;numLikes&#39;])
+        
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=id)</code></pre>
+</details>
+</dd>
+<dt id="main.search_course_names"><code class="name flex">
+<span>async def <span class="ident">search_course_names</span></span>(<span>courseName: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>View all matching course names in the database.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>courseName</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string containing the requested course name.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The requested courses with matching names.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/searchcoursenames/{courseName}&#34;, response_description=&#34;View matching course names&#34;)
+async def search_course_names(courseName: str):
+    &#34;&#34;&#34;
+    View all matching course names in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses with matching names.
+    &#34;&#34;&#34;
+    query = {&#34;courseName&#34;: {&#34;$regex&#34;: courseName, &#34;$options&#34;: &#34;i&#34;}}
+    courses = await db[&#34;courseNames&#34;].find(query).sort(&#34;courseName&#34;, 1).to_list(1000)
+    return courses</code></pre>
+</details>
+</dd>
+<dt id="main.search_courses"><code class="name flex">
+<span>async def <span class="ident">search_courses</span></span>(<span>courseName: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>View all courses matching the courseName in the database.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>courseName</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string containing the requested course name.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The requested courses.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/searchcourses/{courseName}&#34;, response_description=&#34;View courses with matching names&#34;)
+async def search_courses(courseName: str):
+    &#34;&#34;&#34;
+    View all courses matching the courseName in the database.
+
+    Args:
+        courseName (str): A string containing the requested course name.
+
+    Returns:
+        The requested courses.
+    &#34;&#34;&#34;
+    query = {&#34;courseName&#34;: {&#34;$regex&#34;: &#34;^&#34;+courseName+&#34;$&#34;, &#34;$options&#34;: &#34;im&#34;}}
+    courses = await db[&#34;courses&#34;].find(query).to_list(1000)
+    return courses</code></pre>
+</details>
+</dd>
+<dt id="main.search_note_by_fields"><code class="name flex">
+<span>async def <span class="ident">search_note_by_fields</span></span>(<span>courseName, instructor, term)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Search note by string fields</p>
+<h2 id="returns">Returns</h2>
+<p>A list of all notes that match these fields</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/searchnote/{courseName}/{instructor}/{term}&#34;, response_description=&#34;Search for notes that match courseName, professor, and quarter&#34;)
+async def search_note_by_fields(courseName, instructor, term):
+    &#34;&#34;&#34;
+    Search note by string fields
+    
+    Returns:
+        A list of all notes that match these fields
+    &#34;&#34;&#34;
+    
+    query =  {&#39;$and&#39;: 
+            [
+                {&#34;courseName&#34;: {&#34;$regex&#34;: courseName, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;instructor&#34;: {&#34;$regex&#34;: instructor, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;term&#34;: {&#34;$regex&#34;: term, &#34;$options&#34;: &#34;i&#34;}}
+            ]
+            }
+        
+    matchingNotes = await db[&#39;notes&#39;].find(query).sort([(&#34;week&#34;, 1),(&#34;role&#34;, 1)]).to_list(1000)
+    return matchingNotes</code></pre>
+</details>
+</dd>
+<dt id="main.search_note_by_id"><code class="name flex">
+<span>async def <span class="ident">search_note_by_id</span></span>(<span>note_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Search note by its _id</p>
+<p>Args:
+the note's _id</p>
+<p>Returns:
+The requested note</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/searchnotebyid/{note_id}&#34;, response_description=&#34;Search for a note by its _id&#34;)
+async def search_note_by_id(note_id):
+    &#34;&#34;&#34;
+    Search note by its _id
+
+    Args: 
+        the note&#39;s _id
+
+    Returns: 
+        The requested note
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        return JSONResponse(status_code=status.HTTP_200_OK, content=note)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=note_id)  </code></pre>
+</details>
+</dd>
+<dt id="main.search_note_requests_by_fields"><code class="name flex">
+<span>async def <span class="ident">search_note_requests_by_fields</span></span>(<span>courseName, instructor, term)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Search note requests by string fields</p>
+<h2 id="returns">Returns</h2>
+<p>A list of all note requests that match these fields</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.get(&#34;/searchnoterequest/{courseName}/{instructor}/{term}&#34;, response_description=&#34;Search for note requests that match courseName, professor, and quarter&#34;)
+async def search_note_requests_by_fields(courseName, instructor, term):
+    &#34;&#34;&#34;
+    Search note requests by string fields
+    
+    Returns:
+        A list of all note requests that match these fields
+    &#34;&#34;&#34;
+
+    query =  {&#39;$and&#39;: 
+            [
+                {&#34;courseName&#34;: {&#34;$regex&#34;: courseName, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;instructor&#34;: {&#34;$regex&#34;: instructor, &#34;$options&#34;: &#34;i&#34;}},
+                {&#34;term&#34;: {&#34;$regex&#34;: term, &#34;$options&#34;: &#34;i&#34;}}
+            ]
+            }
+
+    matchingNoteRequests = await db[&#39;noteRequests&#39;].find(query).sort([(&#34;week&#34;, 1),(&#34;role&#34;, 1)]).to_list(1000)
+    return matchingNoteRequests</code></pre>
+</details>
+</dd>
+<dt id="main.toggle_comment_visibility"><code class="name flex">
+<span>async def <span class="ident">toggle_comment_visibility</span></span>(<span>note_id, user_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Indicate that comment should be shown</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>noteInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd><em>description</em></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Json object with updated note with 200 status</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/togglecommentvisibility/{note_id}/{user_id}&#34;, response_description=&#34;Update comment visibility for the user for the note&#34;)
+async def toggle_comment_visibility(note_id, user_id):
+    &#34;&#34;&#34;Indicate that comment should be shown
+
+    Args:
+        noteInfo (dict): _description_
+
+    Returns:
+        Json object with updated note with 200 status
+    &#34;&#34;&#34;
+    note = await db[&#39;notes&#39;].find_one({&#34;_id&#34;: note_id})
+    if note:
+        visibleUsers = note[&#39;commentVisibleUsers&#39;]
+        if user_id in visibleUsers:
+            visibleUsers[user_id] = not visibleUsers[user_id]
+        else:
+            visibleUsers[user_id] = True
+        updated_note = await db[&#34;notes&#34;].update_one({&#34;_id&#34;: note_id}, {&#34;$set&#34;: {&#34;commentVisibleUsers&#34;: visibleUsers}},upsert=False)
+        if updated_note:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=&#34;visibility status updated sucessfully&#34;)
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=&#34;note not found&#34;)</code></pre>
+</details>
+</dd>
+<dt id="main.update_rating"><code class="name flex">
+<span>async def <span class="ident">update_rating</span></span>(<span>profName, prevRating, newRating)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>updates preexisting rating to a new rating for a professor</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>profName</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of the professor</dd>
+<dt><strong><code>newRating</code></strong> :&ensp;<code>float</code></dt>
+<dd>new incoming rating of the professor, which is
+a number between 0.5 and 5. This replaces a
+pre-existing rating for the professor</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Updated rating of the professor</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.put(&#34;/updaterating/{profName}/{prevRating}/{newRating}&#34;)
+async def update_rating(profName, prevRating, newRating):
+    &#34;&#34;&#34;updates preexisting rating to a new rating for a professor
+
+    Args:
+        profName (str): name of the professor
+        newRating (float): new incoming rating of the professor, which is 
+                        a number between 0.5 and 5. This replaces a
+                        pre-existing rating for the professor
+
+    Returns:
+        Updated rating of the professor
+    &#34;&#34;&#34;
+    prof = db[&#34;professors&#34;].find_one({&#34;name&#34;: profName})
+    if (prof is None):
+        msg = &#34;Professor with this name not found in the database&#34;
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=msg)
+
+    numRating = prof[&#39;numRating&#39;]
+    avgRating = prof[&#39;avgRating&#39;]
+    newRating = (numRating*avgRating - prevRating + newRating)/(numRating)
+    updated_prof_rating = await db[&#39;notes&#39;].update_one({&#39;name&#39;:profName},{&#39;$set&#39;: {&#34;avgRating&#34;:newRating}}, upsert=False)
+    if (updated_prof_rating):
+        return JSONResponse(status_code=status.HTTP_200_OK, content=&#34;{:.1f}&#34;.format(newRating))</code></pre>
 </details>
 </dd>
 <dt id="main.update_user"><code class="name flex">
@@ -454,7 +1687,7 @@ async def view_all_users():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.get(&#34;/viewuser/{uid}&#34;, response_description=&#34;View user with given username&#34;)
+<pre><code class="python">@app.get(&#34;/viewuser/{uid}&#34;, response_description=&#34;View user with given UID&#34;)
 async def view_user(uid: str):
     &#34;&#34;&#34;
     View a specific user in the database.
@@ -478,6 +1711,377 @@ async def view_user(uid: str):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="main.CommentModel"><code class="flex name class">
+<span>class <span class="ident">CommentModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CommentModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    username: str
+    comment: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="main.CommentModel.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CommentModel.comment"><code class="name">var <span class="ident">comment</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CommentModel.id"><code class="name">var <span class="ident">id</span> : <a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CommentModel.username"><code class="name">var <span class="ident">username</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="main.CourseModel"><code class="flex name class">
+<span>class <span class="ident">CourseModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CourseModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+    instructor: str
+    term: str
+    colorCode: int
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="main.CourseModel.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseModel.colorCode"><code class="name">var <span class="ident">colorCode</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseModel.courseName"><code class="name">var <span class="ident">courseName</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseModel.id"><code class="name">var <span class="ident">id</span> : <a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseModel.instructor"><code class="name">var <span class="ident">instructor</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseModel.term"><code class="name">var <span class="ident">term</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="main.CourseNameModel"><code class="flex name class">
+<span>class <span class="ident">CourseNameModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CourseNameModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="main.CourseNameModel.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseNameModel.courseName"><code class="name">var <span class="ident">courseName</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.CourseNameModel.id"><code class="name">var <span class="ident">id</span> : <a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="main.NoteModel"><code class="flex name class">
+<span>class <span class="ident">NoteModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NoteModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+    instructor: str
+    term: str
+    url: str
+    author: str
+    role: str
+    title: str
+    date: str
+    week: int
+    commentList: List[CommentModel]
+    numLikes: int
+    numDislikes: int
+    likeUsers: dict
+    dislikeUsers: dict
+    commentVisibleUsers: dict
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="main.NoteModel.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.author"><code class="name">var <span class="ident">author</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.commentList"><code class="name">var <span class="ident">commentList</span> : List[<a title="main.CommentModel" href="#main.CommentModel">CommentModel</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.commentVisibleUsers"><code class="name">var <span class="ident">commentVisibleUsers</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.courseName"><code class="name">var <span class="ident">courseName</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.date"><code class="name">var <span class="ident">date</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.dislikeUsers"><code class="name">var <span class="ident">dislikeUsers</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.id"><code class="name">var <span class="ident">id</span> : <a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.instructor"><code class="name">var <span class="ident">instructor</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.likeUsers"><code class="name">var <span class="ident">likeUsers</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.numDislikes"><code class="name">var <span class="ident">numDislikes</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.numLikes"><code class="name">var <span class="ident">numLikes</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.role"><code class="name">var <span class="ident">role</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.term"><code class="name">var <span class="ident">term</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.title"><code class="name">var <span class="ident">title</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteModel.week"><code class="name">var <span class="ident">week</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="main.NoteRequestModel"><code class="flex name class">
+<span>class <span class="ident">NoteRequestModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NoteRequestModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    courseName: str
+    instructor: str
+    term: str
+    requestMsg: str
+    week: int
+    uid: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="main.NoteRequestModel.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.courseName"><code class="name">var <span class="ident">courseName</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.id"><code class="name">var <span class="ident">id</span> : <a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.instructor"><code class="name">var <span class="ident">instructor</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.requestMsg"><code class="name">var <span class="ident">requestMsg</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.term"><code class="name">var <span class="ident">term</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.uid"><code class="name">var <span class="ident">uid</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.NoteRequestModel.week"><code class="name">var <span class="ident">week</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="main.ProfessorModel"><code class="flex name class">
+<span>class <span class="ident">ProfessorModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ProfessorModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias=&#34;_id&#34;)
+    name: str
+    avgRating: float
+    numRating: int
+    
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="main.ProfessorModel.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.ProfessorModel.avgRating"><code class="name">var <span class="ident">avgRating</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.ProfessorModel.id"><code class="name">var <span class="ident">id</span> : <a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.ProfessorModel.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="main.ProfessorModel.numRating"><code class="name">var <span class="ident">numRating</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="main.PyObjectId"><code class="flex name class">
 <span>class <span class="ident">PyObjectId</span></span>
 <span>(</span><span>oid=None)</span>
@@ -634,7 +2238,7 @@ def validate(cls, v):
     fullname: str
     uid: str
     email: str
-    password: str
+    key: str
 
     class Config:
         allow_population_by_field_name = True
@@ -664,7 +2268,7 @@ def validate(cls, v):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="main.UserModel.password"><code class="name">var <span class="ident">password</span> : str</code></dt>
+<dt id="main.UserModel.key"><code class="name">var <span class="ident">key</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -684,11 +2288,31 @@ def validate(cls, v):
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
+<li><code><a title="main.add_comment" href="#main.add_comment">add_comment</a></code></li>
+<li><code><a title="main.add_course" href="#main.add_course">add_course</a></code></li>
+<li><code><a title="main.add_note" href="#main.add_note">add_note</a></code></li>
+<li><code><a title="main.add_note_request" href="#main.add_note_request">add_note_request</a></code></li>
+<li><code><a title="main.add_professor" href="#main.add_professor">add_professor</a></code></li>
+<li><code><a title="main.add_rating" href="#main.add_rating">add_rating</a></code></li>
 <li><code><a title="main.add_user" href="#main.add_user">add_user</a></code></li>
 <li><code><a title="main.check_email" href="#main.check_email">check_email</a></code></li>
 <li><code><a title="main.check_password" href="#main.check_password">check_password</a></code></li>
 <li><code><a title="main.check_uid" href="#main.check_uid">check_uid</a></code></li>
+<li><code><a title="main.decrease_dislikes" href="#main.decrease_dislikes">decrease_dislikes</a></code></li>
+<li><code><a title="main.decrease_likes" href="#main.decrease_likes">decrease_likes</a></code></li>
+<li><code><a title="main.delete_note_request" href="#main.delete_note_request">delete_note_request</a></code></li>
+<li><code><a title="main.get_comment_visiblity" href="#main.get_comment_visiblity">get_comment_visiblity</a></code></li>
+<li><code><a title="main.get_prof_rating" href="#main.get_prof_rating">get_prof_rating</a></code></li>
+<li><code><a title="main.increase_dislikes" href="#main.increase_dislikes">increase_dislikes</a></code></li>
+<li><code><a title="main.increase_likes" href="#main.increase_likes">increase_likes</a></code></li>
+<li><code><a title="main.search_course_names" href="#main.search_course_names">search_course_names</a></code></li>
+<li><code><a title="main.search_courses" href="#main.search_courses">search_courses</a></code></li>
+<li><code><a title="main.search_note_by_fields" href="#main.search_note_by_fields">search_note_by_fields</a></code></li>
+<li><code><a title="main.search_note_by_id" href="#main.search_note_by_id">search_note_by_id</a></code></li>
+<li><code><a title="main.search_note_requests_by_fields" href="#main.search_note_requests_by_fields">search_note_requests_by_fields</a></code></li>
+<li><code><a title="main.toggle_comment_visibility" href="#main.toggle_comment_visibility">toggle_comment_visibility</a></code></li>
+<li><code><a title="main.update_rating" href="#main.update_rating">update_rating</a></code></li>
 <li><code><a title="main.update_user" href="#main.update_user">update_user</a></code></li>
 <li><code><a title="main.view_all_users" href="#main.view_all_users">view_all_users</a></code></li>
 <li><code><a title="main.view_user" href="#main.view_user">view_user</a></code></li>
@@ -696,6 +2320,79 @@ def validate(cls, v):
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="main.CommentModel" href="#main.CommentModel">CommentModel</a></code></h4>
+<ul class="">
+<li><code><a title="main.CommentModel.Config" href="#main.CommentModel.Config">Config</a></code></li>
+<li><code><a title="main.CommentModel.comment" href="#main.CommentModel.comment">comment</a></code></li>
+<li><code><a title="main.CommentModel.id" href="#main.CommentModel.id">id</a></code></li>
+<li><code><a title="main.CommentModel.username" href="#main.CommentModel.username">username</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="main.CourseModel" href="#main.CourseModel">CourseModel</a></code></h4>
+<ul class="two-column">
+<li><code><a title="main.CourseModel.Config" href="#main.CourseModel.Config">Config</a></code></li>
+<li><code><a title="main.CourseModel.colorCode" href="#main.CourseModel.colorCode">colorCode</a></code></li>
+<li><code><a title="main.CourseModel.courseName" href="#main.CourseModel.courseName">courseName</a></code></li>
+<li><code><a title="main.CourseModel.id" href="#main.CourseModel.id">id</a></code></li>
+<li><code><a title="main.CourseModel.instructor" href="#main.CourseModel.instructor">instructor</a></code></li>
+<li><code><a title="main.CourseModel.term" href="#main.CourseModel.term">term</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="main.CourseNameModel" href="#main.CourseNameModel">CourseNameModel</a></code></h4>
+<ul class="">
+<li><code><a title="main.CourseNameModel.Config" href="#main.CourseNameModel.Config">Config</a></code></li>
+<li><code><a title="main.CourseNameModel.courseName" href="#main.CourseNameModel.courseName">courseName</a></code></li>
+<li><code><a title="main.CourseNameModel.id" href="#main.CourseNameModel.id">id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="main.NoteModel" href="#main.NoteModel">NoteModel</a></code></h4>
+<ul class="two-column">
+<li><code><a title="main.NoteModel.Config" href="#main.NoteModel.Config">Config</a></code></li>
+<li><code><a title="main.NoteModel.author" href="#main.NoteModel.author">author</a></code></li>
+<li><code><a title="main.NoteModel.commentList" href="#main.NoteModel.commentList">commentList</a></code></li>
+<li><code><a title="main.NoteModel.commentVisibleUsers" href="#main.NoteModel.commentVisibleUsers">commentVisibleUsers</a></code></li>
+<li><code><a title="main.NoteModel.courseName" href="#main.NoteModel.courseName">courseName</a></code></li>
+<li><code><a title="main.NoteModel.date" href="#main.NoteModel.date">date</a></code></li>
+<li><code><a title="main.NoteModel.dislikeUsers" href="#main.NoteModel.dislikeUsers">dislikeUsers</a></code></li>
+<li><code><a title="main.NoteModel.id" href="#main.NoteModel.id">id</a></code></li>
+<li><code><a title="main.NoteModel.instructor" href="#main.NoteModel.instructor">instructor</a></code></li>
+<li><code><a title="main.NoteModel.likeUsers" href="#main.NoteModel.likeUsers">likeUsers</a></code></li>
+<li><code><a title="main.NoteModel.numDislikes" href="#main.NoteModel.numDislikes">numDislikes</a></code></li>
+<li><code><a title="main.NoteModel.numLikes" href="#main.NoteModel.numLikes">numLikes</a></code></li>
+<li><code><a title="main.NoteModel.role" href="#main.NoteModel.role">role</a></code></li>
+<li><code><a title="main.NoteModel.term" href="#main.NoteModel.term">term</a></code></li>
+<li><code><a title="main.NoteModel.title" href="#main.NoteModel.title">title</a></code></li>
+<li><code><a title="main.NoteModel.url" href="#main.NoteModel.url">url</a></code></li>
+<li><code><a title="main.NoteModel.week" href="#main.NoteModel.week">week</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="main.NoteRequestModel" href="#main.NoteRequestModel">NoteRequestModel</a></code></h4>
+<ul class="two-column">
+<li><code><a title="main.NoteRequestModel.Config" href="#main.NoteRequestModel.Config">Config</a></code></li>
+<li><code><a title="main.NoteRequestModel.courseName" href="#main.NoteRequestModel.courseName">courseName</a></code></li>
+<li><code><a title="main.NoteRequestModel.id" href="#main.NoteRequestModel.id">id</a></code></li>
+<li><code><a title="main.NoteRequestModel.instructor" href="#main.NoteRequestModel.instructor">instructor</a></code></li>
+<li><code><a title="main.NoteRequestModel.requestMsg" href="#main.NoteRequestModel.requestMsg">requestMsg</a></code></li>
+<li><code><a title="main.NoteRequestModel.term" href="#main.NoteRequestModel.term">term</a></code></li>
+<li><code><a title="main.NoteRequestModel.uid" href="#main.NoteRequestModel.uid">uid</a></code></li>
+<li><code><a title="main.NoteRequestModel.week" href="#main.NoteRequestModel.week">week</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="main.ProfessorModel" href="#main.ProfessorModel">ProfessorModel</a></code></h4>
+<ul class="">
+<li><code><a title="main.ProfessorModel.Config" href="#main.ProfessorModel.Config">Config</a></code></li>
+<li><code><a title="main.ProfessorModel.avgRating" href="#main.ProfessorModel.avgRating">avgRating</a></code></li>
+<li><code><a title="main.ProfessorModel.id" href="#main.ProfessorModel.id">id</a></code></li>
+<li><code><a title="main.ProfessorModel.name" href="#main.ProfessorModel.name">name</a></code></li>
+<li><code><a title="main.ProfessorModel.numRating" href="#main.ProfessorModel.numRating">numRating</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="main.PyObjectId" href="#main.PyObjectId">PyObjectId</a></code></h4>
 <ul class="">
@@ -718,7 +2415,7 @@ def validate(cls, v):
 <li><code><a title="main.UserModel.email" href="#main.UserModel.email">email</a></code></li>
 <li><code><a title="main.UserModel.fullname" href="#main.UserModel.fullname">fullname</a></code></li>
 <li><code><a title="main.UserModel.id" href="#main.UserModel.id">id</a></code></li>
-<li><code><a title="main.UserModel.password" href="#main.UserModel.password">password</a></code></li>
+<li><code><a title="main.UserModel.key" href="#main.UserModel.key">key</a></code></li>
 <li><code><a title="main.UserModel.uid" href="#main.UserModel.uid">uid</a></code></li>
 </ul>
 </li>
