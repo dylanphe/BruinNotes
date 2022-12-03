@@ -79,10 +79,12 @@ Does not enter the professor, enter "123" as quarter, and "202.2" as year
 Hit the Submit button 
 ```
 
-**Expected outcome**: 
+**Outcome**: 
 ```
 The input form persists and keeps the current user inputs
 The professor input field indicates the field is required 
 The quarter input field indicates an invalid input (should be Fall/Winter/Spring/Summer)
 The year input field indicates an invalid input (should be YYYY)
 ```
+
+More automatic tests can be found in `course.test.js`
