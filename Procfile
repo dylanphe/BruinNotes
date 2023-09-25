@@ -1,1 +1,0 @@
-web: (cd client && npm start) & (cd backend && uvicorn main:app --reload)
