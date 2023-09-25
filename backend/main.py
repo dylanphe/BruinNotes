@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 import bcrypt
 
-client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes_admin:CS130Fall2022@cluster0.kpbsyjm.mongodb.net/?retryWrites=true&w=majority")
+client = motor.motor_asyncio.AsyncIOMotorClient("mongodb+srv://bruinnotes:B7u1nnotes123_@cluster0.pp8bos7.mongodb.net/?retryWrites=true&w=majority")
 db = client.cluster0
 
 app = FastAPI()
