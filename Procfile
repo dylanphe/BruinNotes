@@ -1,2 +1,1 @@
-web: npm start
-web: uvicorn main:app --reload
+web: (cd client && npm start) & (cd backend && uvicorn main:app --reload)
